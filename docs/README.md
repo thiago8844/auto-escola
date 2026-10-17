@@ -15,6 +15,7 @@ Esta pasta documenta **a API** (`apps/api`). Web (`apps/web`) e mobile (`apps/mo
 | 5 | [api.md](api.md) | Endpoints, autenticação (SPA e mobile), payloads, respostas, erros e exemplos. |
 | 6 | [implementacao.md](implementacao.md) | O que foi feito, decisões, limitações e próximos passos. |
 | 7 | [lacunas-mvp-api.md](lacunas-mvp-api.md) | O que falta na API para o MVP (aluno → aulas → exame → CNH) e o rascunho do futuro. |
+| 8 | [web-checklist.md](web-checklist.md) | Checklist das telas do web, por módulo e em ordem de importância. |
 
 Se você quer só **rodar o projeto**, vá direto para [setup-api.md](setup-api.md).
 
