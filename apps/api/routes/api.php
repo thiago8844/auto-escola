@@ -1,8 +1,123 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ChecklistItemController;
+use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\EmailVerificationController;
+use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\InvitationAcceptController;
+use App\Http\Controllers\Api\V1\InvitationController;
+use App\Http\Controllers\Api\V1\LessonController;
+use App\Http\Controllers\Api\V1\MeInstructorController;
+use App\Http\Controllers\Api\V1\MyLessonController;
+use App\Http\Controllers\Api\V1\OrganizationController;
+use App\Http\Controllers\Api\V1\OrganizationInstructorController;
+use App\Http\Controllers\Api\V1\OrganizationMemberController;
+use App\Http\Controllers\Api\V1\PartnerController;
+use App\Http\Controllers\Api\V1\QualificationProcessController;
+use App\Http\Controllers\Api\V1\StudentController;
+use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+/*
+|--------------------------------------------------------------------------
+| API v1
+|--------------------------------------------------------------------------
+|
+| Prefixo final: /api/v1. Documentação em docs/api.md.
+| Rotas dentro de organizations/{organization} passam por auth:sanctum e
+| organization.member, e usam scopeBindings() para que todo registro filho
+| seja buscado dentro do espaço da rota.
+|
+*/
+
+Route::prefix('v1')->group(function () {
+
+    // Autenticação pública (limitada por IP)
+    Route::post('auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+    Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('auth/token', [AuthController::class, 'token'])->middleware('throttle:10,1');
+
+    // Link de confirmação de e-mail (assinado, enviado por e-mail)
+    Route::get('auth/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    Route::middleware('auth:sanctum')->group(function () {
+
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::get('auth/user', [AuthController::class, 'user']);
+        Route::post('auth/email/verification-notification', [EmailVerificationController::class, 'resend'])
+            ->middleware('throttle:6,1');
+
+        // Perfil profissional da própria conta e agenda pessoal
+        Route::get('me/instructor', [MeInstructorController::class, 'show']);
+        Route::post('me/instructor', [MeInstructorController::class, 'store']);
+        Route::patch('me/instructor', [MeInstructorController::class, 'update']);
+        Route::get('me/lessons', [MyLessonController::class, 'index']);
+
+        // Espaços
+        Route::get('organizations', [OrganizationController::class, 'index']);
+        Route::post('organizations', [OrganizationController::class, 'store']);
+
+        // Aceite de convite: somente o token no corpo da requisição
+        Route::post('invitations/accept', InvitationAcceptController::class)->middleware('throttle:20,1');
+
+        Route::prefix('organizations/{organization}')
+            ->middleware('organization.member')
+            ->scopeBindings()
+            ->group(function () {
+
+                Route::get('/', [OrganizationController::class, 'show']);
+                Route::patch('/', [OrganizationController::class, 'update']);
+
+                // Membros (acesso)
+                Route::get('members', [OrganizationMemberController::class, 'index']);
+                Route::patch('members/{member}', [OrganizationMemberController::class, 'update']);
+                Route::delete('members/{member}', [OrganizationMemberController::class, 'destroy']);
+
+                // Convites
+                Route::get('invitations', [InvitationController::class, 'index']);
+                Route::post('invitations', [InvitationController::class, 'store']);
+                Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy']);
+
+                // Instrutores (identidade + vínculo com o espaço)
+                Route::get('instructors', [OrganizationInstructorController::class, 'index']);
+                Route::post('instructors', [OrganizationInstructorController::class, 'store']);
+                Route::get('instructors/{instructor}', [OrganizationInstructorController::class, 'show']);
+                Route::patch('instructors/{instructor}', [OrganizationInstructorController::class, 'update']);
+                Route::patch('instructors/{instructor}/link', [OrganizationInstructorController::class, 'link']);
+
+                // Cadastros operacionais
+                Route::apiResource('partners', PartnerController::class);
+                Route::apiResource('students', StudentController::class);
+                Route::apiResource('enrollments', EnrollmentController::class)
+                    ->only(['index', 'store', 'show', 'update']);
+
+                // Veículos
+                Route::apiResource('vehicles', VehicleController::class);
+
+                // Processos de habilitação e checklist de liberação para a prática
+                Route::apiResource('qualification-processes', QualificationProcessController::class)
+                    ->only(['index', 'store', 'show', 'update']);
+                Route::post('qualification-processes/{qualification_process}/checklist-items', [ChecklistItemController::class, 'store']);
+                Route::patch('qualification-processes/{qualification_process}/checklist-items/{checklist_item}', [ChecklistItemController::class, 'update']);
+
+                // Documentos privados
+                Route::get('documents', [DocumentController::class, 'index']);
+                Route::post('documents', [DocumentController::class, 'store']);
+                Route::get('documents/{document}', [DocumentController::class, 'show']);
+                Route::patch('documents/{document}', [DocumentController::class, 'update']);
+                Route::get('documents/{document}/download', [DocumentController::class, 'download']);
+
+                // Aulas
+                Route::get('lessons', [LessonController::class, 'index']);
+                Route::post('lessons', [LessonController::class, 'store']);
+                Route::get('lessons/{lesson}', [LessonController::class, 'show']);
+                Route::patch('lessons/{lesson}', [LessonController::class, 'update']);
+                Route::patch('lessons/{lesson}/registry', [LessonController::class, 'registry']);
+                Route::post('lessons/{lesson}/reschedule', [LessonController::class, 'reschedule']);
+                Route::patch('lessons/{lesson}/status', [LessonController::class, 'updateStatus']);
+            });
+    });
+});
