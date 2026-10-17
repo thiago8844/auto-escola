@@ -1,5 +1,6 @@
 @use 'sass:map';
 @use 'brand' as b;
+@use 'layout';
 
 // Configura o Bootstrap com a identidade antes de carregá-lo.
 // Modo claro por enquanto; as cores ficam em variáveis (--rc-*) para o modo escuro depois.
