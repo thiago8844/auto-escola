@@ -25,3 +25,8 @@ export function canManageMember(actor: Role, target: Role): boolean {
   if (actor === 'admin') return ADMIN_MANAGEABLE.includes(target)
   return false
 }
+
+// Cadastros e agenda do espaço (alunos, matrículas, processos): owner, admin e staff
+export function canOperate(role: Role): boolean {
+  return role === 'owner' || role === 'admin' || role === 'staff'
+}

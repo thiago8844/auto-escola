@@ -11,13 +11,16 @@ import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import StudentDetailPage from '../pages/students/StudentDetailPage'
+import StudentFormPage from '../pages/students/StudentFormPage'
+import StudentsPage from '../pages/students/StudentsPage'
 import InvitationsPage from '../pages/organization/InvitationsPage'
 import MembersPage from '../pages/organization/MembersPage'
 import OrganizationHomePage from '../pages/organization/OrganizationHomePage'
 import OrganizationSettingsPage from '../pages/organization/OrganizationSettingsPage'
 import OrganizationCreatePage from '../pages/organizations/OrganizationCreatePage'
 import OrganizationsPage from '../pages/organizations/OrganizationsPage'
-import { canManageMembers } from '../utils/permissions'
+import { canManageMembers, canOperate } from '../utils/permissions'
 import { organizationSections, paths } from './paths'
 
 export const router = createBrowserRouter([
@@ -65,6 +68,15 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <OrganizationHomePage /> },
               { path: organizationSections.settings, element: <OrganizationSettingsPage /> },
+              { path: organizationSections.students, element: <StudentsPage /> },
+              { path: `${organizationSections.students}/:studentId`, element: <StudentDetailPage /> },
+              {
+                element: <RequirePermission allow={canOperate} />,
+                children: [
+                  { path: `${organizationSections.students}/novo`, element: <StudentFormPage /> },
+                  { path: `${organizationSections.students}/:studentId/editar`, element: <StudentFormPage /> },
+                ],
+              },
               {
                 element: <RequirePermission allow={canManageMembers} />,
                 children: [

@@ -15,6 +15,7 @@ export function OrganizationLayout() {
 
   const navItems = [
     { to: links.home, icon: 'bi-speedometer2', label: 'Início', end: true },
+    { to: links.students, icon: 'bi-mortarboard', label: 'Alunos' },
     ...(organization && canManageMembers(organization.role)
       ? [
           { to: links.members, icon: 'bi-people', label: 'Membros' },

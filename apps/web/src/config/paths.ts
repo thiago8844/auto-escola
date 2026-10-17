@@ -17,6 +17,9 @@ export const organizationSections = {
   members: 'membros',
   invitations: 'convites',
   settings: 'configuracoes',
+  students: 'alunos',
+  enrollments: 'matriculas',
+  processes: 'processos',
 } as const
 
 // O espaço ativo está sempre na URL
@@ -27,5 +30,15 @@ export function organizationPaths(organizationId: number | string) {
     members: `${base}/${organizationSections.members}`,
     invitations: `${base}/${organizationSections.invitations}`,
     settings: `${base}/${organizationSections.settings}`,
+    students: `${base}/${organizationSections.students}`,
+    studentNew: `${base}/${organizationSections.students}/novo`,
+    student: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}`,
+    studentEdit: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}/editar`,
+    enrollments: `${base}/${organizationSections.enrollments}`,
+    enrollment: (enrollmentId: number | string) => `${base}/${organizationSections.enrollments}/${enrollmentId}`,
+    enrollmentNew: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}/matriculas/nova`,
+    processes: `${base}/${organizationSections.processes}`,
+    process: (processId: number | string) => `${base}/${organizationSections.processes}/${processId}`,
+    processNew: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}/processos/novo`,
   }
 }

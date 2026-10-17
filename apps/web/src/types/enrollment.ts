@@ -1,0 +1,33 @@
+import type { Student } from './student'
+
+export type LicenseCategory = 'A' | 'AB' | 'AC' | 'AD' | 'AE' | 'B' | 'C' | 'D' | 'E' | 'ACC'
+
+export type EnrollmentStatus = 'prospect' | 'contracted' | 'in_service' | 'closed' | 'terminated'
+
+export type ChecklistItemType =
+  | 'current_license'
+  | 'theory_completion'
+  | 'learning_license'
+  | 'medical_exam'
+  | 'psychological_exam'
+  | 'toxicological_exam'
+
+// Só os tipos pendentes (sem laudos nem notas); aparece quando a matrícula tem processo
+export type PracticeRelease = {
+  released: boolean
+  pending: ChecklistItemType[]
+}
+
+export type Enrollment = {
+  id: number
+  category: LicenseCategory
+  status: EnrollmentStatus
+  contracted_minutes: number | null
+  // Preço e observações só vêm para a equipe
+  price_cents?: number | null
+  notes?: string | null
+  qualification_process_id: number | null
+  practice_release?: PracticeRelease
+  student?: Pick<Student, 'id' | 'name' | 'phone'>
+  created_at: string
+}
