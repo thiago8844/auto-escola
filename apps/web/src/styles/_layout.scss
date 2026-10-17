@@ -16,3 +16,12 @@
 .app-content {
   min-width: 0;
 }
+
+// Formulários de página inteira não precisam ocupar toda a largura
+.form-narrow {
+  max-width: 520px;
+}
+
+.role-select {
+  min-width: 140px;
+}

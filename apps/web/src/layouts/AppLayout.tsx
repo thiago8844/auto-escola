@@ -1,15 +1,21 @@
+import type { ReactNode } from 'react'
 import { Button, Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
-import { NavItem } from '../components/NavItem'
+import { NavItem, type NavItemProps } from '../components/NavItem'
 import { APP_NAME } from '../config'
-import { paths } from '../config/paths'
 import { useLogout } from '../hooks/useAuthMutations'
 import { useAuthStore } from '../stores/authStore'
 
-const navItems = [{ to: paths.home, icon: 'bi-house', label: 'Início' }]
+type AppLayoutProps = {
+  navItems: NavItemProps[]
+  // Bloco acima do menu (ex.: espaço ativo)
+  sidebarHeader?: ReactNode
+  // Conteúdo no lugar do <Outlet /> (ex.: carregando o espaço)
+  children?: ReactNode
+}
 
 // Menu lateral fixo em telas grandes; no mobile vira uma barra com menu deslizante
-export function AppLayout() {
+export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps) {
   const user = useAuthStore((state) => state.user)
   const logout = useLogout()
 
@@ -24,6 +30,7 @@ export function AppLayout() {
               <Offcanvas.Title>{APP_NAME}</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body className="flex-column">
+              {sidebarHeader && <div className="border-bottom pb-3 mb-3">{sidebarHeader}</div>}
               <Nav as="nav" className="flex-column flex-grow-1" aria-label="Principal">
                 {navItems.map((item) => (
                   <NavItem key={item.to} {...item} />
@@ -43,9 +50,7 @@ export function AppLayout() {
           </Navbar.Offcanvas>
         </Container>
       </Navbar>
-      <main className="app-content flex-grow-1 p-4">
-        <Outlet />
-      </main>
+      <main className="app-content flex-grow-1 p-4">{children ?? <Outlet />}</main>
     </div>
   )
 }

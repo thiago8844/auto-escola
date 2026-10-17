@@ -26,6 +26,17 @@ const GENERIC_MESSAGES: Record<ApiErrorKind, string> = {
 const CODE_MESSAGES: Record<string, string> = {
   invalid_credentials: 'E-mail ou senha incorretos.',
   invalid_verification_link: 'Link de confirmação inválido ou expirado.',
+  role_not_assignable_by_admin: 'Gestores só podem gerenciar membros com papel de equipe ou instrutor.',
+  last_owner: 'O espaço precisa ter ao menos um proprietário.',
+  independent_space_exists: 'Você já possui um espaço particular.',
+  already_member: 'Esta pessoa já tem acesso ao espaço.',
+  invitation_already_pending: 'Já existe um convite pendente para este e-mail.',
+  invitation_not_found: 'Convite não encontrado. Confira o link recebido por e-mail.',
+  invitation_already_used: 'Este convite já foi usado.',
+  invitation_revoked: 'Este convite foi cancelado pela equipe do espaço.',
+  invitation_expired: 'Este convite expirou. Peça um novo à equipe do espaço.',
+  invitation_recipient_mismatch: 'Este convite foi enviado para outro e-mail. Entre com a conta do e-mail convidado.',
+  email_not_verified: 'Confirme seu e-mail antes de aceitar o convite.',
 }
 
 function kindFromStatus(status: number | undefined): ApiErrorKind {

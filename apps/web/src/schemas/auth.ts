@@ -1,11 +1,5 @@
 import { z } from 'zod'
-
-const email = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .min(1, 'Informe o e-mail.')
-  .pipe(z.email('Informe um e-mail válido.'))
+import { emailField as email } from './shared'
 
 export const loginSchema = z.object({
   email,
