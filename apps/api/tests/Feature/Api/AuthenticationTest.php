@@ -31,6 +31,23 @@ class AuthenticationTest extends ApiTestCase
         Notification::assertSentTo($user, VerifyEmail::class);
     }
 
+    public function test_verification_email_links_to_frontend_with_signature(): void
+    {
+        Notification::fake();
+        config(['autoescola.frontend_url' => 'http://front.test']);
+
+        $user = User::factory()->unverified()->create();
+        $user->sendEmailVerificationNotification();
+
+        Notification::assertSentTo($user, VerifyEmail::class, function (VerifyEmail $notification) use ($user) {
+            $url = $notification->toMail($user)->actionUrl;
+            $hash = sha1($user->getEmailForVerification());
+
+            return str_starts_with($url, "http://front.test/auth/email/verify/{$user->getKey()}/{$hash}?")
+                && str_contains($url, 'signature=') && str_contains($url, 'expires=');
+        });
+    }
+
     public function test_register_rejects_duplicate_email(): void
     {
         User::factory()->create(['email' => 'dup@example.com']);
