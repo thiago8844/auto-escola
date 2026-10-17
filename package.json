@@ -1,0 +1,11 @@
+{
+  "name": "autoescola",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --dir apps/web dev",
+    "dev:mobile": "pnpm --dir apps/mobile start",
+    "dev:api": "php apps/api/artisan serve",
+    "build:web": "pnpm --dir apps/web build",
+    "test:api": "php apps/api/artisan test"
+  }
+}
