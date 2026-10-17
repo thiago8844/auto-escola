@@ -1,10 +1,10 @@
-import { LIST_PAGE_SIZE } from '../config/organization'
+import { PAGE_SIZE } from '../config/organization'
 import type { Member, Paginated, Role } from '../types/organization'
 import { http } from './client'
 
-export async function listMembers(organizationId: number | string): Promise<Paginated<Member>> {
+export async function listMembers(organizationId: number | string, page: number): Promise<Paginated<Member>> {
   const { data } = await http.get<Paginated<Member>>(`/organizations/${organizationId}/members`, {
-    params: { per_page: LIST_PAGE_SIZE },
+    params: { per_page: PAGE_SIZE, page },
     skipGlobalError: true,
   })
   return data

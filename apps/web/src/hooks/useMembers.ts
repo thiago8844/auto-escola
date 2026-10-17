@@ -1,13 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { changeMemberRole, listMembers, removeMember } from '../api/members'
 import { queryKeys } from '../lib/queryKeys'
 import { notify } from '../stores/toastStore'
 import type { Role } from '../types/organization'
 
-export function useMembers(organizationId: number) {
+export function useMembers(organizationId: number, page: number) {
   return useQuery({
-    queryKey: queryKeys.organizations.members(organizationId),
-    queryFn: () => listMembers(organizationId),
+    queryKey: queryKeys.organizations.members(organizationId, page),
+    queryFn: () => listMembers(organizationId, page),
+    placeholderData: keepPreviousData,
   })
 }
 

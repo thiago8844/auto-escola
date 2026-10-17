@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Alert, Button, Form, Spinner, Table } from 'react-bootstrap'
+import { Button, Form, Spinner, Table } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmModal } from '../../components/ConfirmModal'
+import { Pagination } from '../../components/Pagination'
 import { QueryErrorAlert } from '../../components/QueryErrorAlert'
 import { RoleBadge } from '../../components/RoleBadge'
-import { ROLE_LABELS } from '../../config/organization'
+import { PAGE_SIZE, ROLE_LABELS } from '../../config/organization'
 import { paths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useChangeMemberRole, useMembers, useRemoveMember } from '../../hooks/useMembers'
 import { useAuthStore } from '../../stores/authStore'
 import type { Member, Role } from '../../types/organization'
@@ -17,7 +19,9 @@ export default function MembersPage() {
   const organization = useActiveOrganization()
   const navigate = useNavigate()
   const currentUserId = useAuthStore((state) => state.user?.id)
-  const members = useMembers(organization.id)
+  const [page, setPage] = usePageParam()
+  const members = useMembers(organization.id, page)
+  useClampPage(page, members.data?.meta.last_page, setPage)
   const changeRole = useChangeMemberRole(organization.id)
   const remove = useRemoveMember(organization.id)
   const [toRemove, setToRemove] = useState<Member | null>(null)
@@ -45,9 +49,6 @@ export default function MembersPage() {
 
       {members.data && (
         <>
-          {members.data.meta.total > members.data.data.length && (
-            <Alert variant="info">Mostrando {members.data.data.length} de {members.data.meta.total} membros.</Alert>
-          )}
           <Table responsive hover className="align-middle bg-white">
             <thead>
               <tr>
@@ -105,8 +106,15 @@ export default function MembersPage() {
               })}
             </tbody>
           </Table>
+          <Pagination
+            page={page}
+            lastPage={members.data.meta.last_page}
+            total={members.data.meta.total}
+            perPage={PAGE_SIZE}
+            onPageChange={setPage}
+          />
           {organization.role === 'admin' && (
-            <p className="small text-secondary">Gestores só alteram membros com papel de equipe ou instrutor.</p>
+            <p className="small text-secondary mt-3">Gestores só alteram membros com papel de equipe ou instrutor.</p>
           )}
         </>
       )}

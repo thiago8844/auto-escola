@@ -21,4 +21,6 @@ export const INVITATION_STATUS: Record<InvitationStatus, { label: string; bg: st
 }
 
 // Listagens da API são paginadas (padrão 15, máximo 100)
+export const PAGE_SIZE = 15
+// Lista de espaços sem paginação na tela: o usuário tem poucos, e a tela de criação precisa de todos
 export const LIST_PAGE_SIZE = 100

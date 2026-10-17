@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Form } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
+import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
@@ -20,6 +21,7 @@ export default function OrganizationCreatePage() {
 
   const {
     register,
+    control,
     handleSubmit,
     setError,
     formState: { errors },
@@ -63,7 +65,7 @@ export default function OrganizationCreatePage() {
           </fieldset>
 
           <FormField label="Nome" autoFocus error={errors.name?.message} {...register('name')} />
-          <FormField label="CPF ou CNPJ (opcional)" inputMode="numeric" error={errors.document?.message} {...register('document')} />
+          <DocumentField control={control} name="document" label="CPF ou CNPJ (opcional)" error={errors.document?.message} />
           <FormField label="E-mail de contato (opcional)" type="email" error={errors.email?.message} {...register('email')} />
           <FormField label="Telefone (opcional)" type="tel" error={errors.phone?.message} {...register('phone')} />
 

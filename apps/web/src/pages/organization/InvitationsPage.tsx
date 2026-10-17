@@ -4,10 +4,12 @@ import { Alert, Badge, Button, Card, Form, Spinner, Table } from 'react-bootstra
 import { useForm } from 'react-hook-form'
 import { ConfirmModal } from '../../components/ConfirmModal'
 import { FormField } from '../../components/FormField'
+import { Pagination } from '../../components/Pagination'
 import { QueryErrorAlert } from '../../components/QueryErrorAlert'
 import { SubmitButton } from '../../components/SubmitButton'
-import { INVITATION_STATUS, ROLE_LABELS } from '../../config/organization'
+import { INVITATION_STATUS, PAGE_SIZE, ROLE_LABELS } from '../../config/organization'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useCreateInvitation, useInvitations, useRevokeInvitation } from '../../hooks/useInvitations'
 import { invitationSchema, type InvitationInput } from '../../schemas/invitation'
 import type { Invitation } from '../../types/organization'
@@ -18,7 +20,9 @@ import { assignableRoles } from '../../utils/permissions'
 export default function InvitationsPage() {
   const organization = useActiveOrganization()
   const roleOptions = assignableRoles(organization.role)
-  const invitations = useInvitations(organization.id)
+  const [page, setPage] = usePageParam()
+  const invitations = useInvitations(organization.id, page)
+  useClampPage(page, invitations.data?.meta.last_page, setPage)
   const create = useCreateInvitation(organization.id)
   const revoke = useRevokeInvitation(organization.id)
   const [toRevoke, setToRevoke] = useState<Invitation | null>(null)
@@ -87,9 +91,6 @@ export default function InvitationsPage() {
 
       {invitations.data && (
         <>
-          {invitations.data.meta.total > invitations.data.data.length && (
-            <Alert variant="info">Mostrando {invitations.data.data.length} de {invitations.data.meta.total} convites.</Alert>
-          )}
           {invitations.data.data.length === 0 ? (
             <p className="text-secondary">Nenhum convite enviado ainda.</p>
           ) : (
@@ -132,6 +133,13 @@ export default function InvitationsPage() {
               </tbody>
             </Table>
           )}
+          <Pagination
+            page={page}
+            lastPage={invitations.data.meta.last_page}
+            total={invitations.data.meta.total}
+            perPage={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </>
       )}
 

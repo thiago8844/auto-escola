@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
+import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
@@ -17,6 +18,7 @@ export default function OrganizationSettingsPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     setError,
     formState: { errors },
@@ -47,7 +49,7 @@ export default function OrganizationSettingsPage() {
         <form onSubmit={onSubmit} noValidate>
           <fieldset disabled={!editable}>
             <FormField label="Nome" error={errors.name?.message} {...register('name')} />
-            <FormField label="CPF ou CNPJ" inputMode="numeric" error={errors.document?.message} {...register('document')} />
+            <DocumentField control={control} name="document" label="CPF ou CNPJ" error={errors.document?.message} />
             <FormField label="E-mail de contato" type="email" error={errors.email?.message} {...register('email')} />
             <FormField label="Telefone" type="tel" error={errors.phone?.message} {...register('phone')} />
             {editable && <SubmitButton loading={update.isPending}>Salvar alterações</SubmitButton>}

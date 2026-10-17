@@ -1,13 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { acceptInvitation, createInvitation, listInvitations, revokeInvitation } from '../api/invitations'
 import { queryKeys } from '../lib/queryKeys'
 import type { InvitationInput } from '../schemas/invitation'
 import { notify } from '../stores/toastStore'
 
-export function useInvitations(organizationId: number) {
+export function useInvitations(organizationId: number, page: number) {
   return useQuery({
-    queryKey: queryKeys.organizations.invitations(organizationId),
-    queryFn: () => listInvitations(organizationId),
+    queryKey: queryKeys.organizations.invitations(organizationId, page),
+    queryFn: () => listInvitations(organizationId, page),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -15,7 +16,7 @@ export function useCreateInvitation(organizationId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: InvitationInput) => createInvitation(organizationId, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.invitations(organizationId) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.invitationsAll(organizationId) }),
   })
 }
 
@@ -26,7 +27,7 @@ export function useRevokeInvitation(organizationId: number) {
     meta: { toastOnError: true },
     onSuccess: () => {
       notify.success('Convite cancelado.')
-      return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.invitations(organizationId) })
+      return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.invitationsAll(organizationId) })
     },
   })
 }

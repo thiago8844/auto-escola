@@ -1,11 +1,11 @@
-import { LIST_PAGE_SIZE } from '../config/organization'
+import { PAGE_SIZE } from '../config/organization'
 import type { InvitationInput } from '../schemas/invitation'
 import type { Invitation, Paginated } from '../types/organization'
 import { http } from './client'
 
-export async function listInvitations(organizationId: number | string): Promise<Paginated<Invitation>> {
+export async function listInvitations(organizationId: number | string, page: number): Promise<Paginated<Invitation>> {
   const { data } = await http.get<Paginated<Invitation>>(`/organizations/${organizationId}/invitations`, {
-    params: { per_page: LIST_PAGE_SIZE },
+    params: { per_page: PAGE_SIZE, page },
     skipGlobalError: true,
   })
   return data
