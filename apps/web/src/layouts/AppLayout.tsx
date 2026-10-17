@@ -1,28 +1,44 @@
-import { Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
+import { Button, Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
 import { NavItem } from '../components/NavItem'
 import { APP_NAME } from '../config'
+import { paths } from '../config/paths'
+import { useLogout } from '../hooks/useAuthMutations'
+import { useAuthStore } from '../stores/authStore'
 
-const navItems = [{ to: '/', icon: 'bi-house', label: 'Início' }]
+const navItems = [{ to: paths.home, icon: 'bi-house', label: 'Início' }]
 
 // Menu lateral fixo em telas grandes; no mobile vira uma barra com menu deslizante
 export function AppLayout() {
+  const user = useAuthStore((state) => state.user)
+  const logout = useLogout()
+
   return (
     <div className="app-shell d-lg-flex">
       <Navbar expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-white border-bottom">
-        <Container fluid className="flex-lg-column align-items-lg-stretch">
+        <Container fluid className="flex-lg-column align-items-lg-stretch flex-lg-grow-1">
           <Navbar.Brand className="fw-semibold">{APP_NAME}</Navbar.Brand>
           <Navbar.Toggle aria-controls="app-menu" aria-label="Abrir menu" />
-          <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg">
+          <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg" className="flex-lg-grow-1">
             <Offcanvas.Header closeButton>
               <Offcanvas.Title>{APP_NAME}</Offcanvas.Title>
             </Offcanvas.Header>
-            <Offcanvas.Body>
+            <Offcanvas.Body className="flex-column">
               <Nav as="nav" className="flex-column flex-grow-1" aria-label="Principal">
                 {navItems.map((item) => (
                   <NavItem key={item.to} {...item} />
                 ))}
               </Nav>
+              <div className="border-top pt-3 mt-3">
+                <p className="small text-secondary mb-2 text-truncate" title={user?.email}>
+                  <i className="bi bi-person-circle me-2" aria-hidden="true" />
+                  {user?.name}
+                </p>
+                <Button variant="outline-secondary" size="sm" className="w-100" onClick={() => logout.mutate()} disabled={logout.isPending}>
+                  <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />
+                  Sair
+                </Button>
+              </div>
             </Offcanvas.Body>
           </Navbar.Offcanvas>
         </Container>
