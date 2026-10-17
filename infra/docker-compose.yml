@@ -1,0 +1,41 @@
+# Infraestrutura local do sistema de auto escola.
+# Serviços próprios deste projeto; não reutiliza nem altera containers de outros projetos.
+#
+# Uso: copie infra/.env.example para infra/.env, defina as senhas e rode:
+#   docker compose -f infra/docker-compose.yml --env-file infra/.env up -d
+name: autoescola
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: autoescola-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AUTOESCOLA_DB_ROOT_PASSWORD:?Defina AUTOESCOLA_DB_ROOT_PASSWORD em infra/.env}
+      MYSQL_DATABASE: autoescola
+      MYSQL_USER: ${AUTOESCOLA_DB_USERNAME:-autoescola}
+      MYSQL_PASSWORD: ${AUTOESCOLA_DB_PASSWORD:?Defina AUTOESCOLA_DB_PASSWORD em infra/.env}
+      TZ: UTC
+    ports:
+      - "127.0.0.1:3322:3306"
+    volumes:
+      - autoescola-mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-time-zone=+00:00"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${AUTOESCOLA_DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mailpit:
+    # Captura e-mails localmente (SMTP em 1025, interface web em 8025). Nada é enviado para fora.
+    image: axllent/mailpit:latest
+    container_name: autoescola-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+volumes:
+  autoescola-mysql-data:
