@@ -1,0 +1,75 @@
+@use 'sass:map';
+@use 'brand' as b;
+
+// Configura o Bootstrap com a identidade antes de carregá-lo.
+// Modo claro por enquanto; as cores ficam em variáveis (--rc-*) para o modo escuro depois.
+@use 'bootstrap/scss/bootstrap' with (
+  $theme-colors: (
+    'primary': b.$brand-primary,
+    'secondary': b.$brand-text-muted,
+    'success': b.$status-success,
+    'info': b.$status-info,
+    'warning': b.$status-warning,
+    'danger': b.$status-danger,
+    'light': b.$brand-bg,
+    'dark': b.$brand-text,
+    'accent': b.$brand-accent,
+  ),
+
+  // Contraste: texto escuro sobre cores claras usa o azul-petróleo, nunca branco sobre âmbar
+  $color-contrast-dark: b.$brand-primary,
+  $color-contrast-light: #ffffff,
+
+  // Texto e superfícies
+  $body-color: b.$brand-text,
+  $body-bg: b.$brand-bg,
+  $body-secondary-color: b.$brand-text-muted,
+  $link-color: b.$brand-primary,
+  $border-color: b.$brand-border,
+  $card-bg: b.$brand-surface,
+  $card-border-color: b.$brand-border,
+  $input-bg: b.$brand-surface,
+  $input-border-color: b.$brand-border,
+
+  // Fonte e tipografia (16 px para conteúdo, 14 px auxiliar, títulos de 20 a 28 px)
+  $font-family-sans-serif: b.$font-family-brand,
+  $font-family-monospace: b.$font-family-brand,
+  $font-size-base: 1rem,
+  $small-font-size: .875rem,
+  $h1-font-size: 1.75rem,
+  $h2-font-size: 1.5rem,
+  $h3-font-size: 1.25rem,
+  $headings-font-weight: 600,
+
+  // Espaçamento: escala de 4, 8, 12, 16, 24 e 32 px
+  $spacers: (
+    0: 0,
+    1: 4px,
+    2: 8px,
+    3: 12px,
+    4: 16px,
+    5: 24px,
+    6: 32px,
+  ),
+
+  // Bordas: 8 px em campos e botões, 12 px em cards
+  $border-radius: 8px,
+  $border-radius-lg: 12px,
+  $card-border-radius: 12px,
+);
+
+// Tokens da marca como custom properties, para componentes próprios e para o modo escuro
+:root {
+  --rc-primary: #{b.$brand-primary};
+  --rc-accent: #{b.$brand-accent};
+  --rc-bg: #{b.$brand-bg};
+  --rc-surface: #{b.$brand-surface};
+  --rc-text: #{b.$brand-text};
+  --rc-text-muted: #{b.$brand-text-muted};
+  --rc-border: #{b.$brand-border};
+}
+
+// Horários e valores alinham em colunas com números tabulares
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

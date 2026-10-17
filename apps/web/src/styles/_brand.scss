@@ -1,0 +1,20 @@
+// Identidade visual do Rota Certa. Fonte única dos valores da marca.
+// Os nomes seguem a tabela de docs/identidade-visual.md.
+
+// Papéis da marca
+$brand-primary: #123b4a; // Botões principais, navegação e seleção
+$brand-accent: #f5b942; // Detalhes da marca e destaques pontuais
+$brand-bg: #f5f7fa; // Fundo das páginas
+$brand-surface: #ffffff; // Cards, tabelas e formulários
+$brand-text: #172b36; // Títulos e conteúdo
+$brand-text-muted: #526574; // Legendas e informações auxiliares
+$brand-border: #dce3e9; // Separação de componentes
+
+// Estados (separados da identidade; sempre acompanhados de texto ou ícone)
+$status-success: #15803d; // Aula concluída, pagamento recebido
+$status-warning: #92400e; // Documento próximo do vencimento
+$status-danger: #b91c1c; // Documento vencido, falha no cadastro
+$status-info: #1d4ed8; // Aula agendada
+
+// Fonte única do app. Horários e valores usam números tabulares, não outra fonte.
+$font-family-brand: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

@@ -2,3 +2,5 @@ packages:
   - "apps/web"
   - "apps/mobile"
   - "packages/*"
+allowBuilds:
+  '@parcel/watcher': false
