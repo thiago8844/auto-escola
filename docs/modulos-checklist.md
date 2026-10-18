@@ -2,7 +2,7 @@
 
 Análise da base em **17/10/2026**. Este é o checklist principal do produto até o lançamento do MVP **web**, atendendo CFCs e instrutores autônomos. Cada entrega inclui a API necessária e a experiência completa em `apps/web`.
 
-**Próximo módulo recomendado: Pendências e alertas reais (módulo 5).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; o módulo 4 (disponibilidade e frota) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
+**Próximo módulo recomendado: Acesso, correções e acabamento web (módulo 6).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; os módulos 4 (disponibilidade e frota) e 5 (pendências e alertas) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
 
 **Ordem definida:** saldo → exames e taxas → desfecho e histórico → disponibilidade e frota → alertas → acesso e acabamento → relatórios → financeiro básico. **O financeiro é o último módulo do MVP.** Depois do MVP entram **Vendas e atendimento** e, em uma etapa própria posterior, o aplicativo mobile.
 
@@ -79,7 +79,7 @@ Esses resultados verificam a base atual. Não significam que os módulos planeja
 | 2               | **Exames práticos e taxas externas**         | Falta                                             | Agendamento, tentativas, resultado e evidências de taxas.                                                          |
 | 3               | **Desfecho do processo e histórico**         | Parcial: situação editável e marca de conferência | Acompanhar aprovação, emissão e encerramento com rastreabilidade.                                                  |
 | 4               | **Disponibilidade e frota**                  | Implementado em 18/10/2026                         | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
-| 5               | **Pendências e alertas reais**               | Parcial: componentes visuais                      | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
+| 5               | **Pendências e alertas reais**               | Implementado em 18/10/2026 (contas no módulo 8)   | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
 | 6               | **Acesso, correções e acabamento web**       | Parcial                                           | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
 | 7               | **Relatórios e painel de gestão**            | Falta; início ainda é protótipo                   | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
 | 8               | **Financeiro básico — último módulo do MVP** | Falta                                             | Receitas/despesas, parcelas, formas de pagamento, contas bancárias/caixa, transferências e relatórios financeiros. |
@@ -172,17 +172,19 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 **Objetivo:** transformar o sino existente em uma ferramenta para acompanhar o que precisa de ação.
 
-- [ ] Persistir notificações e leitura por usuário, com organização, assunto, referência do recurso, data, prioridade e link para a ação.
-- [ ] Gerar alertas de documento/CRLV a vencer ou vencido, manutenção próxima, recurso bloqueado com compromisso futuro e pendência de liberação.
-- [ ] Incluir exames próximos, resultado ainda não informado, taxa pendente e emissão aguardando conferência.
-- [ ] Incluir saldo baixo/esgotado, aulas agendadas no passado sem desfecho e aluno em atendimento sem aula há prazo configurado.
-- [ ] Definir antecedência, destinatários e deduplicação por evento/prazo; resolver ou atualizar o alerta quando a pendência mudar.
-- [ ] Integrar a API ao sino: paginação, não lidas, marcar uma/todas como lidas e arquivar. Persistir o estado ao recarregar ou trocar de navegador.
-- [ ] Preservar o isolamento por espaço e o escopo do instrutor; revogação de acesso também deve retirar acesso às notificações e aos links correspondentes.
-- [ ] Executar geração periódica com agendador/fila e rotina de reprocessamento, sem depender de alguém abrir a tela para descobrir vencimentos.
-- [ ] Definir preferências e uso de toast/alerta máximo com a base existente; lembretes comuns não devem bloquear a operação.
+- [x] Persistir notificações e leitura por usuário, com organização, assunto, referência do recurso, data, prioridade e link para a ação.
+- [x] Gerar alertas de documento/CRLV a vencer ou vencido, manutenção próxima, recurso bloqueado com compromisso futuro e pendência de liberação.
+- [x] Incluir exames próximos, resultado ainda não informado, taxa pendente e emissão aguardando conferência.
+- [x] Incluir saldo baixo/esgotado, aulas agendadas no passado sem desfecho e aluno em atendimento sem aula há prazo configurado.
+- [x] Definir antecedência, destinatários e deduplicação por evento/prazo; resolver ou atualizar o alerta quando a pendência mudar.
+- [x] Integrar a API ao sino: paginação, não lidas, marcar uma/todas como lidas e arquivar. Persistir o estado ao recarregar ou trocar de navegador.
+- [x] Preservar o isolamento por espaço e o escopo do instrutor; revogação de acesso também deve retirar acesso às notificações e aos links correspondentes.
+- [x] Executar geração periódica com agendador/fila e rotina de reprocessamento, sem depender de alguém abrir a tela para descobrir vencimentos.
+- [x] Definir preferências e uso de toast/alerta máximo com a base existente; lembretes comuns não devem bloquear a operação.
 - [ ] Acrescentar contas vencidas/a vencer somente ao entregar o financeiro no módulo 8. Cobrança de assinatura do próprio sistema é outro assunto e fica fora deste MVP.
-- [ ] Verificar persistência, evento repetido, mudança de prazo, pendência resolvida e leitura restrita aos destinatários autorizados.
+- [x] Verificar persistência, evento repetido, mudança de prazo, pendência resolvida e leitura restrita aos destinatários autorizados.
+
+**Implementação:** `alerts` (por espaço, chave de deduplicação) e `alert_user_states` (leitura/arquivo por usuário), `AlertEngine` idempotente com 13 detectores e ponto de extensão para o financeiro, `alerts:generate` agendado a cada 10 minutos, configurações de antecedência por espaço. Web: sino ligado à API, página *Pendências*, balão para novas pendências, alerta máximo só para urgentes e configurações em *Dados do espaço*. Testes: `AlertTest`. O item de contas a pagar/receber fica para o módulo 8 (detector registrado via `AlertEngine::register`).
 
 **Aceite:** gerar uma pendência real, vê-la no sino após novo login, abrir o registro correto e resolver a pendência sem criar notificações repetidas.
 

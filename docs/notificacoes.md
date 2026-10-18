@@ -2,9 +2,9 @@
 
 Como lançar avisos no `apps/web`: toasts, o sino (central de notificações) e o alerta máximo. Tudo aqui é para **quem usa o sistema** (gestor, equipe, instrutor), não para os clientes (alunos).
 
-> Status: ✅ base implementada no web. 📋 Ainda não há notificações reais: a lista do sino começa vazia e nenhum fluxo do sistema as gera. A API não tem endpoint de notificações.
+> Status: ✅ base implementada no web. ✅ Pendências reais: dentro de um espaço o sino lê da API (`/alerts`), com leitura e arquivo por usuário guardados no servidor. Veja a seção "Pendências reais" abaixo.
 
-Os TODOs de persistência, geração de pendências, destinatários e integração com o sino estão no módulo **Pendências e alertas reais** do [checklist do MVP web](modulos-checklist.md). Os alertas financeiros entram junto com o financeiro, último módulo do MVP.
+Os alertas financeiros entram junto com o financeiro, último módulo do MVP (o motor aceita novos detectores via `AlertEngine::register`).
 
 ## Os três tipos de aviso
 
@@ -81,13 +81,16 @@ A lista vive em [`stores/notificationStore.ts`](../apps/web/src/stores/notificat
 | `markRead(id)`, `markAllRead()` | Marcam como lida |
 | `remove(id)`, `clear()` | Removem |
 
-### Quando a API de notificações existir
-
-1. Criar um hook que busca `GET /notifications` (React Query) e chama `useNotificationStore.getState().setAll(items)`.
-2. Marcar como lida: chamar a API e `markRead(id)`.
-3. Nenhuma tela muda: o sino já lê do store.
-
 Para gerar uma notificação **no front** (ex.: a partir de dados que o app já tem), basta `notices.inbox(...)` ou `notices.notify(...)` com um `id` estável, para não duplicar.
+
+## Pendências reais (módulo 5)
+
+Dentro de um espaço, o sino mostra as **pendências** geradas pela API ([detalhes em `apps/api/docs/api.md`](../apps/api/docs/api.md#pendências-e-alertas-módulo-5)): documentos e CRLV vencendo, revisão de veículo, bloqueios com compromissos afetados, exames próximos e sem resultado, taxas, saldo baixo, aulas sem desfecho e outras. O servidor recalcula tudo a cada 10 minutos e a pendência some sozinha quando é resolvida.
+
+- **Sino e página Pendências:** `NotificationBell` e `pages/alerts/AlertsPage`. Ler, marcar todas e arquivar ficam salvos por usuário: valem em outro navegador ou depois de um novo login. "Abrir" leva ao registro de origem (`utils/alertPath.ts`).
+- **Como avisam sem atrapalhar:** `hooks/useAlertWatcher.ts` recalcula ao entrar, a cada 5 minutos e 3 s depois de qualquer alteração. Pendência **urgente** (`critical`) não lida abre o **alerta máximo** (confirmar marca como lida); as demais novas viram um **balão** (até 3), com "Não mostrar novamente" (`alerts.toast`). Lembretes comuns nunca bloqueiam a tela.
+- **Fora de um espaço** (ex.: Minha agenda) o sino mostra só os avisos da sessão (`notices.inbox`/`notices.notify`).
+- **Antecedência e destinatários:** *Dados do espaço* > Pendências e alertas.
 
 ## Alerta máximo
 
