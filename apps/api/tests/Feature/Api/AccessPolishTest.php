@@ -3,11 +3,12 @@
 namespace Tests\Feature\Api;
 
 use App\Enums\MembershipRole;
-use App\Models\Document;
+use App\Models\Enrollment;
+use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -149,7 +150,7 @@ class AccessPolishTest extends ApiTestCase
         $this->assertSame(1, Student::count());
 
         // Mesma chave com conteúdo diferente: recusada.
-        $this->actingAsUser($this->owner)->postJson("{$this->base}/students", ['name' => 'Outro'] , $headers)
+        $this->actingAsUser($this->owner)->postJson("{$this->base}/students", ['name' => 'Outro'], $headers)
             ->assertUnprocessable()->assertJsonPath('error', 'idempotency_key_reused');
 
         // Sem chave não há proteção (comportamento anterior preservado).
@@ -188,7 +189,7 @@ class AccessPolishTest extends ApiTestCase
     public function test_archive_and_restore_student_keep_history_and_explain_cpf_and_commitments(): void
     {
         $student = Student::factory()->for($this->org)->create(['cpf' => '12345678909']);
-        $enrollment = \App\Models\Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $student->getKey(), 'category' => 'B']);
+        $enrollment = Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $student->getKey(), 'category' => 'B']);
         $instructor = $this->linkInstructor($this->org);
         $window = $this->window(3);
         $this->actingAsUser($this->owner)->postJson("{$this->base}/lessons", [
@@ -199,7 +200,7 @@ class AccessPolishTest extends ApiTestCase
         $this->actingAsUser($this->owner)->deleteJson("{$this->base}/students/{$student->getKey()}")
             ->assertUnprocessable()->assertJsonPath('error', 'student_has_commitments');
 
-        \App\Models\Lesson::query()->update(['status' => 'cancelled']);
+        Lesson::query()->update(['status' => 'cancelled']);
         $this->actingAsUser($this->owner)->deleteJson("{$this->base}/students/{$student->getKey()}")
             ->assertUnprocessable()->assertJsonPath('error', 'student_has_open_enrollments');
 
@@ -241,7 +242,7 @@ class AccessPolishTest extends ApiTestCase
         $student = Student::factory()->for($this->org)->create();
 
         $upload = fn (array $extra = []) => $this->actingAsUser($this->owner)->postJson("{$this->base}/documents", [
-            'file' => \Illuminate\Http\UploadedFile::fake()->create('rg.pdf', 20, 'application/pdf'), 'type' => 'identity', 'student_id' => $student->getKey(),
+            'file' => UploadedFile::fake()->create('rg.pdf', 20, 'application/pdf'), 'type' => 'identity', 'student_id' => $student->getKey(),
         ] + $extra)->assertCreated();
 
         $v1 = $upload()->json('data.id');
@@ -257,7 +258,7 @@ class AccessPolishTest extends ApiTestCase
 
     public function test_onboarding_tracks_the_first_steps(): void
     {
-        $this->actingAsUser($this->owner)->getJson("{$this->base}/onboarding")->assertOk()->assertJsonPath('data.done', 0)->assertJsonPath('data.total', 7);
+        $this->actingAsUser($this->owner)->getJson("{$this->base}/onboarding")->assertOk()->assertJsonPath('data.done', 0)->assertJsonPath('data.total', 8);
 
         $this->linkInstructor($this->org);
         $this->vehicleFor($this->org);
@@ -278,8 +279,8 @@ class AccessPolishTest extends ApiTestCase
         $partnerId = $this->actingAsUser($this->owner)->postJson("{$this->base}/partners", ['name' => 'CFC Parceiro'])->assertCreated()->json('data.id');
         $maria = Student::factory()->for($this->org)->create(['name' => 'Maria Souza']);
         $joao = Student::factory()->for($this->org)->create(['name' => 'João Lima']);
-        \App\Models\Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $maria->getKey(), 'category' => 'B', 'partner_id' => $partnerId]);
-        \App\Models\Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $joao->getKey(), 'category' => 'A', 'status' => 'in_service']);
+        Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $maria->getKey(), 'category' => 'B', 'partner_id' => $partnerId]);
+        Enrollment::create(['organization_id' => $this->org->getKey(), 'student_id' => $joao->getKey(), 'category' => 'A', 'status' => 'in_service']);
 
         $list = fn (string $query) => $this->actingAsUser($this->owner)->getJson("{$this->base}/enrollments?{$query}")->assertOk();
         $list('category=B')->assertJsonCount(1, 'data')->assertJsonPath('data.0.student.name', 'Maria Souza');

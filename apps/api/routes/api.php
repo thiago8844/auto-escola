@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AlertController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AvailabilityBlockController;
+use App\Http\Controllers\Api\V1\AvailableLessonSlotsController;
 use App\Http\Controllers\Api\V1\ChecklistItemController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
@@ -122,6 +123,7 @@ Route::prefix('v1')->group(function () {
                 Route::put('enrollments/{enrollment}/assignment', EnrollmentAssignmentController::class);
 
                 // Pacotes e saldo de aulas
+                Route::get('lesson-slots', AvailableLessonSlotsController::class)->middleware('throttle:30,1');
                 Route::get('enrollments/{enrollment}/balance', [EnrollmentBalanceController::class, 'show']);
                 Route::get('enrollments/{enrollment}/credit-entries', [EnrollmentBalanceController::class, 'entries']);
                 Route::post('enrollments/{enrollment}/packages', [EnrollmentBalanceController::class, 'storePackage']);

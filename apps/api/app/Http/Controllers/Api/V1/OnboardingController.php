@@ -26,6 +26,7 @@ class OnboardingController extends Controller
             ['key' => 'student', 'label' => 'Cadastrar um aluno', 'hint' => 'Nome e telefone bastam para começar.', 'done' => $organization->students()->exists()],
             ['key' => 'enrollment', 'label' => 'Criar a matrícula do aluno', 'hint' => 'Escolha a categoria e, se houver, o processo de habilitação.', 'done' => $organization->enrollments()->exists()],
             ['key' => 'package', 'label' => 'Registrar a contratação de aulas', 'hint' => 'O pacote define o saldo de aulas que será consumido.', 'done' => EnrollmentPackage::query()->whereHas('enrollment', fn ($q) => $q->where('organization_id', $organization->getKey()))->exists()],
+            ['key' => 'finance_account', 'label' => 'Preparar uma conta ou caixa', 'hint' => $this->organizationRole($request)?->canAudit() ? 'Cadastre onde os recebimentos e pagamentos serão registrados.' : 'Peça à gerência para cadastrar uma conta ou caixa antes de registrar pagamentos.', 'done' => $organization->financeAccounts()->where('active', true)->exists()],
             ['key' => 'lesson', 'label' => 'Agendar a primeira aula', 'hint' => 'Com instrutor, veículo e horário.', 'done' => $organization->lessons()->exists()],
         ];
 

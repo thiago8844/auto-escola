@@ -168,7 +168,7 @@ Erros de validação (`422` do Laravel) usam o formato padrão:
 }
 ```
 
-> **Limitação:** as mensagens de validação do Laravel estão em **inglês**. Apenas as mensagens de regra de negócio do sistema estão em português. Traduzir exige publicar `lang/pt_BR` (ver [implementacao.md](implementacao.md#limitações)).
+> As mensagens de validação e negócio são apresentadas em português. Consulte os códigos de erro e a referência de implementação para os tratamentos específicos.
 
 ### Códigos de erro
 
@@ -1160,3 +1160,26 @@ Rotas sob `/api/v1/organizations/{organization}`. **Tudo em centavos (inteiros).
 **Realizado × previsto.** O realizado usa a data em que o dinheiro entrou ou saiu; o previsto usa o vencimento. Parcelas em aberto nunca alteram o realizado. *Faturamento* = recebimentos líquidos de estorno, fora de categorias de repasse/reembolso; transferências e saldo inicial nunca entram.
 
 **Alertas.** `AlertEngine` recebe os alertas financeiros (parcela a vencer/em atraso e liquidação sem confirmação) pelo público `finance` (proprietário, gestor e equipe; nunca o instrutor). Antecedência: `finance_lead_days` em `/alert-settings`.
+
+
+## Encaminhamento de matrícula e sugestões de agenda
+
+Rotas relativas a `/api/v1/organizations/{organization}`; sessão, vínculo com o espaço e isolamento continuam obrigatórios.
+
+### `PUT enrollments/{enrollment}/assignment`
+
+Somente owner/admin/staff, pela policy de atualização da matrícula. Corpo:
+
+```json
+{"instructor_id": 4, "expected_instructor_id": null}
+```
+
+`expected_instructor_id` é obrigatório e deve refletir o responsável carregado (ou `null`). Divergência retorna `409 stale_assignment`, sem sobrescrever. `instructor_id: null` remove o encaminhamento; repetir o estado atual não duplica auditoria. O instrutor precisa ter vínculo ativo neste espaço e atender ao menos uma categoria simples da matrícula. Matrícula encerrada permite remover, mas não encaminhar.
+
+Retorna `EnrollmentResource`, com `assignment: {instructor_id, instructor_name, assigned_at}` ou `null`. Não cria aula, reserva ou cobrança. O instrutor membro pode consultar aluno e matrícula encaminhados, com os mesmos campos restritos de antes; retirar o encaminhamento mantém acesso somente quando já existe aula dele na matrícula. Histórico em auditoria, evento `enrollment.assigned`.
+
+### `GET lesson-slots`
+
+Somente quem pode criar aula no espaço. Parâmetros: `enrollment_id`, `instructor_id`, `date` (`YYYY-MM-DD` no fuso do espaço), `duration` (1–240 min); opcionais `vehicle_id`, `category` simples e `from_time` (`HH:mm`, padrão `08:00`). Dia passado é recusado. Limite de 30 consultas/minuto.
+
+Retorna `data: [{starts_at, ends_at}]` em ISO UTC (até cinco sugestões), com `meta.date`, `meta.timezone`, `meta.step_minutes: 15` e explicação de que não existe reserva. Busca no dia informado a partir da hora, sem ultrapassar a meia-noite. Considera aulas e exames, indisponibilidade pessoal entre espaços, manutenção, expediente do espaço/instrutor, categoria/documento do veículo, aluno e saldo. Nenhum motivo de conflito externo é retornado. Resultado vazio exige alterar dia ou recursos; falhas de cadastro/saldo são explicadas pelos códigos de negócio existentes. O POST de aula verifica tudo novamente sob transação.

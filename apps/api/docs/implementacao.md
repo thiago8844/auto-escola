@@ -19,7 +19,7 @@ Registro do que foi construído nesta etapa, das decisões tomadas, do que **nã
 | Aulas: agenda, conflito, remarcação, status | ✅ |
 | Agenda pessoal consolidada (`/me/lessons`) | ✅ |
 | Seeder de demonstração | ✅ |
-| Testes automatizados | ✅ 270 testes, 1.834 asserções (18/10/2026) |
+| Testes automatizados | ✅ 281 testes, 1.922 asserções (18/10/2026) |
 | Documentação geral em `docs/` e técnica em `apps/api/docs/` | ✅ |
 | **Fase 1 do MVP** (ver [lacunas-mvp-api.md](lacunas-mvp-api.md)) | ✅ |
 | Processo de habilitação e checklist de liberação para a prática | ✅ |
@@ -27,7 +27,7 @@ Registro do que foi construído nesta etapa, das decisões tomadas, do que **nã
 | Veículos, aula com veículo, conflito de veículo e de aluno | ✅ |
 | Execução da aula (duração real, motivo, evolução, registro oficial) | ✅ |
 | Fuso horário por espaço | ✅ |
-| Pacotes/saldo, exames práticos, taxas, relatórios e financeiro | 📋 Não implementados; financeiro será o último módulo do MVP |
+| Pacotes/saldo, exames/taxas, desfecho, disponibilidade/frota, alertas, relatórios e financeiro | ✅ Implementados (módulos 1–8); homologação pendente |
 | Frontend web | ✅ Base operacional implementada em `apps/web`; complementos no checklist principal |
 | Aplicativo mobile | 📋 Etapa posterior ao web |
 
@@ -236,6 +236,18 @@ Estas coisas **não estão resolvidas**. Não considere que estão prontas.
 
 A fonte principal de TODOs e prioridades é o **[checklist de módulos do MVP web](../../../docs/modulos-checklist.md)**. O [mapa de lacunas da API](lacunas-mvp-api.md) relaciona as entregas de backend à mesma sequência.
 
-O próximo módulo recomendado é **Pacotes e saldo de aulas**. Depois vêm exames/taxas, desfecho/histórico, disponibilidade/frota, alertas, acesso/acabamento e relatórios. **Financeiro básico é o último módulo do MVP**; Vendas e atendimento vêm após ele. Mobile terá planejamento próprio posterior.
+Os módulos 1 a 8 estão implementados. A etapa atual é homologar os fluxos por perfil, concorrência e preparação de produção. Vendas e atendimento e o aplicativo mobile permanecem posteriores ao MVP.
 
-Concorrência real, tradução, recuperação de senha, impacto de desativação, auditoria, homologação e preparação de produção permanecem pendentes nos módulos/critérios correspondentes. A página de confirmação de e-mail e a base web já existem.
+Concorrência real, homologação e preparação de produção permanecem pendentes. Recuperação de senha, respostas de validação em português, impacto de desativação e auditoria já têm implementação e testes. A página de confirmação de e-mail e a base web já existem.
+
+
+## UX/UI operacional — 18/10/2026
+
+- Painel retorna total de exames separado da amostra e total de matrículas em atendimento separado de alunos distintos.
+- Parcelas informam `awaiting_settlement_cents`; recibos informam direção e lançamento de origem.
+- Encaminhamento explícito por matrícula: responsável atual em `enrollments.assigned_instructor_id`, data em `assigned_at` e histórico em `audit_events`. Migração `2026_10_18_120000_add_assignment_to_enrollments` é necessária.
+- A secretaria encaminha sem agendar aula ou movimentar saldo. O instrutor recebe somente a visão operacional já filtrada pelos resources; documentos e financeiro continuam restritos. Retirar o encaminhamento revoga a visão quando não há histórico de aula.
+- Consulta de horários livres reutiliza guards de agenda, veículo, aluno, expediente e saldo; usa UTC nas consultas, mantém locks na ordem existente e não grava reservas. Sugere até cinco horários no dia; salvar continua sendo a confirmação definitiva.
+- Primeiros passos incluem a conta/caixa e distinguem orientação da gerência e da secretaria.
+
+TODO: homologar concorrência com processos reais e medir latência da busca de horários com volume de produção. A suite automatizada não comprova essas condições.
