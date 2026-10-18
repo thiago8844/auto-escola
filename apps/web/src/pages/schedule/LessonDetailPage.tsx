@@ -92,12 +92,11 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
       {scheduled && (
         <div className="d-flex flex-wrap gap-2 mb-4">
           <Button onClick={() => setModal('status')}>Concluir, faltou ou cancelar</Button>
-          {operate && (
-            <Button variant="outline-primary" onClick={() => setModal('reschedule')}>
-              <i className="bi bi-calendar2-week me-2" aria-hidden="true" />
-              Remarcar
-            </Button>
-          )}
+          <Button variant="outline-primary" onClick={() => setModal('reschedule')}>
+            <i className="bi bi-calendar2-week me-2" aria-hidden="true" />
+            Remarcar
+          </Button>
+          {!operate && <ReassignControls organizationId={organization.id} lessonId={lesson.id} showLink={false} canSwapInstructor={false} />}
         </div>
       )}
 
@@ -133,7 +132,7 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
       {operate && <RegistryForm key={`${lesson.registry.status}-${lesson.registry.reference}-${lesson.registry.document_id}`} lesson={lesson} completed={completed} />}
 
       {modal === 'reschedule' && <RescheduleModal organizationId={organization.id} timeZone={timeZone} lesson={lesson} onClose={() => setModal(null)} />}
-      {modal === 'status' && <StatusModal organizationId={organization.id} lesson={lesson} canCancel={operate} release={release} balance={enrollment.data?.balance} onClose={() => setModal(null)} />}
+      {modal === 'status' && <StatusModal organizationId={organization.id} lesson={lesson} release={release} balance={enrollment.data?.balance} onClose={() => setModal(null)} />}
     </>
   )
 }

@@ -17,15 +17,13 @@ import { formatMinutes } from '../../utils/formatMinutes'
 type StatusModalProps = {
   organizationId: number
   lesson: Lesson
-  // Instrutor só marca realizada ou falta; cancelar é da equipe
-  canCancel: boolean
   release?: PracticeRelease
   // Saldo da matrícula (só a equipe): mostra o efeito da mudança antes de confirmar
   balance?: Balance
   onClose: () => void
 }
 
-export function StatusModal({ organizationId, lesson, canCancel, release, balance, onClose }: StatusModalProps) {
+export function StatusModal({ organizationId, lesson, release, balance, onClose }: StatusModalProps) {
   const change = useChangeLessonStatus(organizationId, String(lesson.id))
   const practiceBlocked = release !== undefined && !release.released
 
@@ -69,7 +67,7 @@ export function StatusModal({ organizationId, lesson, canCancel, release, balanc
               Realizada{practiceBlocked ? ' (bloqueada: prática não liberada)' : ''}
             </option>
             <option value="missed">Falta do aluno</option>
-            {canCancel && <option value="cancelled">Cancelada</option>}
+            <option value="cancelled">Cancelada</option>
           </SelectField>
 
           {status === 'completed' ? (

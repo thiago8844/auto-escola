@@ -51,12 +51,10 @@ export default function SchedulePage() {
       <PageHeader
         title="Agenda"
         actions={
-          operate && (
-            <Link to={links.scheduleNew(`?data=${date}&instrutor=${instructorId}&veiculo=${vehicleId}`)} className="btn btn-primary">
-              <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-              Agendar aula
-            </Link>
-          )
+          <Link to={links.scheduleNew(`?data=${date}&instrutor=${instructorId}&veiculo=${vehicleId}`)} className="btn btn-primary">
+            <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+            Agendar aula
+          </Link>
         }
       />
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useSessionFormRecovery } from '../../hooks/useSessionFormRecovery'
 import { SlotSuggestions } from '../../components/SlotSuggestions'
 import { useFormProtection } from '../../hooks/useFormProtection'
@@ -18,6 +19,8 @@ import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useEnrollment } from '../../hooks/useEnrollments'
 import { useInstructors } from '../../hooks/useInstructors'
+import { useMyInstructor } from '../../hooks/useMe'
+import { canOperate } from '../../utils/permissions'
 import { useCreateLesson } from '../../hooks/useLessons'
 import { useVehicles } from '../../hooks/useVehicles'
 import { scheduleSchema, type ScheduleInput } from '../../schemas/lesson'
@@ -49,7 +52,11 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
   const create = useCreateLesson(organization.id, organization.timezone)
 
   // Só instrutor com vínculo ativo e veículo ativo aparecem nas opções
-  const instructors = useInstructors(organization.id, { page: 1, all: true, active: true })
+  // Instrutor do espaço agenda só para si: a lista de instrutores é da equipe
+  const operate = canOperate(organization.role)
+  const allInstructors = useInstructors(organization.id, { page: 1, all: true, active: true }, operate)
+  const mine = useMyInstructor()
+  const instructors = operate ? allInstructors : { ...mine, data: mine.data ? { data: [mine.data] } : undefined }
   const vehicles = useVehicles(organization.id, { page: 1, all: true, status: 'active' })
 
   const dateParam = searchParams.get('data') ?? ''
@@ -92,6 +99,10 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
 
   useSessionFormRecovery(`lesson:${organization.id}:${presetEnrollment?.id ?? 'new'}`, getValues, reset)
   const protection = useFormProtection(isDirty)
+  const myInstructorId = mine.data?.id
+  useEffect(() => {
+    if (!operate && myInstructorId !== undefined) setValue('instructor_id', String(myInstructorId))
+  }, [operate, myInstructorId, setValue])
 
   const onSubmit = handleSubmit((values) =>
     create.mutate(values, {

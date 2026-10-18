@@ -72,7 +72,7 @@ export function CommitmentList({ organizationId, timezone, commitments, canAct }
 }
 
 // Troca veículo ou instrutor da aula, mantendo horário e saldo. A API confere bloqueios e conflitos de novo.
-export function ReassignControls({ organizationId, lessonId, showLink = true }: { organizationId: number; lessonId: number; showLink?: boolean }) {
+export function ReassignControls({ organizationId, lessonId, showLink = true, canSwapInstructor = true }: { organizationId: number; lessonId: number; showLink?: boolean; canSwapInstructor?: boolean }) {
   const links = organizationPaths(organizationId)
   const [mode, setMode] = useState<null | 'vehicle' | 'instructor'>(null)
 
@@ -82,9 +82,11 @@ export function ReassignControls({ organizationId, lessonId, showLink = true }: 
         <Button size="sm" variant="outline-primary" onClick={() => setMode(mode === 'vehicle' ? null : 'vehicle')}>
           Trocar veículo
         </Button>
-        <Button size="sm" variant="outline-primary" onClick={() => setMode(mode === 'instructor' ? null : 'instructor')}>
-          Trocar instrutor
-        </Button>
+        {canSwapInstructor && (
+          <Button size="sm" variant="outline-primary" onClick={() => setMode(mode === 'instructor' ? null : 'instructor')}>
+            Trocar instrutor
+          </Button>
+        )}
         {showLink && (
           <Link to={links.lesson(lessonId)} className="btn btn-sm btn-outline-secondary">
             Remarcar ou cancelar
@@ -100,7 +102,7 @@ function ReassignForm({ organizationId, lessonId, mode, onDone }: { organization
   const [value, setValue] = useState('')
   const reassign = useReassignLesson(organizationId)
   const vehicles = useVehicles(organizationId, { page: 1, all: true, status: 'active' })
-  const instructors = useInstructors(organizationId, { page: 1, all: true, active: true })
+  const instructors = useInstructors(organizationId, { page: 1, all: true, active: true }, mode === 'instructor')
 
   const submit = () =>
     reassign.mutate(mode === 'vehicle' ? { lessonId, vehicle_id: Number(value) } : { lessonId, instructor_id: Number(value) }, { onSuccess: onDone })
