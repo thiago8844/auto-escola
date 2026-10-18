@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Mínimo de 3 caracteres na senha (o padrão do Laravel é 8).
+        Password::defaults(fn () => Password::min(3));
+
         // O e-mail de confirmação aponta para o frontend. Ele repassa expires e signature à API,
         // que valida a assinatura calculada sobre a rota da própria API.
         VerifyEmail::createUrlUsing(function (object $notifiable): string {
