@@ -164,7 +164,7 @@ Ao agendar, você escolhe matrícula, instrutor ativo, veículo opcional, data, 
 
 Use **Encontrar horário livre neste dia** para receber até cinco sugestões. A consulta não reserva nada.
 
-No detalhe de aula **Agendada**, a equipe pode **Remarcar** data, início e duração, ou marcar **Realizada**, **Falta** e **Cancelada**. Instrutores só podem marcar **Realizada** ou **Falta** nas próprias aulas. Informe duração real e evolução ao realizar; se a duração real ficar vazia, vale a agendada. Depois de um status final, a aula não volta a agendada.
+No detalhe de aula **Agendada**, a equipe e o instrutor responsável podem **Remarcar** data, início e duração, ou marcar **Realizada**, **Falta** e **Cancelada**. O instrutor atua somente nas próprias aulas; o instrutor também troca o veículo das suas aulas; passar a aula a outro instrutor é da equipe. Informe duração real e evolução ao realizar; se a duração real ficar vazia, vale a agendada. Depois de um status final, a aula não volta a agendada.
 
 Concluir a aula desconta o pacote conforme a política do contrato. Se a prática estiver bloqueada pelo checklist, a aula não pode ser concluída.
 

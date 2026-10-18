@@ -72,10 +72,10 @@ Legenda: ✅ permitido · ❌ negado · 🔒 permitido com restrição (detalhad
 |---|---|---|---|---|
 | Listar aulas do espaço | ✅ | ✅ | ✅ | 🔒 só as próprias |
 | Ver aula | ✅ | ✅ | ✅ | 🔒 só as próprias |
-| Agendar aula | ✅ | ✅ | ✅ | ❌ |
-| Remarcar aula | ✅ | ✅ | ✅ | ❌ |
+| Agendar aula | ✅ | ✅ | ✅ | ✅ só para si |
+| Remarcar aula | ✅ | ✅ | ✅ | 🔒 só as próprias |
 | Marcar como **realizada** ou **falta** | ✅ | ✅ | ✅ | 🔒 só as próprias |
-| **Cancelar** aula | ✅ | ✅ | ✅ | ❌ |
+| **Cancelar** aula | ✅ | ✅ | ✅ | 🔒 só as próprias |
 | Editar observações, evolução e duração real | ✅ | ✅ | ✅ | 🔒 só as próprias |
 | Registrar o registro oficial da aula | ✅ | ✅ | ✅ | ❌ |
 | Agenda pessoal (`/me/lessons`) | ✅ | ✅ | ✅ | ✅ (ver seção 4) |
@@ -130,7 +130,7 @@ Retorna aulas em que o `instructor_id` é o perfil do usuário **e** o espaço e
 
 ### 6. Aulas e ações do instrutor
 
-O instrutor só pode mudar o status das **próprias** aulas, e somente para `completed` (realizada) ou `missed` (falta). Cancelar, remarcar e agendar são da equipe.
+O instrutor agenda (somente para si, em matrículas atribuídas a ele), remarca e muda o status (`completed`, `missed`, `cancelled`) apenas das **próprias** aulas. Troca o veículo das próprias aulas (`reassign`); passar a aula a outro instrutor e o registro oficial são da equipe.
 
 ### 7. Dados de saúde e documentos
 

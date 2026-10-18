@@ -9,7 +9,7 @@ Para a explicação de cada módulo do sistema, veja o [Guia de todos os módulo
 ## 1. Entenda os dois modos de atuação
 
 - **Seu espaço particular:** você é o proprietário. Cadastra alunos, matrículas, veículos, processos, exames e aulas, e também usa o **Financeiro** e os **Relatórios** da sua operação. Pode registrar autoescolas parceiras em cada matrícula.
-- **Espaço de uma autoescola:** ela convida você com o papel **Instrutor**. Você vê suas aulas (no menu, **Minhas aulas neste espaço**), os alunos e matrículas que foram atribuídos a você e os seus próprios bloqueios. Agendar, remarcar e cancelar ficam com a equipe. Você **não** vê financeiro, relatórios, processos, parceiros nem o caixa da autoescola.
+- **Espaço de uma autoescola:** ela convida você com o papel **Instrutor**. Você vê suas aulas (no menu, **Minhas aulas neste espaço**), os alunos e matrículas que foram atribuídos a você e os seus próprios bloqueios. Você também **agenda, remarca e cancela** as suas próprias aulas, só com os alunos atribuídos a você; a equipe também pode fazer isso. Você **não** vê financeiro, relatórios, processos, parceiros nem o caixa da autoescola.
 - **Agenda entre espaços:** reúne suas aulas de todos os espaços aos quais sua conta tem acesso. Cada aula pertence ao espaço que a criou; uma aula da autoescola não é copiada para o seu espaço particular. A mesma lista aparece em **Minha agenda**, fora de qualquer espaço.
 
 O papel muda por espaço. Você pode ser proprietário do particular e instrutor em vários CFCs usando a mesma conta.
@@ -114,7 +114,7 @@ Abra o detalhe da aula agendada e escolha **Concluir, faltou ou cancelar**. No s
 
 Em **Observações e evolução**, você pode complementar observações e, após a realização, evolução e duração real. A equipe também pode registrar o **Registro oficial** depois de uma aula realizada, com protocolo/referência ou documento. Marcar a aula como realizada no Rota Certa **não lança a aula no sistema oficial**.
 
-Se a aula pertence a uma autoescola e seu papel lá é **Instrutor**, você pode marcar somente **Realizada** ou **Falta** nas suas próprias aulas e registrar observações, evolução e duração real. Peça à equipe do CFC para agendar, remarcar, cancelar ou registrar o lançamento oficial.
+Se a aula pertence a uma autoescola e seu papel lá é **Instrutor**, você pode agendar, remarcar e marcar **Realizada**, **Falta** ou **Cancelada** nas suas próprias aulas (a agenda do CFC é compartilhada com a equipe, que também pode alterá-las), além de registrar observações, evolução e duração real. Você também troca o veículo das suas aulas. Peça à equipe do CFC para passar a aula a outro instrutor e para registrar o lançamento oficial.
 
 ### Exames
 

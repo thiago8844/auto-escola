@@ -182,7 +182,7 @@ Cada decisão tem motivo. Se algo não fizer sentido para você, é o ponto para
 | 17 | **Sem repository** | O Eloquent já é a camada de acesso. |
 | 18 | **Duração máxima de aula: 240 minutos** | Limite de sanidade, não vem da especificação. Fácil de ajustar. |
 | 19 | **Status de aula: `scheduled`, `completed`, `missed`, `cancelled`** | Nomes em inglês no código, correspondendo ao português da especificação (agendada, realizada, falta, cancelada). |
-| 20 | **Instrutor só marca realizada/falta nas próprias aulas**; cancelar e remarcar ficam com a equipe | Mantém decisões de agenda com quem opera o espaço. |
+| 20 | **Instrutor agenda, remarca, cancela e conclui as próprias aulas**; trocar o veículo também; passar a aula a outro instrutor e o registro oficial ficam com a equipe | Na prática, quem presta a aula também controla a própria agenda; a equipe continua podendo operar tudo. |
 | 21 | **Mailpit como transporte de e-mail em desenvolvimento** | Atende "sem enviar e-mails reais" e não grava tokens em log (o `log` do Laravel gravaria o link com o token). |
 | 22 | **Porta 3322 para o MySQL** | Outros MySQL desta máquina usam 3306, 3307, 3309, 3310, 3312 e 3318. |
 | 23 | **Sem Laravel Boost** | O `CLAUDE.md` do projeto pede a instalação, mas a tarefa pediu não atualizar dependências desnecessariamente. Pode ser instalado depois, se você quiser. |
