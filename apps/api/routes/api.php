@@ -29,6 +29,10 @@ use App\Http\Controllers\Api\V1\QualificationProcessController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\VehicleController;
+use App\Http\Controllers\Api\V1\Finance\CatalogController as FinanceCatalog;
+use App\Http\Controllers\Api\V1\Finance\EntryController as FinanceEntries;
+use App\Http\Controllers\Api\V1\Finance\IntegrationController as FinanceIntegration;
+use App\Http\Controllers\Api\V1\Finance\ReportController as FinanceReport;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -200,6 +204,61 @@ Route::prefix('v1')->group(function () {
                 Route::get('reports/processes', [ReportController::class, 'processes']);
                 Route::get('reports/partners', [ReportController::class, 'partners']);
                 Route::get('students/{student}/summary', [ReportController::class, 'studentSummary']);
+
+                // Financeiro básico (equipe; cadastros, estornos, transferências e ajustes: proprietário e gestor)
+                Route::prefix('finance')->group(function () {
+                    Route::get('overview', [FinanceReport::class, 'overview']);
+                    Route::get('cash-flow', [FinanceReport::class, 'cashFlow']);
+                    Route::get('breakdown', [FinanceReport::class, 'breakdown']);
+                    Route::get('statement', [FinanceReport::class, 'consolidated']);
+                    Route::get('movements', [FinanceReport::class, 'movements']);
+                    Route::get('fee-advances', [FinanceReport::class, 'feeAdvances']);
+                    Route::get('partners/{partner}', [FinanceReport::class, 'partner']);
+                    Route::get('export/installments', [FinanceReport::class, 'exportInstallments'])->middleware('throttle:20,1');
+                    Route::get('export/movements', [FinanceReport::class, 'exportMovements'])->middleware('throttle:20,1');
+
+                    Route::get('accounts', [FinanceCatalog::class, 'accounts']);
+                    Route::post('accounts', [FinanceCatalog::class, 'storeAccount']);
+                    Route::patch('accounts/{finance_account}', [FinanceCatalog::class, 'updateAccount']);
+                    Route::get('accounts/{finance_account}/statement', [FinanceReport::class, 'statement']);
+                    Route::post('accounts/{finance_account}/adjustments', [FinanceCatalog::class, 'adjust']);
+                    Route::get('accounts/{finance_account}/reconciliations', [FinanceCatalog::class, 'reconciliations']);
+                    Route::post('accounts/{finance_account}/reconciliations', [FinanceCatalog::class, 'reconcile']);
+                    Route::get('categories', [FinanceCatalog::class, 'categories']);
+                    Route::post('categories', [FinanceCatalog::class, 'storeCategory']);
+                    Route::patch('categories/{finance_category}', [FinanceCatalog::class, 'updateCategory']);
+                    Route::get('payment-methods', [FinanceCatalog::class, 'methods']);
+                    Route::post('payment-methods', [FinanceCatalog::class, 'storeMethod']);
+                    Route::patch('payment-methods/{finance_method}', [FinanceCatalog::class, 'updateMethod']);
+                    Route::get('parties', [FinanceCatalog::class, 'parties']);
+                    Route::post('parties', [FinanceCatalog::class, 'storeParty']);
+                    Route::patch('parties/{finance_party}', [FinanceCatalog::class, 'updateParty']);
+                    Route::get('recurrences', [FinanceCatalog::class, 'recurrences']);
+                    Route::post('recurrences', [FinanceCatalog::class, 'storeRecurrence']);
+                    Route::delete('recurrences/{finance_recurrence}', [FinanceCatalog::class, 'stopRecurrence']);
+
+                    Route::get('installments', [FinanceEntries::class, 'installments']);
+                    Route::patch('installments/{finance_installment}', [FinanceEntries::class, 'updateInstallment']);
+                    Route::post('installments/{finance_installment}/cancel', [FinanceEntries::class, 'cancelInstallment']);
+                    Route::post('installments/{finance_installment}/payments', [FinanceEntries::class, 'pay']);
+                    Route::post('entries/preview', [FinanceEntries::class, 'preview']);
+                    Route::post('entries', [FinanceEntries::class, 'store']);
+                    Route::get('entries/{finance_entry}', [FinanceEntries::class, 'show']);
+                    Route::patch('entries/{finance_entry}', [FinanceEntries::class, 'update']);
+                    Route::post('entries/{finance_entry}/cancel', [FinanceEntries::class, 'cancel']);
+                    Route::post('payments/{finance_payment}/confirm', [FinanceEntries::class, 'confirm']);
+                    Route::post('payments/{finance_payment}/reverse', [FinanceEntries::class, 'reverse']);
+                    Route::get('payments/{finance_payment}/receipt', [FinanceEntries::class, 'receipt']);
+
+                    Route::get('transfers', [FinanceReport::class, 'transfers']);
+                    Route::post('transfers', [FinanceReport::class, 'transfer']);
+                    Route::post('transfers/{finance_transfer}/reverse', [FinanceReport::class, 'reverseTransfer']);
+                });
+                Route::get('enrollments/{enrollment}/finance', [FinanceIntegration::class, 'enrollmentSummary']);
+                Route::post('enrollments/{enrollment}/finance/charge', [FinanceIntegration::class, 'chargeEnrollment']);
+                Route::post('maintenances/{maintenance}/finance/expense', [FinanceIntegration::class, 'maintenanceExpense']);
+                Route::post('external-fees/{external_fee}/finance/reimbursement', [FinanceIntegration::class, 'feeReimbursement']);
+                Route::post('external-fees/{external_fee}/finance/advance', [FinanceIntegration::class, 'feeAdvance']);
 
                 // Documentos privados
                 Route::get('documents', [DocumentController::class, 'index']);

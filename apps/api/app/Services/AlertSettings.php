@@ -14,6 +14,7 @@ class AlertSettings
         'document_lead_days' => 30,
         'exam_lead_days' => 3,
         'fee_lead_days' => 5,
+        'finance_lead_days' => 5,
         'release_lead_days' => 7,
         'low_balance_minutes' => 100,
         'inactive_days' => 14,

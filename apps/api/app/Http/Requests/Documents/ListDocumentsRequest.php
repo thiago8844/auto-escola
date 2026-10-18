@@ -24,6 +24,8 @@ class ListDocumentsRequest extends FormRequest
             'qualification_process_id' => ['nullable', 'integer'],
             'vehicle_id' => ['nullable', 'integer'],
             'practical_exam_id' => ['nullable', 'integer'],
+            'finance_entry_id' => ['nullable', 'integer'],
+            'finance_payment_id' => ['nullable', 'integer'],
             'type' => ['nullable', Rule::enum(DocumentType::class)],
             'status' => ['nullable', Rule::enum(DocumentStatus::class)],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],

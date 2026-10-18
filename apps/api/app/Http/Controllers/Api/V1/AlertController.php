@@ -121,6 +121,7 @@ class AlertController extends Controller
             'document_lead_days' => ['sometimes', 'integer', 'between:1,180'],
             'exam_lead_days' => ['sometimes', 'integer', 'between:1,30'],
             'fee_lead_days' => ['sometimes', 'integer', 'between:1,60'],
+            'finance_lead_days' => ['sometimes', 'integer', 'between:1,60'],
             'release_lead_days' => ['sometimes', 'integer', 'between:1,30'],
             'low_balance_minutes' => ['sometimes', 'integer', 'between:0,1000'],
             'inactive_days' => ['sometimes', 'integer', 'between:3,180'],

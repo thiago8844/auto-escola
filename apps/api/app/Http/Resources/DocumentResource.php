@@ -27,6 +27,8 @@ class DocumentResource extends JsonResource
             'qualification_process_id' => $this->qualification_process_id,
             'vehicle_id' => $this->vehicle_id,
             'practical_exam_id' => $this->practical_exam_id,
+            'finance_entry_id' => $this->finance_entry_id,
+            'finance_payment_id' => $this->finance_payment_id,
             'replaces_document_id' => $this->replaces_document_id,
             'version' => $this->version,
             'issuer' => $this->issuer,

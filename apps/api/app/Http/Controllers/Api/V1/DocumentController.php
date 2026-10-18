@@ -28,6 +28,8 @@ class DocumentController extends Controller
             ->when($request->filled('student_id'), fn ($q) => $q->where('student_id', $request->integer('student_id')))
             ->when($request->filled('qualification_process_id'), fn ($q) => $q->where('qualification_process_id', $request->integer('qualification_process_id')))
             ->when($request->filled('vehicle_id'), fn ($q) => $q->where('vehicle_id', $request->integer('vehicle_id')))
+            ->when($request->filled('finance_entry_id'), fn ($q) => $q->where('finance_entry_id', $request->integer('finance_entry_id')))
+            ->when($request->filled('finance_payment_id'), fn ($q) => $q->where('finance_payment_id', $request->integer('finance_payment_id')))
             ->when($request->filled('practical_exam_id'), fn ($q) => $q->where('practical_exam_id', $request->integer('practical_exam_id')))
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))

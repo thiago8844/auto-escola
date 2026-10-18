@@ -51,7 +51,7 @@ class Alert extends Model
             $staffSees = $role !== null && $role->canOperate() && ($role !== MembershipRole::Staff || $settings['staff_receives']);
 
             if ($staffSees) {
-                $q->orWhereIn('audience', ['staff', 'both']);
+                $q->orWhereIn('audience', ['staff', 'both', 'finance']);
             }
 
             if ($role !== null && $instructorId !== null) {

@@ -1123,3 +1123,40 @@ Rotas sob `/api/v1/organizations/{organization}/reports`. Exceto `dashboard` e `
 | `GET` | `/students/{student}/summary` | Resumo do aluno (equipe): minutos por matrícula (contratado, reservado, realizado, consumido, disponível), faltas, cancelamentos, evolução, exames e processo/emissão. |
 
 **Definições:** duração agendada = fim − início; duração real = minutos informados (ou a agendada) das aulas **realizadas**; AB conta cada aula uma vez, na categoria da aula (`lessons.category`, ou a da matrícula); cancelamentos aparecem como situação própria (`include_cancelled=0` os exclui); alunos de parceiro são contados uma vez por parceiro.
+
+## Financeiro básico (módulo 8)
+
+Rotas sob `/api/v1/organizations/{organization}`. **Tudo em centavos (inteiros).** Permissões: ver, lançar, editar parcelas abertas e dar baixa = proprietário, gestor e equipe; contas, categorias, formas de pagamento, recorrências, estornos, cancelamentos, transferências, ajustes e conciliação = proprietário e gestor; o instrutor nunca acessa o caixa. Categorias e formas de pagamento comuns são criadas na primeira consulta.
+
+**Modelo.** *Lançamento* (`finance_entries`: a receber ou a pagar) → *parcelas* (`finance_installments`, soma sempre igual ao total) → *pagamentos* (`finance_payments`, uma parcela pode ter vários: forma/conta/data diferentes). O dinheiro vive no livro-razão `finance_movements`, só com inserções: estorno gera o movimento oposto e mantém o original. Saldo da conta = saldo inicial + entradas − saídas. Parcela tem uma situação derivada: `forecast` (prevista), `overdue` (vencida), `partial` (parcialmente paga), `paid` (paga) e `cancelled`.
+
+| Método | Rota | Quem | Descrição |
+|---|---|---|---|
+| `GET` | `/finance/overview` | Equipe | Painel: a receber/a pagar, vencidos, próximos 30 dias, realizado no período (`from`/`to`), saldos por conta e consolidado, liquidações aguardando. |
+| `GET` | `/finance/cash-flow`, `/finance/breakdown?by=`, `/finance/statement`, `/finance/movements` | Equipe | Fluxo previsto × realizado (`by=day\|month`), quebra por `category`, `student`, `partner`, `method` ou `account`, extrato consolidado e movimentações paginadas. |
+| `GET` | `/finance/installments` | Equipe | Lista de parcelas com `totals` (por situação). Filtros: `type`, `situation` (vários, separados por vírgula), `from`/`to` + `date_field` (`due`\|`paid`), `student_id`, `partner_id`, `party_id`, `category_id`, `method_id`, `account_id`, `enrollment_id`, `q`. |
+| `POST` | `/finance/entries/preview`, `/finance/entries` | Equipe | Prévia das parcelas e criação. `plan` (`count`, `first_due`, `periodicity` `monthly`\|`biweekly`\|`weekly`) ou `installments` revisadas (a soma precisa fechar o total); `paid` quita tudo no ato (lançamento avulso já pago). Receita exige `student_id` ou `partner_id` (o parceiro como pagador é uma escolha do lançamento). |
+| `GET`/`PATCH` | `/finance/entries/{id}` | Equipe | Detalhe com parcelas e pagamentos; correção de descrição, categoria, pessoa e observação. |
+| `POST` | `/finance/entries/{id}/cancel`, `/finance/installments/{id}/cancel` | Gestor | `reason`. Recusa se houver pagamentos: estorne antes. |
+| `PATCH` | `/finance/installments/{id}` | Equipe | Vencimento/valor só de parcela sem pagamentos (`installment_has_payments`). |
+| `POST` | `/finance/installments/{id}/payments` | Equipe | `payments[]` (várias linhas = pagamento dividido). Cada linha: `account_id`, `method_id`, `paid_on` (não futura), `applied_cents`, `discount_cents`, `interest_cents`, `fine_cents`, `fee_cents` (qualquer um desses exige `adjust_reason`), `reference`, `client_ref`. `client_ref` repetido devolve a baixa já feita; a parcela é travada, então baixas simultâneas se enfileiram. Forma com `settlement_days > 0` (cartão, boleto) fica `pending` e **não** entra no caixa. |
+| `POST` | `/finance/payments/{id}/confirm` | Equipe | Confirma a liquidação (`settled_on`): só então nasce o movimento. |
+| `POST` | `/finance/payments/{id}/reverse` | Gestor | Estorno com `reason`; reabre a parcela. |
+| `GET` | `/finance/payments/{id}/receipt` | Equipe | Comprovante interno com número (`RC-AAAA-000001`); não é documento fiscal. |
+| `GET`/`POST` | `/finance/accounts`, `PATCH /finance/accounts/{id}` | Equipe lê; gestor altera | Conta/caixa com saldo inicial e data (não é receita); inativar preserva o histórico; saldo inicial só muda antes de haver movimento. |
+| `GET` | `/finance/accounts/{id}/statement` | Equipe | Saldo de abertura, entradas, saídas, transferências, ajustes, estornos e saldo final, linha a linha. |
+| `POST` | `/finance/accounts/{id}/adjustments`, `/reconciliations` | Gestor | Ajuste de saldo (motivo obrigatório) e conferência manual com o extrato externo (diferença registrada). |
+| `GET`/`POST` | `/finance/transfers`, `POST /finance/transfers/{id}/reverse` | Gestor | Transferência entre contas do espaço: débito e crédito vinculados; estorna as duas pontas juntas. Não é receita nem despesa. |
+| `*` | `/finance/categories`, `/finance/payment-methods`, `/finance/parties`, `/finance/recurrences` | Equipe lê; gestor altera (favorecidos: equipe) | Cadastros simples; recorrência mensal gera um lançamento por mês (`recurrence:ID:AAAA-MM`). |
+| `GET` | `/finance/export/installments`, `/finance/export/movements` | Equipe | CSV (UTF-8 com BOM, `;`, valores em reais com vírgula) com os mesmos filtros da lista. |
+| `GET` | `/finance/partners/{partner}` | Equipe | Recebíveis e repasses do parceiro. |
+| `GET` | `/finance/fee-advances` | Equipe | Taxas externas adiantadas: quem adiantou, valor a acertar e baixa. |
+| `GET`/`POST` | `/enrollments/{id}/finance`, `/enrollments/{id}/finance/charge` | Equipe | Cobrança da contratação (`package:ID`); `payer` = `student` ou `partner`. |
+| `POST` | `/maintenances/{id}/finance/expense` | Equipe | Despesa da manutenção (`maintenance:UUID`). |
+| `POST` | `/external-fees/{id}/finance/reimbursement`, `/advance` | Equipe | Cobrança de reembolso e saída do adiantamento (`fee:ID:reimbursement\|advance`); categorias de repasse, fora do faturamento. |
+
+**Sem duplicidade.** Cobrança de contratação, despesa de manutenção e taxa têm referência única (`source_ref`); repetir a ação responde `409 entry_already_exists` com `existing_entry_id`. Aulas consumidas, edições e reenvios nunca geram título novo. Documentos privados (`/documents`) aceitam `finance_entry_id` e `finance_payment_id`.
+
+**Realizado × previsto.** O realizado usa a data em que o dinheiro entrou ou saiu; o previsto usa o vencimento. Parcelas em aberto nunca alteram o realizado. *Faturamento* = recebimentos líquidos de estorno, fora de categorias de repasse/reembolso; transferências e saldo inicial nunca entram.
+
+**Alertas.** `AlertEngine` recebe os alertas financeiros (parcela a vencer/em atraso e liquidação sem confirmação) pelo público `finance` (proprietário, gestor e equipe; nunca o instrutor). Antecedência: `finance_lead_days` em `/alert-settings`.

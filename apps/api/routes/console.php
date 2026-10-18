@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Pendências: recalcula todos os espaços a cada 10 minutos, sem depender de alguém abrir a tela.
 // Requer `php artisan schedule:work` (ou cron com `schedule:run`) e um worker de fila (`queue:work`).
 Schedule::command('alerts:generate')->everyTenMinutes()->withoutOverlapping();
+
+// Financeiro: gera os lançamentos das recorrências mensais todo dia (idempotente).
+Schedule::command('finance:recurrences')->dailyAt('03:00')->withoutOverlapping();

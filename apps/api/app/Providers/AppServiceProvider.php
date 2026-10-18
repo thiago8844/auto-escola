@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Alertas financeiros entram na central de pendências (módulo 5) pelo ponto de extensão do motor.
+        \App\Services\AlertEngine::register(fn (...$args) => app(\App\Services\Finance\FinanceAlerts::class)->detect(...$args));
+
         // Mínimo configurável: 3 em desenvolvimento e 8 em produção (ver config/autoescola.php).
         Password::defaults(fn () => Password::min((int) config('autoescola.password_min')));
 

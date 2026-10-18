@@ -111,7 +111,9 @@ class StoreDocument
         $sameOwner = $previous->student_id === $id('student_id')
             && $previous->qualification_process_id === $id('qualification_process_id')
             && $previous->vehicle_id === $id('vehicle_id')
-            && $previous->practical_exam_id === $id('practical_exam_id');
+            && $previous->practical_exam_id === $id('practical_exam_id')
+            && $previous->finance_entry_id === $id('finance_entry_id')
+            && $previous->finance_payment_id === $id('finance_payment_id');
 
         if ($previous->status === DocumentStatus::Replaced
             || $previous->type->value !== $data['type']

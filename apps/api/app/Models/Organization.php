@@ -85,6 +85,56 @@ class Organization extends Model
         return $this->hasMany(AvailabilityBlock::class);
     }
 
+    public function financeAccounts(): HasMany
+    {
+        return $this->hasMany(FinanceAccount::class);
+    }
+
+    public function financeCategories(): HasMany
+    {
+        return $this->hasMany(FinanceCategory::class);
+    }
+
+    public function financeMethods(): HasMany
+    {
+        return $this->hasMany(FinancePaymentMethod::class);
+    }
+
+    public function financeParties(): HasMany
+    {
+        return $this->hasMany(FinanceParty::class);
+    }
+
+    public function financeEntries(): HasMany
+    {
+        return $this->hasMany(FinanceEntry::class);
+    }
+
+    public function financeInstallments(): HasMany
+    {
+        return $this->hasMany(FinanceInstallment::class);
+    }
+
+    public function financePayments(): HasMany
+    {
+        return $this->hasMany(FinancePayment::class);
+    }
+
+    public function financeTransfers(): HasMany
+    {
+        return $this->hasMany(FinanceTransfer::class);
+    }
+
+    public function financeRecurrences(): HasMany
+    {
+        return $this->hasMany(FinanceRecurrence::class);
+    }
+
+    public function financeMovements(): HasMany
+    {
+        return $this->hasMany(FinanceMovement::class);
+    }
+
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);

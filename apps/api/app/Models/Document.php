@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Metadados de um arquivo privado. O caminho em disco (storage_path) nunca é exposto pela API.
  */
 #[Fillable([
-    'organization_id', 'type', 'status', 'student_id', 'qualification_process_id', 'vehicle_id', 'practical_exam_id',
+    'organization_id', 'type', 'status', 'student_id', 'qualification_process_id', 'vehicle_id', 'practical_exam_id', 'finance_entry_id', 'finance_payment_id',
     'replaces_document_id', 'version', 'issuer', 'issued_at', 'expires_at', 'notes',
     'storage_path', 'original_name', 'mime_type', 'size', 'uploaded_by', 'verified_by', 'verified_at',
 ])]
