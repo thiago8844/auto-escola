@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AlertController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AvailabilityBlockController;
 use App\Http\Controllers\Api\V1\ChecklistItemController;
@@ -162,6 +163,17 @@ Route::prefix('v1')->group(function () {
                 Route::patch('external-fees/{external_fee}', [ExternalFeeController::class, 'update']);
                 Route::post('external-fees/{external_fee}/status', [ExternalFeeController::class, 'status']);
                 Route::post('external-fees/{external_fee}/reimbursement', [ExternalFeeController::class, 'reimbursement']);
+
+                // Central de pendências (o sino)
+                Route::get('alerts', [AlertController::class, 'index']);
+                Route::get('alerts/summary', [AlertController::class, 'summary']);
+                Route::post('alerts/read-all', [AlertController::class, 'readAll']);
+                Route::post('alerts/refresh', [AlertController::class, 'refresh'])->middleware('throttle:30,1');
+                Route::post('alerts/{alert}/read', [AlertController::class, 'read']);
+                Route::post('alerts/{alert}/archive', [AlertController::class, 'archive']);
+                Route::post('alerts/{alert}/unarchive', [AlertController::class, 'unarchive']);
+                Route::get('alert-settings', [AlertController::class, 'settings']);
+                Route::patch('alert-settings', [AlertController::class, 'updateSettings']);
 
                 // Documentos privados
                 Route::get('documents', [DocumentController::class, 'index']);

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Espaço de trabalho: uma autoescola (cfc) ou uma operação particular (independent).
  */
-#[Fillable(['name', 'type', 'document', 'email', 'phone', 'address', 'city', 'state', 'timezone', 'business_hours'])]
+#[Fillable(['name', 'type', 'document', 'email', 'phone', 'address', 'city', 'state', 'timezone', 'business_hours', 'alert_settings'])]
 class Organization extends Model
 {
     use HasFactory;
@@ -26,6 +26,7 @@ class Organization extends Model
         return [
             'type' => OrganizationType::class,
             'business_hours' => 'array',
+            'alert_settings' => 'array',
         ];
     }
 
@@ -82,6 +83,11 @@ class Organization extends Model
     public function availabilityBlocks(): HasMany
     {
         return $this->hasMany(AvailabilityBlock::class);
+    }
+
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
     }
 
     public function maintenances(): HasMany

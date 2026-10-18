@@ -1066,3 +1066,22 @@ Rotas sob `/api/v1/organizations/{organization}`. Bloqueios, manutenção e disp
 - Agendar ou remarcar aula/exame responde `409` com `vehicle_blocked` ou `instructor_blocked` (mensagem indica como resolver). Indisponibilidade pessoal de outro espaço responde o genérico `instructor_unavailable`.
 - `PATCH /vehicles/{id}` (inativar ou antecipar o CRLV) e `PATCH /instructors/{id}/link` (desativar) devolvem `meta.affected`. `DELETE /vehicles/{id}` com compromissos futuros responde `422 vehicle_has_commitments`.
 - `GET /lessons/{id}` (equipe, aula agendada) traz `meta.blockers`: o que impediria a execução hoje. Concluir a aula revalida liberação, validade dos documentos do checklist, veículo ativo, sem bloqueio e CRLV vigente (`practice_document_expired`, `vehicle_inactive`, `vehicle_blocked`, `vehicle_document_expired`).
+
+## Pendências e alertas (módulo 5)
+
+Rotas sob `/api/v1/organizations/{organization}`. O alerta pertence ao espaço (uma linha por pendência, deduplicada por `dedup_key`); leitura e arquivamento são **por usuário** e ficam no servidor. Quem enxerga cada alerta é calculado a cada consulta pelo papel atual: proprietário e gestor veem os alertas de equipe; `staff` também, se `staff_receives` estiver ligado; o instrutor vê só os atribuídos a ele (ex.: aula dele sem desfecho, exame em que é responsável). Revogar o acesso encerra tudo (a rota passa a responder 404).
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/alerts` | Filtros: `status` (`open` padrão, `resolved`, `all`), `unread=1`, `archived=1`, `category`, `priority`. Ordem: prioridade e mais recentes. `meta` traz paginação e os contadores `unread`, `critical_unread`, `open`. |
+| `GET` | `/alerts/summary` | Só os contadores (usado pelo sino). |
+| `POST` | `/alerts/{id}/read`, `/alerts/read-all` | Marca como lida para o usuário atual. |
+| `POST` | `/alerts/{id}/archive`, `/alerts/{id}/unarchive` | Arquiva/restaura (arquivar também marca como lida). |
+| `POST` | `/alerts/refresh` | Recalcula as pendências do espaço agora. |
+| `GET`/`PATCH` | `/alert-settings` | Antecedência e destinatários; só proprietário e gestor alteram. |
+
+**Geração.** `AlertEngine` calcula o conjunto completo de pendências do espaço e o reconcilia com o gravado: cria o que é novo, atualiza texto/prioridade/prazo, resolve o que deixou de existir e reabre (como não lido) o que voltou. É idempotente e trava o espaço durante a rodada. O prazo faz parte da chave nos alertas por vencimento (mudar o prazo resolve o antigo e cria o novo). Detectores: CRLV (a vencer/vencido, crítico com aulas depois da data), documentos do aluno/veículo, revisão de manutenção por data/km, bloqueios com compromissos afetados, aula próxima sem liberação para a prática, exame próximo, resultado de exame não informado, taxa externa (a vencer, vencida, pagamento aguardando confirmação, pendente com exame próximo), emissão pendente/não entregue, saldo baixo/esgotado, aula agendada no passado sem desfecho e aluno em atendimento sem aula.
+
+**Agendador.** `php artisan alerts:generate` enfileira um `GenerateOrganizationAlerts` por espaço (`--now` executa na hora; `--organization=ID` reprocessa um espaço). Está agendado a cada 10 minutos em `routes/console.php`: em produção rode `schedule:run` (cron) e um worker de fila.
+
+**Configurações** (`alert-settings`): `crlv_lead_days` (30), `document_lead_days` (30), `exam_lead_days` (3), `fee_lead_days` (5), `release_lead_days` (7), `low_balance_minutes` (100), `inactive_days` (14), `lesson_grace_hours` (2), `staff_receives` (true).
