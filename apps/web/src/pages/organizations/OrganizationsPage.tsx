@@ -1,5 +1,6 @@
-import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Alert, Badge, Button, Card, Col, Row, Spinner } from 'react-bootstrap'
+import { Link, useLocation } from 'react-router-dom'
+import { usePreferencesStore } from '../../stores/preferencesStore'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryErrorAlert } from '../../components/QueryErrorAlert'
 import { RoleBadge } from '../../components/RoleBadge'
@@ -9,6 +10,9 @@ import { useOrganizations } from '../../hooks/useOrganizations'
 
 // Escolher o espaço leva para /espacos/:id, que passa a estar em todas as URLs
 export default function OrganizationsPage() {
+  const location = useLocation()
+  const defaultSpace = usePreferencesStore((s) => s.defaultSpace)
+  const setDefaultSpace = usePreferencesStore((s) => s.setDefaultSpace)
   const { data, error, isPending, refetch } = useOrganizations()
 
   return (
@@ -23,6 +27,7 @@ export default function OrganizationsPage() {
         }
       />
 
+      {location.state?.invalidDefault && <Alert variant="info">Seu espaço inicial não está disponível. Escolha outro espaço abaixo.</Alert>}
       {isPending && !error && <Spinner animation="border" role="status" variant="primary" />}
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
@@ -44,10 +49,11 @@ export default function OrganizationsPage() {
                   <p className="small text-secondary mb-3">{ORGANIZATION_TYPE_LABELS[organization.type]}</p>
                   <div className="d-flex align-items-center justify-content-between mt-auto">
                     <RoleBadge role={organization.role} />
-                    <Link to={organizationPaths(organization.id).home} className="stretched-link">
+                    <Link to={organizationPaths(organization.id).home} className="btn btn-primary btn-sm">
                       Abrir
                     </Link>
                   </div>
+                  <div className="mt-3">{defaultSpace === String(organization.id) ? <Badge bg="light" text="body" className="border"><i className="bi bi-star-fill me-1" aria-hidden="true" />Meu espaço inicial</Badge> : <Button variant="link" size="sm" className="px-0" onClick={() => setDefaultSpace(String(organization.id))}>Usar como espaço inicial</Button>}</div>
                 </Card.Body>
               </Card>
             </Col>

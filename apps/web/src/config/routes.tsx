@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
+import { DefaultSpaceRedirect } from '../components/DefaultSpaceRedirect'
 import { RootLayout } from '../components/RootLayout'
 import { GuestOnly } from '../components/GuestOnly'
 import { RequireAuth } from '../components/RequireAuth'
@@ -90,7 +91,7 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          { path: paths.home, element: <Navigate to={paths.organizations} replace /> },
+          { path: paths.home, element: <DefaultSpaceRedirect /> },
           {
             element: <AccountLayout />,
             children: [

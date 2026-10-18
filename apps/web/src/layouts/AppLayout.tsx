@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Button, Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
@@ -7,12 +7,15 @@ import { Logo } from '../components/Logo'
 import { NavItem, type NavItemProps } from '../components/NavItem'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { APP_NAME, SUPPORT_EMAIL } from '../config'
+import type { NavigationModule } from '../config/navigation'
 import { paths } from '../config/paths'
 import { useLogout } from '../hooks/useAuthMutations'
 import { useAuthStore } from '../stores/authStore'
 
 type AppLayoutProps = {
   navItems: NavItemProps[]
+  moreNavItems?: NavigationModule[]
+  menuTools?: ReactNode
   // Bloco acima do menu (ex.: espaço ativo)
   sidebarHeader?: ReactNode
   // Conteúdo no lugar do <Outlet /> (ex.: carregando o espaço)
@@ -20,7 +23,8 @@ type AppLayoutProps = {
 }
 
 // Menu lateral fixo em telas grandes; no mobile vira uma barra com menu deslizante
-export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps) {
+export function AppLayout({ navItems, moreNavItems = [], menuTools, sidebarHeader, children }: AppLayoutProps) {
+  const [expanded, setExpanded] = useState(false)
   const user = useAuthStore((state) => state.user)
   const logout = useLogout()
 
@@ -29,7 +33,7 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
       <a href="#conteudo" className="visually-hidden-focusable position-absolute p-2 bg-body" style={{ zIndex: 2000 }}>
         Pular para o conteúdo
       </a>
-      <Navbar expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-surface border-bottom">
+      <Navbar expanded={expanded} onToggle={setExpanded} expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-surface border-bottom">
         <Container fluid className="flex-lg-column align-items-lg-stretch flex-lg-grow-1">
           <Navbar.Brand as={Link} to={paths.home} aria-label={APP_NAME}>
             <Logo height={32} />
@@ -38,19 +42,27 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
             <NotificationBell />
           </div>
           <Navbar.Toggle aria-controls="app-menu" aria-label="Abrir menu" />
-          <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg" className="flex-lg-grow-1">
+          <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg" onHide={() => setExpanded(false)} className="flex-lg-grow-1">
             <Offcanvas.Header closeButton>
               <Offcanvas.Title as="div">
                 <Logo height={28} />
               </Offcanvas.Title>
             </Offcanvas.Header>
-            <Offcanvas.Body className="flex-column">
+            <Offcanvas.Body className="flex-column" onClick={(event) => { if ((event.target as HTMLElement).closest('a')) setExpanded(false) }}>
               {sidebarHeader && <div className="border-bottom pb-3 mb-3">{sidebarHeader}</div>}
-              <Nav as="nav" className="flex-column flex-grow-1" aria-label="Principal">
+              <Nav as="nav" className="flex-column" aria-label="Principal">
                 {navItems.map((item) => (
                   <NavItem key={item.to} {...item} />
                 ))}
               </Nav>
+              {moreNavItems.length > 0 && <details className="app-more-menu mt-2" open={moreNavItems.some((item) => window.location.pathname.startsWith(item.to)) || undefined}>
+                <summary className="small fw-semibold py-2 px-2">Mais módulos</summary>
+                {(['Operação', 'Cadastros', 'Gestão', 'Pessoal'] as const).map((group) => {
+                  const items = moreNavItems.filter((item) => item.group === group)
+                  return items.length > 0 && <Nav as="nav" aria-label={group} key={group} className="flex-column mb-2"><span className="small text-secondary px-2 pt-2 mb-1">{group}</span>{items.map((item) => <NavItem key={item.to} {...item} />)}</Nav>
+                })}
+              </details>}
+              {menuTools}
               <div className="border-top pt-3 mt-3">
                 <p className="small text-secondary mb-2 text-truncate" title={user?.email}>
                   <i className="bi bi-person-circle me-2" aria-hidden="true" />

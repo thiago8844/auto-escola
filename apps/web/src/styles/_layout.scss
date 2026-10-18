@@ -49,3 +49,21 @@
   background-color: var(--rc-active-bg);
   border-radius: var(--bs-border-radius);
 }
+
+.app-sidebar .nav-link {
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.6rem;
+  color: var(--bs-body-color);
+}
+.app-sidebar .nav-link:hover { background: var(--rc-active-bg); }
+.app-more-menu summary { cursor: pointer; border-radius: 0.5rem; }
+.app-more-menu summary:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+.app-content { max-width: 1500px; margin-inline: auto; }
+@media (min-width: 992px) {
+  .app-sidebar { position: sticky; top: 0; height: 100dvh; align-self: flex-start; overflow-y: auto; }
+}
+@media (max-width: 767.98px) {
+  .btn, .nav-link { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .app-sidebar .nav-link { justify-content: flex-start; }
+  .modal-footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+}

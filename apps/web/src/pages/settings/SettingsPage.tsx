@@ -1,3 +1,4 @@
+import { DefaultSpaceSettings } from '../../components/DefaultSpaceSettings'
 import { MutedNoticesSettings } from '../../components/MutedNoticesSettings'
 import { PageHeader } from '../../components/PageHeader'
 import { ChangePasswordCard } from './ChangePasswordCard'
@@ -8,6 +9,7 @@ export default function SettingsPage() {
     <>
       <PageHeader title="Configurações" />
       <div className="form-narrow">
+        <DefaultSpaceSettings />
         <ChangePasswordCard />
         <MutedNoticesSettings />
       </div>

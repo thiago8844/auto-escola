@@ -3,46 +3,21 @@ import { Alert, Spinner } from 'react-bootstrap'
 import { AlertWatcher } from '../components/AlertWatcher'
 import { QueryErrorAlert } from '../components/QueryErrorAlert'
 import { RoleBadge } from '../components/RoleBadge'
-import { organizationPaths, paths } from '../config/paths'
+import { paths } from '../config/paths'
 import { useOrganization } from '../hooks/useOrganizations'
-import { canManageMembers, canOperate } from '../utils/permissions'
+import { arrangeNavigation, organizationNavigation } from '../config/navigation'
+import { usePreferencesStore } from '../stores/preferencesStore'
+import { NavigationSettings } from '../components/NavigationSettings'
 import { AppLayout } from './AppLayout'
 
 // Layout de /espacos/:organizationId. Carrega o espaço e só mostra as páginas se ele existir.
 export function OrganizationLayout() {
   const { organizationId = '' } = useParams()
   const { data: organization, error, refetch } = useOrganization(organizationId)
-  const links = organizationPaths(organizationId)
 
-  const navItems = [
-    { to: links.home, icon: 'bi-speedometer2', label: 'Início', end: true },
-    { to: links.schedule, icon: 'bi-calendar-week', label: 'Agenda' },
-    { to: links.students, icon: 'bi-mortarboard', label: 'Alunos' },
-    { to: links.vehicles, icon: 'bi-car-front', label: 'Veículos' },
-    { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },
-    { to: links.exams, icon: 'bi-clipboard-check', label: 'Exames' },
-    { to: links.alerts, icon: 'bi-bell', label: 'Pendências' },
-    { to: links.availability, icon: 'bi-slash-circle', label: 'Bloqueios' },
-    ...(organization && canOperate(organization.role)
-      ? [
-          { to: links.finance, icon: 'bi-cash-coin', label: 'Financeiro' },
-          { to: links.reports, icon: 'bi-bar-chart-line', label: 'Relatórios' },
-          { to: links.instructors, icon: 'bi-person-badge', label: 'Instrutores' },
-          { to: links.partners, icon: 'bi-building', label: 'Parceiros' },
-        ]
-      : []),
-    ...(organization && canOperate(organization.role) ? [{ to: links.processes, icon: 'bi-diagram-3', label: 'Processos' }] : []),
-    ...(organization && canManageMembers(organization.role)
-      ? [
-          { to: links.members, icon: 'bi-people', label: 'Membros' },
-          { to: links.invitations, icon: 'bi-envelope-plus', label: 'Convites' },
-          { to: links.audit, icon: 'bi-shield-check', label: 'Auditoria' },
-        ]
-      : []),
-    { to: links.settings, icon: 'bi-gear', label: 'Dados do espaço' },
-    // Agenda pessoal reúne as aulas de todos os espaços
-    { to: paths.myLessons, icon: 'bi-calendar-check', label: 'Minha agenda' },
-  ]
+  const preference = usePreferencesStore((state) => state.navigation[organizationId])
+  const menu = organization ? arrangeNavigation(organizationNavigation(organization), organization.role, preference) : { primary: [], secondary: [] }
+
 
   const sidebarHeader = (
     <>
@@ -88,7 +63,7 @@ export function OrganizationLayout() {
   }
 
   return (
-    <AppLayout navItems={navItems} sidebarHeader={sidebarHeader}>
+    <AppLayout navItems={menu.primary} moreNavItems={menu.secondary} menuTools={organization && <NavigationSettings organization={organization} />} sidebarHeader={sidebarHeader}>
       {content}
     </AppLayout>
   )
