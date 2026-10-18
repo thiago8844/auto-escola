@@ -205,6 +205,9 @@ Route::prefix('v1')->group(function () {
                 Route::get('reports/exams', [ReportController::class, 'exams']);
                 Route::get('reports/exams/detail', [ReportController::class, 'examDetail']);
                 Route::get('reports/exams/export', [ReportController::class, 'examExport'])->middleware('throttle:20,1');
+                Route::get('reports/students', [ReportController::class, 'students']);
+                Route::get('reports/students/detail', [ReportController::class, 'studentDetail']);
+                Route::get('reports/students/export', [ReportController::class, 'studentExport'])->middleware('throttle:20,1');
                 Route::get('reports/utilization', [ReportController::class, 'utilization']);
                 Route::get('reports/processes', [ReportController::class, 'processes']);
                 Route::get('reports/partners', [ReportController::class, 'partners']);

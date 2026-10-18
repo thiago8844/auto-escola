@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\LicenseCategory;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\Organization;
@@ -15,6 +16,7 @@ use App\Services\Reports\LessonReport;
 use App\Services\Reports\PartnerReport;
 use App\Services\Reports\ProcessReport;
 use App\Services\Reports\ReportFilters;
+use App\Services\Reports\StudentReport;
 use App\Services\Reports\StudentSummary;
 use App\Services\Reports\UtilizationReport;
 use Illuminate\Http\JsonResponse;
@@ -139,6 +141,47 @@ class ReportController extends Controller
         return Csv::download('exames-'.now()->format('Ymd-His').'.csv', ExamReport::csvHeaders(), $rows);
     }
 
+    public function students(Request $request, Organization $organization, StudentReport $report): JsonResponse
+    {
+        $f = $this->filters($request, $organization, $this->studentRules());
+
+        return response()->json(['data' => $report->summary($organization, $report->rows($organization), $f->values, $f)]);
+    }
+
+    public function studentDetail(Request $request, Organization $organization, StudentReport $report): JsonResponse
+    {
+        $f = $this->filters($request, $organization, $this->studentRules());
+        $sorted = $report->sort(
+            $report->filter($report->rows($organization), $f->values),
+            (string) ($f->get('sort') ?? 'name'),
+            (string) ($f->get('dir') ?? 'asc'),
+        );
+
+        $perPage = $this->perPage($request);
+        $page = max(1, $request->integer('page', 1));
+
+        return response()->json([
+            'data' => $sorted->forPage($page, $perPage)->values()->all(),
+            'meta' => ['current_page' => $page, 'last_page' => max(1, (int) ceil($sorted->count() / $perPage)), 'per_page' => $perPage, 'total' => $sorted->count(), 'timezone' => $f->timezone()],
+        ]);
+    }
+
+    public function studentExport(Request $request, Organization $organization, StudentReport $report, Audit $audit): StreamedResponse
+    {
+        $f = $this->filters($request, $organization, $this->studentRules());
+        $tz = $f->timezone();
+        $audit->record($organization->getKey(), 'report.exported', 'Exportação CSV de alunos.', ['changes' => $f->values]);
+
+        $sorted = $report->sort($report->filter($report->rows($organization), $f->values), (string) ($f->get('sort') ?? 'name'), (string) ($f->get('dir') ?? 'asc'));
+        $rows = (function () use ($report, $sorted, $tz) {
+            foreach ($sorted as $row) {
+                yield $report->csvRow($row, $tz);
+            }
+        })();
+
+        return Csv::download('alunos-'.now()->format('Ymd-His').'.csv', StudentReport::csvHeaders(), $rows);
+    }
+
     public function utilization(Request $request, Organization $organization, UtilizationReport $report): JsonResponse
     {
         $f = $this->filters($request, $organization, self::PERIOD);
@@ -193,9 +236,37 @@ class ReportController extends Controller
     {
         return self::PERIOD + [
             'instructor_id' => ['nullable', 'integer'], 'vehicle_id' => ['nullable', 'integer'], 'partner_id' => ['nullable', 'integer'],
-            'category' => ['nullable', Rule::in(\App\Enums\LicenseCategory::simpleValues())],
+            'category' => ['nullable', Rule::in(LicenseCategory::simpleValues())],
             'status' => ['nullable', Rule::in(['scheduled', 'completed', 'missed', 'cancelled'])],
             'include_cancelled' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function studentRules(): array
+    {
+        $csv = fn (array $allowed) => ['nullable', 'string', 'max:200', function (string $attribute, mixed $value, \Closure $fail) use ($allowed) {
+            foreach (explode(',', (string) $value) as $item) {
+                if (! in_array(trim($item), $allowed, true)) {
+                    $fail('Valor inválido em '.$attribute.'.');
+                }
+            }
+        }];
+        $ids = ['nullable', 'string', 'max:200', 'regex:/^(\d+|none|space)(,(\d+|none|space))*$/'];
+
+        return self::PERIOD + [
+            'search' => ['nullable', 'string', 'max:100'],
+            'situation' => $csv(StudentReport::SITUATIONS),
+            'agenda' => $csv(StudentReport::AGENDA),
+            'stall' => $csv(StudentReport::STALL),
+            'instructor' => $ids,
+            'partner' => $ids,
+            'category' => ['nullable', Rule::enum(LicenseCategory::class)],
+            'archive' => ['nullable', Rule::in(['ready', 'blocked'])],
+            'exam' => ['nullable', Rule::in(['scheduled', 'retry'])],
+            'idle_days' => ['nullable', 'integer', 'between:1,3650'],
+            'sort' => ['nullable', Rule::in(['name', 'idle_days', 'next_lesson_at', 'last_lesson_at', 'available_minutes', 'created_at'])],
+            'dir' => ['nullable', Rule::in(['asc', 'desc'])],
         ];
     }
 
@@ -203,7 +274,7 @@ class ReportController extends Controller
     private function examRules(): array
     {
         return self::PERIOD + [
-            'category' => ['nullable', Rule::in(\App\Enums\LicenseCategory::simpleValues())],
+            'category' => ['nullable', Rule::in(LicenseCategory::simpleValues())],
             'status' => ['nullable', Rule::in(['scheduled', 'approved', 'failed', 'absent', 'incomplete', 'cancelled'])],
             'attempt' => ['nullable', 'integer', 'min:1'],
         ];
