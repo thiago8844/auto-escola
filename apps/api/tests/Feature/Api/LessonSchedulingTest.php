@@ -202,6 +202,9 @@ class LessonSchedulingTest extends ApiTestCase
         [$start3, $end3] = $this->window(4, 9, 60);
         $ownCancel = $this->lessonFor($this->alfa, $this->instructor, $this->enrollmentFor($this->alfa), $start3, $end3);
         $this->actingAsUser($instructorUser)->patchJson("{$base}/{$ownCancel->getKey()}/status", ['status' => 'cancelled'])
+            ->assertOk();
+
+        $this->actingAsUser($instructorUser)->patchJson("{$base}/{$others->getKey()}/status", ['status' => 'cancelled'])
             ->assertForbidden();
 
         $this->actingAsUser($instructorUser)->patchJson("{$base}/{$others->getKey()}/status", ['status' => 'completed'])
@@ -210,21 +213,44 @@ class LessonSchedulingTest extends ApiTestCase
         $this->actingAsUser($instructorUser)->getJson("{$base}/{$others->getKey()}")->assertForbidden();
     }
 
-    public function test_instructor_cannot_create_or_reschedule_lessons(): void
+    public function test_instructor_schedules_and_reschedules_own_lessons_only(): void
     {
         $instructorUser = User::factory()->create();
         $this->addMember($this->alfa, $instructorUser, MembershipRole::Instructor);
         $this->instructor->forceFill(['user_id' => $instructorUser->getKey()])->save();
-        [$start, $end] = $this->window(3, 9, 60);
-        $lesson = $this->lessonFor($this->alfa, $this->instructor, $this->enrollmentFor($this->alfa), $start, $end);
+        $colleague = $this->linkInstructor($this->alfa);
+        $enrollment = $this->enrollmentFor($this->alfa);
+        $enrollment->forceFill(['assigned_instructor_id' => $this->instructor->getKey()])->save();
+        $base = $this->prefix."/organizations/{$this->alfa->getKey()}/lessons";
 
-        $this->schedule($this->alfa, $start, $end, $instructorUser)->assertForbidden();
+        [$start, $end] = $this->window(3, 9, 60);
+        $payload = ['enrollment_id' => $enrollment->getKey(), 'instructor_id' => $this->instructor->getKey(), 'starts_at' => $start, 'ends_at' => $end];
+
+        $created = $this->actingAsUser($instructorUser)->postJson($base, $payload)->assertCreated();
+
+        // Não agenda para colega nem em matrícula que não é dele.
+        [$s2, $e2] = $this->window(3, 11, 60);
+        $this->actingAsUser($instructorUser)->postJson($base, [...$payload, 'instructor_id' => $colleague->getKey(), 'starts_at' => $s2, 'ends_at' => $e2])->assertForbidden();
+        $foreign = $this->enrollmentFor($this->alfa);
+        $this->actingAsUser($instructorUser)->postJson($base, [...$payload, 'enrollment_id' => $foreign->getKey(), 'starts_at' => $s2, 'ends_at' => $e2])->assertForbidden();
 
         $this->actingAsUser($instructorUser)
-            ->postJson($this->prefix."/organizations/{$this->alfa->getKey()}/lessons/{$lesson->getKey()}/reschedule", [
-                'starts_at' => $start,
-                'ends_at' => $end,
-            ])->assertForbidden();
+            ->postJson("{$base}/{$created->json('data.id')}/reschedule", ['starts_at' => $s2, 'ends_at' => $e2])
+            ->assertOk();
+
+        $others = $this->lessonFor($this->alfa, $colleague, $this->enrollmentFor($this->alfa), ...$this->window(5, 9, 60));
+        $this->actingAsUser($instructorUser)
+            ->postJson("{$base}/{$others->getKey()}/reschedule", ['starts_at' => $s2, 'ends_at' => $e2])
+            ->assertForbidden();
+        $this->actingAsUser($instructorUser)
+            ->postJson("{$base}/{$created->json('data.id')}/reassign", ['instructor_id' => $colleague->getKey()])
+            ->assertForbidden();
+        $this->actingAsUser($instructorUser)
+            ->postJson("{$base}/{$created->json('data.id')}/reassign", ['vehicle_id' => null])
+            ->assertOk();
+        $this->actingAsUser($instructorUser)
+            ->postJson("{$base}/{$others->getKey()}/reassign", ['vehicle_id' => null])
+            ->assertForbidden();
     }
 
     public function test_lesson_listing_is_scoped_and_filterable_by_status(): void

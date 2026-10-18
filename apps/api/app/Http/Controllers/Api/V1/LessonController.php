@@ -57,6 +57,17 @@ class LessonController extends Controller
 
         $enrollment = $organization->enrollments()->whereKey($request->integer('enrollment_id'))->firstOrFail();
 
+        if (! $this->isOperator($request)) {
+            // Instrutor agenda somente para si, em matrículas atribuídas a ele.
+            $instructor = $request->user()->instructor;
+            abort_unless(
+                $instructor !== null
+                    && $request->integer('instructor_id') === $instructor->getKey()
+                    && app(\App\Services\AssignmentScope::class)->enrollmentIsAssigned($organization, $instructor, $enrollment),
+                403,
+            );
+        }
+
         $lesson = $schedule(
             $organization,
             $enrollment,
@@ -101,12 +112,20 @@ class LessonController extends Controller
         Lesson $lesson,
         ReassignLesson $reassign,
     ): JsonResponse {
-        $this->authorize('reschedule', [$lesson, $organization]);
+        $this->authorize('reassign', [$lesson, $organization]);
 
         $data = $request->validate([
             'vehicle_id' => ['sometimes', 'nullable', 'integer', \Illuminate\Validation\Rule::exists('vehicles', 'id')->where('organization_id', $organization->getKey())->whereNull('deleted_at')],
             'instructor_id' => ['sometimes', 'integer', \Illuminate\Validation\Rule::exists('organization_instructor', 'instructor_id')->where('organization_id', $organization->getKey())],
         ]);
+
+        // Instrutor tem autonomia sobre veículo; passar a aula a outro instrutor é decisão da equipe.
+        abort_if(
+            ! $this->isOperator($request)
+                && isset($data['instructor_id'])
+                && (int) $data['instructor_id'] !== $lesson->instructor_id,
+            403,
+        );
 
         return (new LessonResource($reassign($lesson, $data)->load(self::RELATIONS)))->response();
     }

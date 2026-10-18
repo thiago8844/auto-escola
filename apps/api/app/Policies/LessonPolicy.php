@@ -8,8 +8,8 @@ use App\Models\Organization;
 use App\Models\User;
 
 /**
- * Aulas. Instrutor vê e marca como realizada/falta somente as próprias aulas.
- * Cancelar e remarcar são exclusivos da equipe de operação.
+ * Aulas. Equipe e instrutor agendam, remarcam e cancelam; o instrutor atua somente
+ * nas próprias aulas. Trocar o instrutor de uma aula e o registro oficial são da equipe.
  */
 class LessonPolicy extends OperationalPolicy
 {
@@ -27,14 +27,21 @@ class LessonPolicy extends OperationalPolicy
         return $this->isOwnLesson($user, $lesson, $organization);
     }
 
+    /** Equipe, ou instrutor com perfil no espaço (o controller restringe a aulas dele). */
     public function create(User $user, Organization $organization): bool
     {
-        return $this->canOperate($user, $organization);
+        return $this->canOperate($user, $organization) || $this->instructorOf($user, $organization) !== null;
     }
 
     public function reschedule(User $user, Lesson $lesson, Organization $organization): bool
     {
-        return $this->canOperate($user, $organization);
+        return $this->canOperate($user, $organization) || $this->isOwnLesson($user, $lesson, $organization);
+    }
+
+    /** Troca de veículo (e de instrutor, só pela equipe): o controller barra a troca de instrutor. */
+    public function reassign(User $user, Lesson $lesson, Organization $organization): bool
+    {
+        return $this->canOperate($user, $organization) || $this->isOwnLesson($user, $lesson, $organization);
     }
 
     /** Observações, evolução e duração real: equipe ou o instrutor da própria aula. */
@@ -56,7 +63,7 @@ class LessonPolicy extends OperationalPolicy
         }
 
         return $this->isOwnLesson($user, $lesson, $organization)
-            && in_array($next, [LessonStatus::Completed, LessonStatus::Missed], true);
+            && in_array($next, [LessonStatus::Completed, LessonStatus::Missed, LessonStatus::Cancelled], true);
     }
 
     private function isOwnLesson(User $user, Lesson $lesson, Organization $organization): bool

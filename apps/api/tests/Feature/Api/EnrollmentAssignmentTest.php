@@ -38,7 +38,7 @@ class EnrollmentAssignmentTest extends ApiTestCase
         [$start, $end] = $this->window();
         $this->postJson("{$base}/lessons", [
             'enrollment_id' => $enrollment->id, 'instructor_id' => $instructor->id, 'starts_at' => $start, 'ends_at' => $end,
-        ])->assertForbidden();
+        ])->assertCreated();
     }
 
     public function test_reencaminhamento_revoga_visao_sem_historico_e_recusa_alteracao_desatualizada(): void
