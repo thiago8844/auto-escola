@@ -34,6 +34,7 @@ export async function createEnrollment(organizationId: number | string, studentI
       contracted_minutes: input.contracted_minutes ? Number(input.contracted_minutes) : null,
       price_cents: input.price ? Math.round(Number(input.price) * 100) : null,
       qualification_process_id: input.qualification_process_id ? Number(input.qualification_process_id) : null,
+      partner_id: input.partner_id ? Number(input.partner_id) : null,
       notes: input.notes || null,
     },
     { skipGlobalError: true },

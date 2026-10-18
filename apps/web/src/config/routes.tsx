@@ -21,6 +21,8 @@ import ProcessFormPage from '../pages/processes/ProcessFormPage'
 import StudentDetailPage from '../pages/students/StudentDetailPage'
 import StudentFormPage from '../pages/students/StudentFormPage'
 import StudentsPage from '../pages/students/StudentsPage'
+import PartnerFormPage from '../pages/partners/PartnerFormPage'
+import PartnersPage from '../pages/partners/PartnersPage'
 import InstructorFormPage from '../pages/instructors/InstructorFormPage'
 import InstructorsPage from '../pages/instructors/InstructorsPage'
 import LessonDetailPage from '../pages/schedule/LessonDetailPage'
@@ -98,6 +100,9 @@ export const router = createBrowserRouter([
                 children: [
                   { path: `${organizationSections.schedule}/nova`, element: <LessonFormPage /> },
                   { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
+                  { path: organizationSections.partners, element: <PartnersPage /> },
+                  { path: `${organizationSections.partners}/novo`, element: <PartnerFormPage /> },
+                  { path: `${organizationSections.partners}/:partnerId`, element: <PartnerFormPage /> },
                   { path: organizationSections.instructors, element: <InstructorsPage /> },
                   { path: `${organizationSections.instructors}/novo`, element: <InstructorFormPage /> },
                   { path: `${organizationSections.instructors}/:instructorId`, element: <InstructorFormPage /> },

@@ -19,7 +19,12 @@ export function OrganizationLayout() {
     { to: links.students, icon: 'bi-mortarboard', label: 'Alunos' },
     { to: links.vehicles, icon: 'bi-car-front', label: 'Veículos' },
     { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },
-    ...(organization && canOperate(organization.role) ? [{ to: links.instructors, icon: 'bi-person-badge', label: 'Instrutores' }] : []),
+    ...(organization && canOperate(organization.role)
+      ? [
+          { to: links.instructors, icon: 'bi-person-badge', label: 'Instrutores' },
+          { to: links.partners, icon: 'bi-building', label: 'Parceiros' },
+        ]
+      : []),
     ...(organization && canOperate(organization.role) ? [{ to: links.processes, icon: 'bi-clipboard-check', label: 'Processos' }] : []),
     ...(organization && canManageMembers(organization.role)
       ? [

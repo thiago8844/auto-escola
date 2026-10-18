@@ -12,6 +12,7 @@ import { ENROLLMENT_STATUS, LICENSE_CATEGORIES, PROCESS_TYPE_LABELS } from '../.
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCreateEnrollment } from '../../hooks/useEnrollments'
+import { usePartners } from '../../hooks/usePartners'
 import { useProcesses } from '../../hooks/useProcesses'
 import { useStudent } from '../../hooks/useStudents'
 import { enrollmentSchema, type EnrollmentInput } from '../../schemas/enrollment'
@@ -37,6 +38,8 @@ function EnrollmentForm({ student }: { student: Student }) {
   const links = organizationPaths(organization.id)
   const navigate = useNavigate()
   const create = useCreateEnrollment(organization.id, student.id)
+  const isIndependent = organization.type === 'independent'
+  const partners = usePartners(organization.id, { page: 1, all: true }, isIndependent)
   const processes = useProcesses(organization.id, { page: 1, studentId: student.id })
 
   const {
@@ -47,7 +50,7 @@ function EnrollmentForm({ student }: { student: Student }) {
     formState: { errors },
   } = useForm<EnrollmentInput>({
     resolver: zodResolver(enrollmentSchema),
-    defaultValues: { category: 'B', status: 'contracted', contracted_minutes: '', price: '', qualification_process_id: '', notes: '' },
+    defaultValues: { category: 'B', status: 'contracted', contracted_minutes: '', price: '', qualification_process_id: '', partner_id: '', notes: '' },
   })
 
   const onSubmit = handleSubmit((values) =>
@@ -103,6 +106,17 @@ function EnrollmentForm({ student }: { student: Student }) {
           <p className="small mb-3">
             Ainda não tem processo? <Link to={links.processNew(student.id)}>Criar processo para este aluno</Link>
           </p>
+
+          {isIndependent && (
+            <SelectField label="Auto escola parceira (opcional)" error={errors.partner_id?.message} {...register('partner_id')}>
+              <option value="">Nenhuma</option>
+              {partners.data?.data.map((partner) => (
+                <option key={partner.id} value={partner.id}>
+                  {partner.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
 
           <TextAreaField label="Observações do contrato (opcional)" error={errors.notes?.message} {...register('notes')} />
           <SubmitButton loading={create.isPending}>Criar matrícula</SubmitButton>

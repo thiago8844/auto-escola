@@ -12,6 +12,7 @@ export const enrollmentSchema = z.object({
   // Reais como texto ("2500.5"); vira centavos no envio
   price: z.string(),
   qualification_process_id: z.string(),
+  partner_id: z.string(),
   notes: z.string().trim().max(2000, 'As observações devem ter no máximo 2000 caracteres.'),
 })
 
