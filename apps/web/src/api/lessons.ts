@@ -88,7 +88,11 @@ export async function updateLessonNotes(organizationId: number | string, lessonI
 export async function updateLessonRegistry(organizationId: number | string, lessonId: number | string, input: RegistryInput): Promise<Lesson> {
   const { data } = await http.patch<{ data: Lesson }>(
     `${base(organizationId)}/${lessonId}/registry`,
-    { registry_status: input.registry_status, registry_reference: orNull(input.registry_reference) },
+    {
+      registry_status: input.registry_status,
+      registry_reference: orNull(input.registry_reference),
+      registry_document_id: input.registry_document_id ? Number(input.registry_document_id) : null,
+    },
     handledByScreen,
   )
   return data.data

@@ -8,13 +8,15 @@ type AgendaDaysProps = {
   today: string
   timeZone: string
   columns: Column<Lesson>[]
+  // Fuso de cada aula, quando varia (agenda pessoal mistura espaços); senão vale `timeZone`
+  timeZoneOf?: (lesson: Lesson) => string
 }
 
 // Aulas agrupadas por dia (no fuso informado), cada dia com a sua tabela
-export function AgendaDays({ days, lessons, today, timeZone, columns }: AgendaDaysProps) {
+export function AgendaDays({ days, lessons, today, timeZone, columns, timeZoneOf }: AgendaDaysProps) {
   const byDay = new Map<string, Lesson[]>()
   for (const lesson of [...lessons].sort((a, b) => a.starts_at.localeCompare(b.starts_at))) {
-    const day = isoToZonedParts(lesson.starts_at, timeZone).date
+    const day = isoToZonedParts(lesson.starts_at, timeZoneOf?.(lesson) ?? timeZone).date
     byDay.set(day, [...(byDay.get(day) ?? []), lesson])
   }
 

@@ -9,6 +9,9 @@ export type Organization = {
   document: string | null
   email: string | null
   phone: string | null
+  address: string | null
+  city: string | null
+  state: string | null
   timezone: string
   // Papel do usuário logado neste espaço
   role: Role

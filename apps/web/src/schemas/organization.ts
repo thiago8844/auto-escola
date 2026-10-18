@@ -15,6 +15,9 @@ export const organizationSchema = z.object({
     .toLowerCase()
     .refine((value) => value === '' || z.email().safeParse(value).success, 'Informe um e-mail válido.'),
   phone: z.string().trim().max(30, 'O telefone deve ter no máximo 30 caracteres.'),
+  address: z.string().trim().max(255, 'O endereço deve ter no máximo 255 caracteres.'),
+  city: z.string().trim().max(100, 'A cidade deve ter no máximo 100 caracteres.'),
+  state: z.string(),
   timezone: z.string().min(1, 'Escolha o fuso horário.'),
 })
 

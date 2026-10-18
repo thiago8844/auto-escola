@@ -44,10 +44,12 @@ export const registrySchema = z
   .object({
     registry_status: z.enum(['not_informed', 'pending', 'confirmed', 'rejected']),
     registry_reference: z.string().trim().max(100, 'Máximo de 100 caracteres.'),
+    // ID do documento que comprova o lançamento ('' = nenhum)
+    registry_document_id: z.string(),
   })
-  .refine((data) => data.registry_status !== 'confirmed' || data.registry_reference !== '', {
+  .refine((data) => data.registry_status !== 'confirmed' || data.registry_reference !== '' || data.registry_document_id !== '', {
     path: ['registry_reference'],
-    message: 'Para confirmar, informe o protocolo ou referência.',
+    message: 'Para confirmar, informe o protocolo ou vincule um documento.',
   })
 
 export type ScheduleInput = z.infer<typeof scheduleSchema>

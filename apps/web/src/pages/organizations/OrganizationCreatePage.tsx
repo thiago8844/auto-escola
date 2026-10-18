@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
 import { TimezoneField } from '../../components/TimezoneField'
+import { SelectField } from '../../components/SelectField'
+import { UFS } from '../../config/domain'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
 import { organizationPaths } from '../../config/paths'
@@ -28,7 +30,7 @@ export default function OrganizationCreatePage() {
     formState: { errors },
   } = useForm<OrganizationInput>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: { name: '', type: 'cfc', document: '', email: '', phone: '', timezone: 'America/Sao_Paulo' },
+    defaultValues: { name: '', type: 'cfc', document: '', email: '', phone: '', address: '', city: '', state: '', timezone: 'America/Sao_Paulo' },
   })
 
   const onSubmit = handleSubmit((values) =>
@@ -69,6 +71,16 @@ export default function OrganizationCreatePage() {
           <DocumentField control={control} name="document" label="CPF ou CNPJ (opcional)" error={errors.document?.message} />
           <FormField label="E-mail de contato (opcional)" type="email" error={errors.email?.message} {...register('email')} />
           <FormField label="Telefone (opcional)" type="tel" error={errors.phone?.message} {...register('phone')} />
+          <FormField label="Endereço (opcional)" autoComplete="street-address" error={errors.address?.message} {...register('address')} />
+          <FormField label="Cidade (opcional)" error={errors.city?.message} {...register('city')} />
+          <SelectField label="UF (opcional)" error={errors.state?.message} {...register('state')}>
+            <option value="">Não informada</option>
+            {UFS.map((uf) => (
+              <option key={uf} value={uf}>
+                {uf}
+              </option>
+            ))}
+          </SelectField>
           <TimezoneField error={errors.timezone?.message} {...register('timezone')} />
 
           <SubmitButton loading={create.isPending}>Criar espaço</SubmitButton>

@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
 import { TimezoneField } from '../../components/TimezoneField'
+import { SelectField } from '../../components/SelectField'
+import { UFS } from '../../config/domain'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
@@ -31,6 +33,9 @@ export default function OrganizationSettingsPage() {
       document: organization.document ?? '',
       email: organization.email ?? '',
       phone: organization.phone ?? '',
+      address: organization.address ?? '',
+      city: organization.city ?? '',
+      state: organization.state ?? '',
       timezone: organization.timezone,
     },
   })
@@ -54,6 +59,16 @@ export default function OrganizationSettingsPage() {
             <DocumentField control={control} name="document" label="CPF ou CNPJ" error={errors.document?.message} />
             <FormField label="E-mail de contato" type="email" error={errors.email?.message} {...register('email')} />
             <FormField label="Telefone" type="tel" error={errors.phone?.message} {...register('phone')} />
+            <FormField label="Endereço (opcional)" autoComplete="street-address" error={errors.address?.message} {...register('address')} />
+            <FormField label="Cidade (opcional)" error={errors.city?.message} {...register('city')} />
+            <SelectField label="UF (opcional)" error={errors.state?.message} {...register('state')}>
+              <option value="">Não informada</option>
+              {UFS.map((uf) => (
+                <option key={uf} value={uf}>
+                  {uf}
+                </option>
+              ))}
+            </SelectField>
             <TimezoneField current={organization.timezone} error={errors.timezone?.message} {...register('timezone')} />
             <p className="small text-secondary">O fuso define em que horário começa e termina cada dia da agenda. Todos os horários do espaço são exibidos nele.</p>
             {editable && <SubmitButton loading={update.isPending}>Salvar alterações</SubmitButton>}

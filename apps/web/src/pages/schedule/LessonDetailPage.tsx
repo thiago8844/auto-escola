@@ -10,10 +10,11 @@ import { SelectField } from '../../components/SelectField'
 import { LessonStatusBadge } from '../../components/StatusBadges'
 import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
-import { REGISTRY_STATUS } from '../../config/domain'
+import { DOCUMENT_TYPE_LABELS, REGISTRY_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useEnrollment } from '../../hooks/useEnrollments'
+import { useStudentDocuments } from '../../hooks/useStudentHistory'
 import { useLesson, useUpdateLessonNotes, useUpdateLessonRegistry } from '../../hooks/useLessons'
 import { lessonNotesSchema, registrySchema, type LessonNotesInput, type RegistryInput } from '../../schemas/lesson'
 import type { Lesson } from '../../types/lesson'
@@ -103,7 +104,7 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
 
       <NotesForm key={`${lesson.notes}-${lesson.evolution}-${lesson.actual_minutes}`} lesson={lesson} completed={completed} />
 
-      {operate && <RegistryForm key={`${lesson.registry.status}-${lesson.registry.reference}`} lesson={lesson} completed={completed} />}
+      {operate && <RegistryForm key={`${lesson.registry.status}-${lesson.registry.reference}-${lesson.registry.document_id}`} lesson={lesson} completed={completed} />}
 
       {modal === 'reschedule' && <RescheduleModal organizationId={organization.id} timeZone={timeZone} lesson={lesson} onClose={() => setModal(null)} />}
       {modal === 'status' && <StatusModal organizationId={organization.id} lesson={lesson} canCancel={operate} release={release} onClose={() => setModal(null)} />}
@@ -154,6 +155,8 @@ function NotesForm({ lesson, completed }: { lesson: Lesson; completed: boolean }
 function RegistryForm({ lesson, completed }: { lesson: Lesson; completed: boolean }) {
   const organization = useActiveOrganization()
   const update = useUpdateLessonRegistry(organization.id, String(lesson.id))
+  // Documentos do aluno que podem comprovar o lançamento oficial (a equipe é quem vê esta seção)
+  const documents = useStudentDocuments(organization.id, String(lesson.enrollment?.student?.id ?? ''), lesson.enrollment?.student !== undefined)
   const {
     register,
     handleSubmit,
@@ -161,7 +164,11 @@ function RegistryForm({ lesson, completed }: { lesson: Lesson; completed: boolea
     formState: { errors },
   } = useForm<RegistryInput>({
     resolver: zodResolver(registrySchema),
-    defaultValues: { registry_status: lesson.registry.status, registry_reference: lesson.registry.reference ?? '' },
+    defaultValues: {
+      registry_status: lesson.registry.status,
+      registry_reference: lesson.registry.reference ?? '',
+      registry_document_id: lesson.registry.document_id ? String(lesson.registry.document_id) : '',
+    },
   })
   const onSubmit = handleSubmit((values) => update.mutate(values, { onError: (error) => applyFieldErrors(error, setError) }))
   const alertMessage = formAlertMessage(update.error)
@@ -186,6 +193,17 @@ function RegistryForm({ lesson, completed }: { lesson: Lesson; completed: boolea
               ))}
             </SelectField>
             <FormField label="Protocolo ou referência" error={errors.registry_reference?.message} {...register('registry_reference')} />
+            <SelectField label="Documento de comprovação (opcional)" error={errors.registry_document_id?.message} {...register('registry_document_id')}>
+              <option value="">Nenhum</option>
+              {documents.data?.data
+                .filter((doc) => doc.status !== 'replaced' || doc.id === lesson.registry.document_id)
+                .map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {DOCUMENT_TYPE_LABELS[doc.type]} · {doc.original_name}
+                  </option>
+                ))}
+            </SelectField>
+            {documents.error && <p className="small text-danger">Não foi possível carregar os documentos: {documents.error.message}</p>}
             <SubmitButton loading={update.isPending}>Salvar registro</SubmitButton>
           </fieldset>
         </form>

@@ -32,6 +32,8 @@ export default function StudentDetailPage() {
   )
 }
 
+const LESSONS_STEP = 10
+
 function StudentDetail({ student }: { student: Student }) {
   const organization = useActiveOrganization()
   const links = organizationPaths(organization.id)
@@ -44,6 +46,7 @@ function StudentDetail({ student }: { student: Student }) {
   const documentFile = useDocumentFile(organization.id)
   const updateDocumentStatus = useUpdateDocumentStatus(organization.id)
   const [uploading, setUploading] = useState(false)
+  const [lessonsShown, setLessonsShown] = useState(LESSONS_STEP)
 
   // Aulas de todas as matrículas, da mais recente para a mais antiga
   const lessons = lessonQueries.flatMap((q) => q.data?.data ?? []).sort((a, b) => b.starts_at.localeCompare(a.starts_at))
@@ -135,7 +138,7 @@ function StudentDetail({ student }: { student: Student }) {
         ) : (
           <>
             <DataTable
-              rows={lessons.slice(0, 10)}
+              rows={lessons.slice(0, lessonsShown)}
               getKey={(lesson) => lesson.id}
               columns={[
                 { header: 'Data e hora', primary: true, cell: (lesson) => <span className="tabular-nums">{formatDateTime(lesson.starts_at, organization.timezone)}</span> },
@@ -143,7 +146,16 @@ function StudentDetail({ student }: { student: Student }) {
                 { header: 'Situação', cell: (lesson) => <LessonStatusBadge status={lesson.status} /> },
               ]}
             />
-            {lessons.length > 10 && <p className="small text-secondary">Mostrando as 10 aulas mais recentes.</p>}
+            {lessons.length > lessonsShown && (
+              <div className="d-flex flex-wrap align-items-center gap-3">
+                <span className="small text-secondary">
+                  Mostrando {lessonsShown} de {lessons.length} aulas, da mais recente para a mais antiga.
+                </span>
+                <Button variant="outline-primary" size="sm" onClick={() => setLessonsShown((n) => n + LESSONS_STEP)}>
+                  Mostrar mais
+                </Button>
+              </div>
+            )}
           </>
         )}
       </section>
