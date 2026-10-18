@@ -30,25 +30,27 @@ Após relatórios e financeiro: **Vendas e atendimento**, com interessados, pró
 | [Implementação da API](../apps/api/docs/implementacao.md) | Decisões da base, verificações e limitações técnicas. |
 | [Lacunas da API](../apps/api/docs/lacunas-mvp-api.md) | Mapa das entregas de backend para o checklist principal, sem sequência concorrente. |
 | [Setup do web](../apps/web/README.md) | Configuração, execução, lint e build. |
+| [Requisitos de UX/UI](requisitos-ux-ui.md) | Diagnóstico dos módulos 1–8, requisitos por perfil, prioridades e critérios de aceite. |
+| [Implementação de UX/UI](ux-ui-implementacao.md) | Entregas, commits, verificações e TODOs de homologação. |
 | [Identidade visual](identidade-visual.md) | Cores, estados, tipografia e espaçamento. |
-| [Avisos e notificações](notificacoes.md) | Toasts, sino e alerta máximo existentes; integração operacional ainda pendente. |
+| [Avisos e notificações](notificacoes.md) | Componentes de avisos; estado das integrações no registro de implementação de UX/UI. |
 | [Fluxo de habilitação](fluxo-habilitacao-brasil-mg.md) | Referência de domínio e cenários, incluindo serviços fora do MVP. Não amplia o escopo por si só. |
 
 ## Estado atual
 
 | Área | Situação |
 |---|---|
-| Conta, confirmação de e-mail, espaços, equipe e convites | Implementados na API e no web; recuperação de senha pendente. |
+| Conta, confirmação de e-mail, espaços, equipe e convites | Implementados, incluindo recuperação de senha. |
 | Alunos, parceiros, instrutores, matrículas e processos | Base implementada; há complementos de edição e histórico no checklist. |
-| Documentos privados, veículos, agenda e execução de aulas | Base implementada; saldo, bloqueios por período e manutenção pendentes. |
+| Documentos privados, veículos, agenda e execução de aulas | Implementados, incluindo saldo, bloqueios por período e manutenção. |
 | Agenda pessoal do instrutor em vários espaços | Implementada. |
-| Toasts, sino e alerta máximo | Componentes implementados; notificações operacionais persistentes pendentes. |
-| Painel inicial | Protótipo com contadores sem dados. |
-| Pacotes/saldo, exames/taxas, relatórios e financeiro | Planejados no checklist principal. |
+| Toasts, sino e alerta máximo | Implementados com pendências operacionais persistentes. |
+| Painel inicial | Indicadores reais, com totais distintos das amostras. |
+| Pacotes/saldo, exames/taxas, relatórios e financeiro | Implementados na API e no web (módulos 1–8). |
 | Vendas e atendimento | Depois do MVP. |
 | Aplicativo mobile | Etapa posterior; não está desenvolvido. |
 
-Verificação em **17/10/2026**: API com **152 testes e 584 asserções aprovados**; lint e build do web aprovados. O build registra avisos de Sass/Bootstrap e tamanho do JavaScript. Homologação no navegador e preparação de produção continuam pendentes; os resultados atuais não certificam o lançamento.
+Verificação em **18/10/2026**: API com **281 testes e 1.922 asserções**; web com **15 testes**, lint e build aprovados. Verificação automatizada em Chromium, 360 px e 1366 px, com respostas simuladas da API, para ficha do aluno, encaminhamento e proteção do cadastro. Isso não substitui integração real, piloto com usuários ou homologação de produção. O build mantém avisos de Sass/Bootstrap; páginas agora são carregadas sob demanda.
 
 ## Rodar o projeto
 
@@ -67,6 +69,8 @@ Configure `VITE_API_URL=http://localhost:8010` no web ao usar essa porta. Creden
 ## Conceitos centrais
 
 - **Espaço de trabalho:** uma autoescola (`cfc`) ou operação particular (`independent`); os módulos são compartilhados.
+- **Preferência pessoal:** organiza o menu e o espaço inicial neste navegador, sem conceder ou revogar acessos.
+- **Encaminhamento:** atribui um responsável à matrícula, sem reservar horário ou consumir saldo; histórico fica na auditoria.
 - **Papel:** define o que a pessoa pode fazer naquele espaço. Uma pessoa pode ter papéis diferentes em espaços diferentes.
 - **Instrutor:** identidade profissional global, com conta opcional. Acesso ao espaço e vínculo profissional são separados.
 - **Parceiro:** CFC externo cadastrado localmente; não ganha acesso ao sistema.
