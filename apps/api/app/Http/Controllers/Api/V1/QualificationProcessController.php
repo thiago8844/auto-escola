@@ -27,6 +27,8 @@ class QualificationProcessController extends Controller
             'status' => ['nullable', Rule::enum(ProcessStatus::class)],
             'type' => ['nullable', Rule::enum(ProcessType::class)],
             'student_id' => ['nullable', 'integer'],
+            'category' => ['nullable', Rule::enum(\App\Enums\LicenseCategory::class)],
+            'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $processes = $organization->qualificationProcesses()
@@ -34,6 +36,8 @@ class QualificationProcessController extends Controller
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
             ->when($request->filled('student_id'), fn ($q) => $q->where('student_id', $request->integer('student_id')))
+            ->when($request->filled('category'), fn ($q) => $q->whereJsonContains('target_categories', $request->string('category')->toString()))
+            ->when($request->filled('search'), fn ($q) => $q->whereHas('student', fn ($s) => $s->where('name', 'like', '%'.$request->string('search').'%')))
             ->orderByDesc('id')
             ->paginate($this->perPage($request));
 
@@ -67,6 +71,8 @@ class QualificationProcessController extends Controller
         QualificationProcess $qualificationProcess,
     ): JsonResponse {
         $this->authorize('update', [$qualificationProcess, $organization]);
+
+        app(\App\Services\StaleGuard::class)->assertFresh($qualificationProcess, $request);
 
         $qualificationProcess->fill($request->payload());
         $changes = collect($qualificationProcess->getDirty())

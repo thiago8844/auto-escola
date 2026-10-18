@@ -20,6 +20,7 @@ class PartnerResource extends JsonResource
             'document' => $this->document,
             'email' => $this->email,
             'phone' => $this->phone,
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

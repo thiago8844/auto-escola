@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rules\Password;
@@ -22,8 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Mínimo de 3 caracteres na senha (o padrão do Laravel é 8).
-        Password::defaults(fn () => Password::min(3));
+        // Mínimo configurável: 3 em desenvolvimento e 8 em produção (ver config/autoescola.php).
+        Password::defaults(fn () => Password::min((int) config('autoescola.password_min')));
+
+        // O e-mail de redefinição também aponta para o web: /redefinir-senha?token=...&email=...
+        ResetPassword::createUrlUsing(fn (object $notifiable, string $token): string => rtrim((string) config('autoescola.frontend_url'), '/')
+            .'/redefinir-senha?token='.$token.'&email='.urlencode($notifiable->getEmailForPasswordReset()));
 
         // O e-mail de confirmação aponta para o frontend. Ele repassa expires e signature à API,
         // que valida a assinatura calculada sobre a rota da própria API.

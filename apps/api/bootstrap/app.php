@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'organization.member' => EnsureOrganizationMember::class,
+            'idempotent' => \App\Http\Middleware\IdempotentRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -48,6 +48,8 @@ class OrganizationController extends Controller
     {
         $this->authorize('update', $organization);
 
+        app(\App\Services\StaleGuard::class)->assertFresh($organization, $request);
+
         $data = $request->validated();
 
         if (array_key_exists('business_hours', $data)) {

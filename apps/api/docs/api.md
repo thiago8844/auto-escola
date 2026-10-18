@@ -1085,3 +1085,22 @@ Rotas sob `/api/v1/organizations/{organization}`. O alerta pertence ao espaço (
 **Agendador.** `php artisan alerts:generate` enfileira um `GenerateOrganizationAlerts` por espaço (`--now` executa na hora; `--organization=ID` reprocessa um espaço). Está agendado a cada 10 minutos em `routes/console.php`: em produção rode `schedule:run` (cron) e um worker de fila.
 
 **Configurações** (`alert-settings`): `crlv_lead_days` (30), `document_lead_days` (30), `exam_lead_days` (3), `fee_lead_days` (5), `release_lead_days` (7), `low_balance_minutes` (100), `inactive_days` (14), `lesson_grace_hours` (2), `staff_receives` (true).
+
+## Acesso, correções e acabamento (módulo 6)
+
+**Recuperação e troca de senha** (decisão registrada em `config/autoescola.php`):
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `POST` | `/auth/forgot-password` | `email`. Responde sempre igual, exista a conta ou não, e é limitado a 5 pedidos por minuto por IP. O e-mail leva a `FRONTEND_URL/redefinir-senha?token=…&email=…`. |
+| `POST` | `/auth/reset-password` | `email`, `token`, `password`, `password_confirmation`. Link de uso único que expira em 60 minutos; link inválido, expirado ou já usado responde `422 invalid_reset_token`. Encerra todos os tokens e sessões da conta. |
+| `POST` | `/auth/password` | Autenticado: `current_password`, `password`, `password_confirmation` (a nova precisa ser diferente). Mantém a sessão/token atual e encerra os demais. |
+
+- **Política de senha:** mínimo vigente em `autoescola.password_min` — **8 em produção**, 3 em desenvolvimento/testes (`AUTOESCOLA_PASSWORD_MIN` sobrescreve). Sem exigência de símbolos. O web lê a mesma regra (`VITE_PASSWORD_MIN`; em build de produção, 8).
+- **Mensagens em português:** `lang/pt_BR` (validação, senhas, autenticação); `APP_LOCALE=pt_BR` por padrão.
+- **Duplo envio e falha de rede:** `Idempotency-Key` (8–100 caracteres) em qualquer POST/PUT/PATCH/DELETE de `/organizations/{id}/…`. A primeira resposta 2xx é guardada por 24 h e devolvida (`Idempotent-Replay: true`) em repetições; duas requisições simultâneas com a mesma chave não rodam juntas (`409 request_in_progress`); mesma chave com outro conteúdo é recusada (`422 idempotency_key_reused`). Erros não são guardados.
+- **Edição simultânea:** `PATCH` de aluno, parceiro, veículo, matrícula, processo e espaço aceita `expected_updated_at` (o `updated_at` recebido ao abrir a tela). Se o registro mudou, responde `409 stale_record` em vez de sobrescrever. Sem o campo, nada muda.
+- **Arquivar e restaurar:** `DELETE` arquiva (aluno, parceiro, veículo); `POST …/restore` restaura; `?archived=1` lista os arquivados. Aluno com aula/exame agendado (`student_has_commitments`) ou matrícula em andamento (`student_has_open_enrollments`) não é arquivado; veículo com compromissos futuros também não (`vehicle_has_commitments`). CPF e placa continuam reservados ao cadastro arquivado, e o erro orienta a restaurar. Todo arquivamento e restauração entra na auditoria.
+- **Documentos:** `GET /documents/{id}/versions` devolve a cadeia de substituições; `download` de arquivo ausente responde `404 document_file_missing` com orientação para anexar de novo.
+- **Filtros:** `GET /enrollments` aceita `status`, `category`, `partner_id`, `search` (nome do aluno); `GET /qualification-processes` aceita `category` e `search`.
+- **Primeiros passos:** `GET /onboarding` (equipe) devolve os 7 passos com `done`, `done`/`total` e `support_email`.

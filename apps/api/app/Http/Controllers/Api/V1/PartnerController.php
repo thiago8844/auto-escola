@@ -19,6 +19,7 @@ class PartnerController extends Controller
         $this->authorize('viewAny', [Partner::class, $organization]);
 
         $partners = $organization->partners()
+            ->when($request->boolean('archived'), fn ($q) => $q->onlyTrashed())
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->string('search').'%'))
             ->orderBy('name')
             ->paginate($this->perPage($request));
@@ -46,6 +47,8 @@ class PartnerController extends Controller
     {
         $this->authorize('update', [$partner, $organization]);
 
+        app(\App\Services\StaleGuard::class)->assertFresh($partner, $request);
+
         $partner->update($request->validated());
 
         return (new PartnerResource($partner->refresh()))->response();
@@ -54,12 +57,23 @@ class PartnerController extends Controller
     /**
      * Exclusão lógica: parceiros antigos continuam referenciados por matrículas existentes.
      */
-    public function destroy(Organization $organization, Partner $partner): Response
+    public function destroy(Organization $organization, Partner $partner, \App\Services\Audit $audit): Response
     {
         $this->authorize('delete', [$partner, $organization]);
 
         $partner->delete();
+        $audit->record($organization->getKey(), 'partner.archived', "Parceiro {$partner->name} arquivado.", ['subject' => $partner]);
 
         return response()->noContent();
+    }
+
+    public function restore(Organization $organization, Partner $partner, \App\Services\Audit $audit): JsonResponse
+    {
+        $this->authorize('delete', [$partner, $organization]);
+
+        $partner->restore();
+        $audit->record($organization->getKey(), 'partner.restored', "Parceiro {$partner->name} restaurado.", ['subject' => $partner]);
+
+        return (new PartnerResource($partner->refresh()))->response();
     }
 }

@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Students\StudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Exceptions\BusinessRuleException;
+use App\Models\Lesson;
 use App\Models\Organization;
+use App\Models\PracticalExam;
+use App\Services\Audit;
 use App\Models\Student;
 use App\Services\AssignmentScope;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +26,11 @@ class StudentController extends Controller
         $query = $this->isOperator($request)
             ? $organization->students()
             : $this->assignedOnly($request, $organization, $scope);
+
+        // Arquivados: só a equipe consulta; o histórico continua ligado a eles.
+        if ($this->isOperator($request) && $request->boolean('archived')) {
+            $query->onlyTrashed();
+        }
 
         $students = $query
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->string('search').'%'))
@@ -51,21 +60,58 @@ class StudentController extends Controller
     {
         $this->authorize('update', [$student, $organization]);
 
+        app(\App\Services\StaleGuard::class)->assertFresh($student, $request);
+
         $student->update($request->validated());
 
         return (new StudentResource($student->refresh()))->response();
     }
 
     /**
-     * Exclusão lógica: preserva o histórico de matrículas e aulas do aluno.
+     * Arquivar tira o aluno da operação sem apagar nada: matrículas, aulas, saldo, exames e documentos ficam
+     * no histórico. Não arquiva quem ainda tem aula/exame agendado ou matrícula em andamento: resolva antes.
+     * O CPF continua reservado ao cadastro arquivado (restaurar em vez de cadastrar de novo).
      */
-    public function destroy(Organization $organization, Student $student): Response
+    public function destroy(Organization $organization, Student $student, Audit $audit): Response
     {
         $this->authorize('delete', [$student, $organization]);
 
+        $scheduledLessons = Lesson::query()->where('organization_id', $organization->getKey())
+            ->where('status', 'scheduled')->whereHas('enrollment', fn ($q) => $q->where('student_id', $student->getKey()))->count();
+        $scheduledExams = PracticalExam::query()->where('organization_id', $organization->getKey())
+            ->where('status', 'scheduled')->where('student_id', $student->getKey())->count();
+        $openEnrollments = $student->enrollments()->whereIn('status', ['prospect', 'contracted', 'in_service'])->count();
+
+        if ($scheduledLessons + $scheduledExams > 0) {
+            throw new BusinessRuleException(
+                "Este aluno tem {$scheduledLessons} aula(s) e {$scheduledExams} exame(s) agendados. Conclua, cancele ou remarque antes de arquivar.",
+                'student_has_commitments',
+                422,
+            );
+        }
+
+        if ($openEnrollments > 0) {
+            throw new BusinessRuleException(
+                "Este aluno tem {$openEnrollments} matrícula(s) em andamento. Encerre ou rescinda antes de arquivar.",
+                'student_has_open_enrollments',
+                422,
+            );
+        }
+
         $student->delete();
+        $audit->record($organization->getKey(), 'student.archived', "Aluno {$student->name} arquivado.", ['student_id' => $student->getKey(), 'subject' => $student]);
 
         return response()->noContent();
+    }
+
+    public function restore(Organization $organization, Student $student, Audit $audit): JsonResponse
+    {
+        $this->authorize('delete', [$student, $organization]);
+
+        $student->restore();
+        $audit->record($organization->getKey(), 'student.restored', "Aluno {$student->name} restaurado.", ['student_id' => $student->getKey(), 'subject' => $student]);
+
+        return (new StudentResource($student->refresh()))->response();
     }
 
     /**

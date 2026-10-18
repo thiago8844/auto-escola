@@ -16,7 +16,9 @@ use App\Http\Controllers\Api\V1\LessonController;
 use App\Http\Controllers\Api\V1\MaintenanceController;
 use App\Http\Controllers\Api\V1\MeInstructorController;
 use App\Http\Controllers\Api\V1\MyLessonController;
+use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\OrganizationController;
+use App\Http\Controllers\Api\V1\PasswordController;
 use App\Http\Controllers\Api\V1\OrganizationInstructorController;
 use App\Http\Controllers\Api\V1\OrganizationMemberController;
 use App\Http\Controllers\Api\V1\PartnerController;
@@ -47,6 +49,10 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('auth/token', [AuthController::class, 'token'])->middleware('throttle:10,1');
 
+    // Recuperação de senha: resposta idêntica exista a conta ou não; tentativas limitadas por IP
+    Route::post('auth/forgot-password', [PasswordController::class, 'forgot'])->middleware('throttle:5,1');
+    Route::post('auth/reset-password', [PasswordController::class, 'reset'])->middleware('throttle:10,1');
+
     // Link de confirmação de e-mail (assinado, enviado por e-mail)
     Route::get('auth/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
@@ -55,6 +61,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::post('auth/password', [PasswordController::class, 'change'])->middleware('throttle:10,1');
         Route::get('auth/user', [AuthController::class, 'user']);
         Route::post('auth/email/verification-notification', [EmailVerificationController::class, 'resend'])
             ->middleware('throttle:6,1');
@@ -73,11 +80,12 @@ Route::prefix('v1')->group(function () {
         Route::post('invitations/accept', InvitationAcceptController::class)->middleware('throttle:20,1');
 
         Route::prefix('organizations/{organization}')
-            ->middleware('organization.member')
+            ->middleware(['organization.member', 'idempotent'])
             ->scopeBindings()
             ->group(function () {
 
                 Route::get('/', [OrganizationController::class, 'show']);
+                Route::get('onboarding', [OnboardingController::class, 'show']);
                 Route::patch('/', [OrganizationController::class, 'update']);
 
                 // Membros (acesso)
@@ -99,7 +107,9 @@ Route::prefix('v1')->group(function () {
 
                 // Cadastros operacionais
                 Route::apiResource('partners', PartnerController::class);
+                Route::post('partners/{partner}/restore', [PartnerController::class, 'restore'])->withTrashed();
                 Route::apiResource('students', StudentController::class);
+                Route::post('students/{student}/restore', [StudentController::class, 'restore'])->withTrashed();
                 Route::apiResource('enrollments', EnrollmentController::class)
                     ->only(['index', 'store', 'show', 'update']);
 
@@ -112,6 +122,7 @@ Route::prefix('v1')->group(function () {
 
                 // Veículos
                 Route::apiResource('vehicles', VehicleController::class);
+                Route::post('vehicles/{vehicle}/restore', [VehicleController::class, 'restore'])->withTrashed();
 
                 // Disponibilidade e frota: bloqueios, manutenção, detalhe do veículo e do instrutor
                 Route::get('availability-blocks', [AvailabilityBlockController::class, 'index']);
@@ -180,6 +191,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('documents', [DocumentController::class, 'store']);
                 Route::get('documents/{document}', [DocumentController::class, 'show']);
                 Route::patch('documents/{document}', [DocumentController::class, 'update']);
+                Route::get('documents/{document}/versions', [DocumentController::class, 'versions']);
                 Route::get('documents/{document}/download', [DocumentController::class, 'download']);
 
                 // Aulas

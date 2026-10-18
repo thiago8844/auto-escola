@@ -89,9 +89,43 @@ class DocumentController extends Controller
         return (new DocumentResource($document->refresh()))->response();
     }
 
+    /**
+     * Todas as versões do documento (da mais nova para a mais antiga), seguindo a cadeia de substituições.
+     */
+    public function versions(Organization $organization, Document $document): AnonymousResourceCollection
+    {
+        $this->authorize('view', [$document, $organization]);
+
+        $chain = collect([$document]);
+        $cursor = $document;
+
+        while ($cursor->replaces_document_id !== null && ($previous = $organization->documents()->find($cursor->replaces_document_id))) {
+            $chain->push($previous);
+            $cursor = $previous;
+        }
+
+        $cursor = $document;
+
+        while (($next = $organization->documents()->where('replaces_document_id', $cursor->getKey())->first()) !== null) {
+            $chain->prepend($next);
+            $cursor = $next;
+        }
+
+        return DocumentResource::collection($chain->sortByDesc('version')->values());
+    }
+
     public function download(Organization $organization, Document $document): StreamedResponse
     {
         $this->authorize('view', [$document, $organization]);
+
+        // Arquivo apagado do disco (ou ainda não restaurado de um backup): mensagem clara, sem erro técnico.
+        if (! Storage::disk(config('autoescola.documents_disk'))->exists($document->storage_path)) {
+            throw new BusinessRuleException(
+                'O arquivo deste documento não está disponível. Anexe-o novamente como nova versão (Substituir) para recuperá-lo.',
+                'document_file_missing',
+                404,
+            );
+        }
 
         return Storage::disk(config('autoescola.documents_disk'))
             ->download($document->storage_path, $document->original_name, ['X-Content-Type-Options' => 'nosniff']);

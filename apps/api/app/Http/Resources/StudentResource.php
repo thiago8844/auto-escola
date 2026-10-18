@@ -32,6 +32,7 @@ class StudentResource extends JsonResource
             'email' => $this->when($canSeeSensitive, $this->email),
             'birth_date' => $this->when($canSeeSensitive, $this->birth_date?->toDateString()),
             'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }

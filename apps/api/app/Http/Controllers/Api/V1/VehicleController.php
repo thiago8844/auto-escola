@@ -21,6 +21,7 @@ class VehicleController extends Controller
         $this->authorize('viewAny', [Vehicle::class, $organization]);
 
         $vehicles = $organization->vehicles()
+            ->when($request->boolean('archived'), fn ($q) => $q->onlyTrashed())
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
             ->when($request->filled('search'), function ($q) use ($request) {
@@ -52,6 +53,8 @@ class VehicleController extends Controller
     public function update(VehicleRequest $request, Organization $organization, Vehicle $vehicle): JsonResponse
     {
         $this->authorize('update', [$vehicle, $organization]);
+
+        app(\App\Services\StaleGuard::class)->assertFresh($vehicle, $request);
 
         $previousCrlv = $vehicle->crlv_expires_at?->toDateString();
         $wasActive = $vehicle->status->value === 'active';
@@ -97,7 +100,21 @@ class VehicleController extends Controller
         }
 
         $vehicle->delete();
+        app(\App\Services\Audit::class)->record($organization->getKey(), 'vehicle.archived', "Veículo {$vehicle->plate} arquivado.", ['subject' => $vehicle]);
 
         return response()->noContent();
+    }
+
+    /**
+     * Restaura um veículo arquivado. A placa continua reservada ao cadastro arquivado.
+     */
+    public function restore(Organization $organization, Vehicle $vehicle): JsonResponse
+    {
+        $this->authorize('delete', [$vehicle, $organization]);
+
+        $vehicle->restore();
+        app(\App\Services\Audit::class)->record($organization->getKey(), 'vehicle.restored', "Veículo {$vehicle->plate} restaurado.", ['subject' => $vehicle]);
+
+        return (new VehicleResource($vehicle->refresh()))->response();
     }
 }

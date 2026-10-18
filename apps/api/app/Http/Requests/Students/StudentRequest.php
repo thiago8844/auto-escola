@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Students;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class StudentRequest extends FormRequest
@@ -43,5 +44,29 @@ class StudentRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'birth_date' => ['nullable', 'date', 'before:today'],
         ];
+    }
+
+    /**
+     * CPF de aluno arquivado continua reservado: orienta a restaurar em vez de duplicar o cadastro.
+     *
+     * @return array<int, callable(Validator): void>
+     */
+    public function after(): array
+    {
+        return [function (Validator $validator) {
+            if (! $validator->errors()->has('cpf') || ! $this->filled('cpf')) {
+                return;
+            }
+
+            $archived = \App\Models\Student::onlyTrashed()
+                ->where('organization_id', $this->route('organization')->getKey())
+                ->where('cpf', $this->input('cpf'))
+                ->exists();
+
+            if ($archived) {
+                $validator->errors()->forget('cpf');
+                $validator->errors()->add('cpf', 'Este CPF pertence a um aluno arquivado. Restaure o cadastro dele em vez de criar outro.');
+            }
+        }];
     }
 }

@@ -28,8 +28,19 @@ class EnrollmentController extends Controller
             ? $organization->enrollments()
             : $this->assignedOnly($request, $organization, $scope);
 
+        $request->validate([
+            'status' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\EnrollmentStatus::class)],
+            'category' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\LicenseCategory::class)],
+            'partner_id' => ['nullable', 'integer'],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $enrollments = $query
             ->when($request->filled('student_id'), fn ($q) => $q->where('student_id', $request->integer('student_id')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
+            ->when($request->filled('partner_id'), fn ($q) => $q->where('partner_id', $request->integer('partner_id')))
+            ->when($request->filled('search'), fn ($q) => $q->whereHas('student', fn ($s) => $s->where('name', 'like', '%'.$request->string('search').'%')))
             ->with(self::RELATIONS)
             ->orderByDesc('id')
             ->paginate($this->perPage($request));
@@ -81,6 +92,8 @@ class EnrollmentController extends Controller
     public function update(EnrollmentRequest $request, Organization $organization, Enrollment $enrollment, UpdateEnrollment $update): JsonResponse
     {
         $this->authorize('update', [$enrollment, $organization]);
+
+        app(\App\Services\StaleGuard::class)->assertFresh($enrollment, $request);
 
         $update($enrollment, $request->validated());
 

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Vehicles;
 use App\Enums\LicenseCategory;
 use App\Enums\VehicleStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class VehicleRequest extends FormRequest
@@ -48,5 +49,29 @@ class VehicleRequest extends FormRequest
             'status' => ['sometimes', Rule::enum(VehicleStatus::class)],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
+    }
+
+    /**
+     * Placa de veículo arquivado continua reservada: orienta a restaurar o cadastro.
+     *
+     * @return array<int, callable(Validator): void>
+     */
+    public function after(): array
+    {
+        return [function (Validator $validator) {
+            if (! $validator->errors()->has('plate') || ! $this->filled('plate')) {
+                return;
+            }
+
+            $archived = \App\Models\Vehicle::onlyTrashed()
+                ->where('organization_id', $this->route('organization')->getKey())
+                ->where('plate', $this->input('plate'))
+                ->exists();
+
+            if ($archived) {
+                $validator->errors()->forget('plate');
+                $validator->errors()->add('plate', 'Esta placa pertence a um veículo arquivado. Restaure o cadastro dele em vez de criar outro.');
+            }
+        }];
     }
 }

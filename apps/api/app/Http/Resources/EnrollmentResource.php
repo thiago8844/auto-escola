@@ -40,6 +40,7 @@ class EnrollmentResource extends JsonResource
             'student' => new StudentResource($this->whenLoaded('student')),
             'partner' => $this->when($this->partner_id !== null && $this->relationLoaded('partner'), fn () => new PartnerResource($this->partner)),
             'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
         ];
     }
 }
