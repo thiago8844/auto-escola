@@ -10,7 +10,7 @@ export const registerSchema = z
   .object({
     name: z.string().trim().min(1, 'Informe seu nome.').max(150, 'O nome deve ter no máximo 150 caracteres.'),
     email,
-    password: z.string().min(8, 'A senha deve ter ao menos 8 caracteres.'),
+    password: z.string().min(3, 'A senha deve ter ao menos 3 caracteres.'),
     password_confirmation: z.string().min(1, 'Confirme a senha.'),
   })
   .refine((data) => data.password === data.password_confirmation, {

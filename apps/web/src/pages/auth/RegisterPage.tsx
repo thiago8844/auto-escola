@@ -43,7 +43,7 @@ export default function RegisterPage() {
           label="Senha"
           type="password"
           autoComplete="new-password"
-          hint="Mínimo de 8 caracteres."
+          hint="Mínimo de 3 caracteres."
           error={errors.password?.message}
           {...register('password')}
         />
