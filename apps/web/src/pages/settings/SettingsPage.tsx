@@ -16,8 +16,8 @@ export default function SettingsPage() {
   return (
     <>
       <PageHeader title="Configurações" />
-      <div className="form-narrow">
-        <DefaultSpaceSettings />
+      <div className="settings-grid">
+        <div><DefaultSpaceSettings /></div>
         <Card className="mb-4"><Card.Body>
           <Card.Title as="h2" className="h5">Organizar meu menu</Card.Title>
           <p className="small text-secondary">Escolha um espaço para ordenar ou ocultar módulos no seu menu. Essa preferência é pessoal e não altera seus acessos.</p>
@@ -35,8 +35,8 @@ export default function SettingsPage() {
             </>
           }}</QueryState>
         </Card.Body></Card>
-        <ChangePasswordCard />
-        <MutedNoticesSettings />
+        <div><ChangePasswordCard /></div>
+        <div><MutedNoticesSettings /></div>
       </div>
     </>
   )

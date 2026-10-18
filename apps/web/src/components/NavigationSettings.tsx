@@ -22,7 +22,7 @@ export function NavigationSettings({ organization }: { organization: Organizatio
 
   return <>
     <Button size="sm" variant="link" className="text-start px-2 mt-2" onClick={() => setOpen(true)}><i className="bi bi-sliders me-2" aria-hidden="true" />Organizar meu menu</Button>
-    <Modal show={open} onHide={() => setOpen(false)} size="lg" fullscreen="sm-down">
+    <Modal show={open} onHide={() => setOpen(false)} size="lg" fullscreen="sm-down" dialogClassName="navigation-settings-dialog">
       <Modal.Header closeButton><Modal.Title as="h2" className="h5">Meu menu · {organization.name}</Modal.Title></Modal.Header>
       <Modal.Body>
         <p>Os cinco primeiros módulos visíveis são seus atalhos. Use as setas para ordenar ou o botão de estrela para fixar no início.</p>
