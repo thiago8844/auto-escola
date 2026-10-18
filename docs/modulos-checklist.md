@@ -2,7 +2,7 @@
 
 Análise da base em **17/10/2026**. Este é o checklist principal do produto até o lançamento do MVP **web**, atendendo CFCs e instrutores autônomos. Cada entrega inclui a API necessária e a experiência completa em `apps/web`.
 
-**Próximo módulo recomendado: Relatórios e painel de gestão (módulo 7).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; os módulos 4 (disponibilidade e frota), 5 (pendências e alertas) e 6 (acesso e acabamento, exceto a homologação manual de teclado e dispositivos) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
+**Próximo módulo recomendado: Financeiro básico (módulo 8).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; os módulos 4 (disponibilidade e frota), 5 (pendências e alertas) 6 (acesso e acabamento, exceto a homologação manual de teclado e dispositivos) e 7 (relatórios e painel) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
 
 **Ordem definida:** saldo → exames e taxas → desfecho e histórico → disponibilidade e frota → alertas → acesso e acabamento → relatórios → financeiro básico. **O financeiro é o último módulo do MVP.** Depois do MVP entram **Vendas e atendimento** e, em uma etapa própria posterior, o aplicativo mobile.
 
@@ -50,7 +50,7 @@ Foram analisados rotas, páginas, clientes HTTP e hooks do web; models, migratio
 | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | Minutos e preço são campos de cadastro; não há movimentação de créditos                                                          | [EnrollmentController](../apps/api/app/Http/Controllers/Api/V1/EnrollmentController.php), [ChangeLessonStatus](../apps/api/app/Actions/Lessons/ChangeLessonStatus.php) | Construir pacotes, saldo e consumo antes de cobrar por eles.                               |
 | Não há modelos/rotas de exames, taxas externas, caixa ou relatórios                                                              | [Rotas da API](../apps/api/routes/api.php), [rotas web](../apps/web/src/config/routes.tsx)                                                                             | Exigem entregas completas de API e web.                                                    |
-| A página inicial ainda é um protótipo, com contadores `—`                                                                        | [OrganizationHomePage](../apps/web/src/pages/organization/OrganizationHomePage.tsx)                                                                                    | Entregar painel com dados reais no módulo de relatórios.                                   |
+| ~~A página inicial era um protótipo~~ (resolvido no módulo 7)                                                                      | [OrganizationHomePage](../apps/web/src/pages/organization/OrganizationHomePage.tsx)                                                                                    | Painel com dados reais entregue.                                                           |
 | O sino guarda dados apenas em memória e não recebe eventos reais da operação                                                     | [notificationStore](../apps/web/src/stores/notificationStore.ts), [documentação dos avisos](notificacoes.md)                                                           | Persistir notificações, gerar pendências e resolver sua leitura por usuário/espaço.        |
 | Agenda do espaço, agenda pessoal e histórico de aulas consultam até 100 registros; há consultas auxiliares só da primeira página | [lessons.ts](../apps/web/src/api/lessons.ts), [me.ts](../apps/web/src/api/me.ts), [useStudentHistory](../apps/web/src/hooks/useStudentHistory.ts)                      | Evitar agenda/histórico incompletos; nunca calcular total ou saldo a partir de uma página. |
 | A API edita dados de matrícula/processo e substitui documentos; o web expõe apenas parte dessas operações                        | [enrollments.ts](../apps/web/src/api/enrollments.ts), [processes.ts](../apps/web/src/api/processes.ts), [documents.ts](../apps/web/src/api/documents.ts)               | Completar correções e anexação de evidências na interface.                                 |
@@ -81,7 +81,7 @@ Esses resultados verificam a base atual. Não significam que os módulos planeja
 | 4               | **Disponibilidade e frota**                  | Implementado em 18/10/2026                         | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
 | 5               | **Pendências e alertas reais**               | Implementado em 18/10/2026 (contas no módulo 8)   | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
 | 6               | **Acesso, correções e acabamento web**       | Implementado em 18/10/2026 (homologação manual pendente) | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
-| 7               | **Relatórios e painel de gestão**            | Falta; início ainda é protótipo                   | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
+| 7               | **Relatórios e painel de gestão**            | Implementado em 18/10/2026                         | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
 | 8               | **Financeiro básico — último módulo do MVP** | Falta                                             | Receitas/despesas, parcelas, formas de pagamento, contas bancárias/caixa, transferências e relatórios financeiros. |
 | Após o MVP      | **Vendas e atendimento**                     | Futuro                                            | Organizar interessados, próximos contatos, propostas e conversão em matrícula.                                     |
 | Etapa posterior | **Aplicativo mobile**                        | Fora deste checklist                              | Planejamento próprio após a conclusão do web.                                                                      |
@@ -219,18 +219,20 @@ Lembretes externos para alunos por WhatsApp, SMS, push e automações de e-mail 
 
 **Objetivo:** entregar números em que o gestor confie antes de adicionar o financeiro.
 
-- [ ] Substituir o início de protótipo por painel real: aulas do dia/semana, alunos em atendimento, pendências, saldo baixo e próximos exames, com atalhos para agir.
-- [ ] Disponibilizar resumo do aluno: contratação, minutos reservados/realizados/consumidos/disponíveis, faltas, cancelamentos, evolução, exames e situação do processo/emissão.
-- [ ] Relatar aulas por período, instrutor, veículo, categoria, situação e parceiro, distinguindo duração agendada, real e registro oficial confirmado.
-- [ ] Relatar utilização e indisponibilidade de instrutores/veículos, incluindo manutenção e bloqueios, com definição explícita da base de cálculo.
-- [ ] Relatar exames por categoria e tentativa: agendados, aprovados, reprovados, ausentes, não concluídos e resultado pendente; exibir numerador/denominador das taxas de aprovação.
-- [ ] Relatar processos por etapa, pendência e tempo sem movimentação, além de documentos vencendo/vencidos e taxas externas por situação.
-- [ ] Oferecer visão operacional por CFC parceiro para autônomos: alunos, aulas, minutos e exames. Receita/repasse só entram com o financeiro.
-- [ ] Aplicar filtros na API, agregando todos os registros elegíveis; apresentar totais e detalhes que conciliem mesmo acima do limite de uma página.
-- [ ] Padronizar período no fuso do espaço, data de referência, inclusão de cancelamentos e atualização dos dados; evitar contagem duplicada em AB e taxas compartilhadas.
-- [ ] Exportar CSV completo conforme filtros e permissões, com texto acentuado, datas e valores utilizáveis em planilha; oferecer impressão legível do resumo do aluno pelo navegador.
-- [ ] Restringir relatórios de gestão à equipe autorizada e dados pessoais ao necessário. Instrutor acessa somente o resumo próprio permitido; exportação não amplia acesso.
-- [ ] Verificar totais com conjunto conhecido de dados, várias páginas, fronteira de dia/fuso, AB parcial, cancelamentos e isolamento entre espaços.
+- [x] Substituir o início de protótipo por painel real: aulas do dia/semana, alunos em atendimento, pendências, saldo baixo e próximos exames, com atalhos para agir.
+- [x] Disponibilizar resumo do aluno: contratação, minutos reservados/realizados/consumidos/disponíveis, faltas, cancelamentos, evolução, exames e situação do processo/emissão.
+- [x] Relatar aulas por período, instrutor, veículo, categoria, situação e parceiro, distinguindo duração agendada, real e registro oficial confirmado.
+- [x] Relatar utilização e indisponibilidade de instrutores/veículos, incluindo manutenção e bloqueios, com definição explícita da base de cálculo.
+- [x] Relatar exames por categoria e tentativa: agendados, aprovados, reprovados, ausentes, não concluídos e resultado pendente; exibir numerador/denominador das taxas de aprovação.
+- [x] Relatar processos por etapa, pendência e tempo sem movimentação, além de documentos vencendo/vencidos e taxas externas por situação.
+- [x] Oferecer visão operacional por CFC parceiro para autônomos: alunos, aulas, minutos e exames. Receita/repasse só entram com o financeiro.
+- [x] Aplicar filtros na API, agregando todos os registros elegíveis; apresentar totais e detalhes que conciliem mesmo acima do limite de uma página.
+- [x] Padronizar período no fuso do espaço, data de referência, inclusão de cancelamentos e atualização dos dados; evitar contagem duplicada em AB e taxas compartilhadas.
+- [x] Exportar CSV completo conforme filtros e permissões, com texto acentuado, datas e valores utilizáveis em planilha; oferecer impressão legível do resumo do aluno pelo navegador.
+- [x] Restringir relatórios de gestão à equipe autorizada e dados pessoais ao necessário. Instrutor acessa somente o resumo próprio permitido; exportação não amplia acesso.
+- [x] Verificar totais com conjunto conhecido de dados, várias páginas, fronteira de dia/fuso, AB parcial, cancelamentos e isolamento entre espaços.
+
+**Implementação:** serviços em `app/Services/Reports` (aulas, exames, utilização, processos, parceiros, resumo do aluno e painel) com consulta-base única por relatório, exportação CSV transmitida em fluxo e filtros no fuso do espaço. Web: painel real na página inicial (cada cartão leva à lista que o compõe), página *Relatórios* com abas, período por atalhos, “Ver aulas” para detalhar um indicador, exportação CSV, resumo do aluno com impressão. Testes: `ReportTest` (130 aulas em duas páginas de detalhe, fronteira de dia/fuso, AB parcial, cancelamentos, taxa com numerador/denominador, isolamento entre espaços).
 
 **Aceite:** partir de um indicador, abrir seus registros e exportar o mesmo conjunto com totais iguais. O painel deve mostrar dados reais, sem contadores ilustrativos.
 
