@@ -1,12 +1,16 @@
-import { Alert, Card } from 'react-bootstrap'
+import { useState } from 'react'
+import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
 import { DocumentStatusBadge, EnrollmentStatusBadge, LessonStatusBadge, ReleaseBadge } from '../../components/StatusBadges'
-import { DOCUMENT_TYPE_LABELS } from '../../config/domain'
+import { DOCUMENT_STATUS, DOCUMENT_TYPE_LABELS } from '../../config/domain'
+import type { DocumentStatus } from '../../types/document'
+import { UploadDocumentModal } from './UploadDocumentModal'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useDocumentFile, useUpdateDocumentStatus } from '../../hooks/useDocuments'
 import { useEnrollmentsLessons, useStudentDocuments, useStudentEnrollments } from '../../hooks/useStudentHistory'
 import { useStudent } from '../../hooks/useStudents'
 import type { Student } from '../../types/student'
@@ -37,6 +41,9 @@ function StudentDetail({ student }: { student: Student }) {
   const enrollments = useStudentEnrollments(organization.id, studentId)
   const lessonQueries = useEnrollmentsLessons(organization.id, enrollments.data?.data)
   const documents = useStudentDocuments(organization.id, studentId, operate)
+  const documentFile = useDocumentFile(organization.id)
+  const updateDocumentStatus = useUpdateDocumentStatus(organization.id)
+  const [uploading, setUploading] = useState(false)
 
   // Aulas de todas as matrículas, da mais recente para a mais antiga
   const lessons = lessonQueries.flatMap((q) => q.data?.data ?? []).sort((a, b) => b.starts_at.localeCompare(a.starts_at))
@@ -143,9 +150,18 @@ function StudentDetail({ student }: { student: Student }) {
 
       {operate && (
         <section aria-labelledby="documents-title">
-          <h2 id="documents-title" className="h4 mb-3">
-            Documentos
-          </h2>
+          <div id="documents-title">
+            <PageHeader
+              as="h2"
+              title="Documentos"
+              actions={
+                <Button size="sm" onClick={() => setUploading(true)}>
+                  <i className="bi bi-upload me-2" aria-hidden="true" />
+                  Anexar documento
+                </Button>
+              }
+            />
+          </div>
           <QueryState query={documents} isEmpty={(d) => d.data.length === 0} empty="Nenhum documento anexado a este aluno.">
             {(data) => (
               <DataTable
@@ -162,14 +178,67 @@ function StudentDetail({ student }: { student: Student }) {
                     ),
                   },
                   { header: 'Arquivo', cell: (doc) => <span className="text-break">{doc.original_name}</span> },
-                  { header: 'Situação', cell: (doc) => <DocumentStatusBadge status={doc.status} /> },
+                  {
+                    header: 'Situação',
+                    cell: (doc, { mobile }) =>
+                      // Documento substituído é histórico: não muda mais
+                      doc.status === 'replaced' ? (
+                        <DocumentStatusBadge status={doc.status} />
+                      ) : (
+                        <Form.Select
+                          size={mobile ? undefined : 'sm'}
+                          className="role-select"
+                          aria-label={`Situação de ${DOCUMENT_TYPE_LABELS[doc.type]}`}
+                          value={doc.status}
+                          disabled={updateDocumentStatus.isPending}
+                          onChange={(event) => updateDocumentStatus.mutate({ documentId: doc.id, status: event.target.value as DocumentStatus })}
+                        >
+                          {(['attached', 'verified', 'rejected'] as const).map((status) => (
+                            <option key={status} value={status}>
+                              {DOCUMENT_STATUS[status].label}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      ),
+                  },
                   { header: 'Validade', cell: (doc) => <span className="tabular-nums">{doc.expires_at ? formatDate(doc.expires_at) : 'Indeterminada'}</span> },
+                  {
+                    header: 'Ações',
+                    actions: true,
+                    cell: (doc, { mobile }) => (
+                      <>
+                        <Button
+                          variant="outline-primary"
+                          size={mobile ? undefined : 'sm'}
+                          className={mobile ? 'flex-fill' : 'me-2'}
+                          disabled={documentFile.isPending}
+                          // A aba é aberta no clique (antes da resposta) para o navegador não bloquear
+                          onClick={() => documentFile.mutate({ document: doc, mode: 'view', tab: window.open('', '_blank') })}
+                        >
+                          <i className="bi bi-eye me-1" aria-hidden="true" />
+                          Visualizar
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          size={mobile ? undefined : 'sm'}
+                          className={mobile ? 'flex-fill' : undefined}
+                          disabled={documentFile.isPending}
+                          onClick={() => documentFile.mutate({ document: doc, mode: 'download', tab: null })}
+                        >
+                          <i className="bi bi-download me-1" aria-hidden="true" />
+                          Baixar
+                        </Button>
+                      </>
+                    ),
+                  },
                 ]}
               />
             )}
           </QueryState>
         </section>
       )}
+
+      {uploading && <UploadDocumentModal organizationId={organization.id} studentId={student.id} onClose={() => setUploading(false)} />}
     </>
   )
 }
