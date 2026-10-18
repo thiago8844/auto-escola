@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Vehicles\VehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Organization;
+use App\Exceptions\BusinessRuleException;
 use App\Models\Vehicle;
+use App\Services\CommitmentFinder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -51,9 +53,30 @@ class VehicleController extends Controller
     {
         $this->authorize('update', [$vehicle, $organization]);
 
-        $vehicle->update($request->validated());
+        $previousCrlv = $vehicle->crlv_expires_at?->toDateString();
+        $wasActive = $vehicle->status->value === 'active';
 
-        return (new VehicleResource($vehicle->refresh()))->response();
+        $vehicle->update($request->validated());
+        $vehicle->refresh();
+
+        // Inativar ou antecipar o vencimento do CRLV não cancela nada: a equipe recebe a lista dos
+        // compromissos futuros afetados e decide cada um (trocar veículo, remarcar ou cancelar).
+        $affected = [];
+        $finder = app(CommitmentFinder::class);
+
+        if ($wasActive && $vehicle->status->value !== 'active') {
+            $affected = $finder->find($organization, $vehicle->getKey(), null, now());
+        } elseif ($vehicle->crlv_expires_at !== null && $vehicle->crlv_expires_at->toDateString() !== $previousCrlv) {
+            $timezone = $organization->timezone ?: config('autoescola.default_timezone');
+            $affected = $finder->find(
+                $organization,
+                $vehicle->getKey(),
+                null,
+                $vehicle->crlv_expires_at->copy()->addDay()->startOfDay()->shiftTimezone($timezone)->utc(),
+            );
+        }
+
+        return (new VehicleResource($vehicle))->additional(['meta' => ['affected' => $affected]])->response();
     }
 
     /**
@@ -62,6 +85,16 @@ class VehicleController extends Controller
     public function destroy(Organization $organization, Vehicle $vehicle): Response
     {
         $this->authorize('delete', [$vehicle, $organization]);
+
+        $pending = count(app(CommitmentFinder::class)->find($organization, $vehicle->getKey(), null, now()));
+
+        if ($pending > 0) {
+            throw new BusinessRuleException(
+                "Este veículo tem {$pending} compromisso(s) futuro(s). Troque o veículo ou remarque antes de excluir.",
+                'vehicle_has_commitments',
+                422,
+            );
+        }
 
         $vehicle->delete();
 

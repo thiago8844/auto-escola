@@ -48,7 +48,13 @@ class OrganizationController extends Controller
     {
         $this->authorize('update', $organization);
 
-        $organization->update($request->validated());
+        $data = $request->validated();
+
+        if (array_key_exists('business_hours', $data)) {
+            $data['business_hours'] = app(\App\Services\WorkingHours::class)->normalize($data['business_hours']);
+        }
+
+        $organization->update($data);
 
         return (new OrganizationResource($organization->refresh()))->response();
     }

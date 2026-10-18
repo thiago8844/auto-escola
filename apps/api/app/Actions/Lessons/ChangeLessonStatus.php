@@ -8,13 +8,14 @@ use App\Models\Lesson;
 use App\Models\Enrollment;
 use App\Services\Audit;
 use App\Services\CreditLedger;
-use App\Services\PracticeRelease;
+use App\Services\ExecutionChecks;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Altera o status de uma aula seguindo as transições permitidas (ver LessonStatus).
  *
- * Concluir exige a matrícula liberada para a prática (checklist do processo) e grava a
+ * Concluir exige a matrícula liberada para a prática (checklist do processo), documentos vigentes e veículo
+ * utilizável (ativo, sem bloqueio, CRLV válido), e grava a
  * duração real (padrão: a agendada) e a evolução. Falta e cancelamento guardam o motivo.
  * Estados finais não mudam, então concluir duas vezes é rejeitado e nada é contado em dobro.
  * A mesma transação encerra a reserva e grava o consumo no saldo (uma única vez por aula).
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 class ChangeLessonStatus
 {
     public function __construct(
-        private readonly PracticeRelease $release,
+        private readonly ExecutionChecks $checks,
         private readonly CreditLedger $ledger,
         private readonly Audit $audit,
     ) {}
@@ -49,7 +50,7 @@ class ChangeLessonStatus
             $changes = ['status' => $next, 'notes' => $notes];
 
             if ($next === LessonStatus::Completed) {
-                $this->release->assertReleased($current->enrollment);
+                $this->checks->assertCanComplete($current);
 
                 $changes['actual_minutes'] = $actualMinutes ?? $current->scheduledMinutes();
                 $changes['evolution'] = $evolution;

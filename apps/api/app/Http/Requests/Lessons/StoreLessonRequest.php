@@ -38,6 +38,8 @@ class StoreLessonRequest extends FormRequest
             'category' => ['nullable', 'string', Rule::in(\App\Enums\LicenseCategory::simpleValues())],
             // Exceção autorizada para agendar com saldo insuficiente; exige motivo.
             'override_reason' => ['nullable', 'string', 'min:3', 'max:255'],
+            // Exceção para agendar fora do horário de atendimento configurado; exige motivo.
+            'hours_override_reason' => ['nullable', 'string', 'min:3', 'max:255'],
         ];
     }
 

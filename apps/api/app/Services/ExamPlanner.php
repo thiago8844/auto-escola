@@ -21,6 +21,7 @@ class ExamPlanner
     public function __construct(
         private readonly InstructorAvailability $availability,
         private readonly SchedulingConstraints $constraints,
+        private readonly AvailabilityGuard $guard,
     ) {}
 
     /**
@@ -39,7 +40,7 @@ class ExamPlanner
         $endsAt = $startsAt->addMinutes($durationMinutes);
 
         if ($instructorId !== null) {
-            $this->availability->lockInstructor($instructorId);
+            $instructor = $this->availability->lockInstructor($instructorId);
 
             $linkActive = $organization->instructors()->whereKey($instructorId)->wherePivot('active', true)->exists();
 
@@ -48,6 +49,7 @@ class ExamPlanner
             }
 
             $this->availability->assertAvailable($instructorId, $startsAt, $endsAt, ignoreExamId: $ignoreExamId);
+            $this->guard->assertInstructorNotBlocked($organization, $instructor, $startsAt, $endsAt);
         }
 
         if ($vehicleId !== null) {
@@ -58,6 +60,7 @@ class ExamPlanner
             }
 
             $this->constraints->assertVehicleAvailable($vehicleId, $startsAt, $endsAt, ignoreExamId: $ignoreExamId);
+            $this->guard->assertVehicleNotBlocked($vehicle, $startsAt, $endsAt, $organization->timezone ?: config('autoescola.default_timezone'));
         }
 
         $this->constraints->lockStudent($studentId);

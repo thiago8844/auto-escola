@@ -51,4 +51,14 @@ class Vehicle extends Model
     {
         return $this->hasMany(Document::class);
     }
+
+    public function blocks(): HasMany
+    {
+        return $this->hasMany(AvailabilityBlock::class);
+    }
+
+    public function maintenances(): HasMany
+    {
+        return $this->hasMany(VehicleMaintenance::class);
+    }
 }

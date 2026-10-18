@@ -106,7 +106,13 @@ class OrganizationInstructorController extends Controller
 
         $link($organization, $instructor, $request->boolean('active'));
 
+        // Desativar o vínculo não mexe na agenda: devolve os compromissos futuros para a equipe resolver.
+        $affected = $request->boolean('active')
+            ? []
+            : app(\App\Services\CommitmentFinder::class)->find($organization, null, $instructor->getKey(), now());
+
         return (new InstructorResource($organization->instructors()->whereKey($instructor->getKey())->firstOrFail()))
+            ->additional(['meta' => ['affected' => $affected]])
             ->response();
     }
 }

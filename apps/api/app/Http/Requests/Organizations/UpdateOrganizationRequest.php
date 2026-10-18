@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Organizations;
 
+use App\Http\Requests\Availability\WeeklyHoursRequest;
 use App\Http\Requests\Processes\QualificationProcessRequest;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -42,6 +44,11 @@ class UpdateOrganizationRequest extends FormRequest
             'city' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', Rule::in(QualificationProcessRequest::UFS)],
             'timezone' => ['sometimes', 'timezone:all'],
-        ];
+        ] + WeeklyHoursRequest::hoursRules('business_hours');
+    }
+
+    public function after(): array
+    {
+        return [fn (Validator $validator) => WeeklyHoursRequest::validateShape($validator, 'business_hours', $this->input('business_hours'))];
     }
 }

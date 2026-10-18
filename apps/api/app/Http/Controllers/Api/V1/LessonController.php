@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Lessons\ChangeLessonStatus;
+use App\Actions\Lessons\ReassignLesson;
 use App\Actions\Lessons\RescheduleLesson;
 use App\Actions\Lessons\ScheduleLesson;
 use App\Actions\Lessons\SetLessonRegistry;
@@ -66,6 +67,7 @@ class LessonController extends Controller
             $request->validated('vehicle_id'),
             $request->validated('category'),
             $request->validated('override_reason'),
+            $request->validated('hours_override_reason'),
         );
 
         return (new LessonResource($lesson->load(self::RELATIONS)))
@@ -78,7 +80,35 @@ class LessonController extends Controller
     {
         $this->authorize('view', [$lesson, $organization]);
 
-        return (new LessonResource($lesson->load(self::RELATIONS)))->response();
+        $lesson->load(self::RELATIONS);
+
+        // Pré-reserva x prática liberada: aulas agendadas mostram o que impediria a execução hoje.
+        $resource = new LessonResource($lesson);
+
+        if ($this->isOperator(request()) && $lesson->status === LessonStatus::Scheduled) {
+            $resource->additional(['meta' => ['blockers' => app(\App\Services\ExecutionChecks::class)->blockers($lesson)]]);
+        }
+
+        return $resource->response();
+    }
+
+    /**
+     * Troca instrutor e/ou veículo de uma aula agendada (providência para compromissos afetados).
+     */
+    public function reassign(
+        \Illuminate\Http\Request $request,
+        Organization $organization,
+        Lesson $lesson,
+        ReassignLesson $reassign,
+    ): JsonResponse {
+        $this->authorize('reschedule', [$lesson, $organization]);
+
+        $data = $request->validate([
+            'vehicle_id' => ['sometimes', 'nullable', 'integer', \Illuminate\Validation\Rule::exists('vehicles', 'id')->where('organization_id', $organization->getKey())->whereNull('deleted_at')],
+            'instructor_id' => ['sometimes', 'integer', \Illuminate\Validation\Rule::exists('organization_instructor', 'instructor_id')->where('organization_id', $organization->getKey())],
+        ]);
+
+        return (new LessonResource($reassign($lesson, $data)->load(self::RELATIONS)))->response();
     }
 
     public function reschedule(
@@ -93,6 +123,7 @@ class LessonController extends Controller
             $lesson,
             CarbonImmutable::parse($request->string('starts_at')->toString()),
             CarbonImmutable::parse($request->string('ends_at')->toString()),
+            $request->validated('hours_override_reason'),
         );
 
         return (new LessonResource($updated->load(self::RELATIONS)))->response();

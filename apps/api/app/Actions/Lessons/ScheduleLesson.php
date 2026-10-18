@@ -8,6 +8,7 @@ use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\Organization;
 use App\Services\Audit;
+use App\Services\AvailabilityGuard;
 use App\Services\CreditLedger;
 use App\Services\InstructorAvailability;
 use App\Services\SchedulingConstraints;
@@ -29,6 +30,7 @@ class ScheduleLesson
         private readonly SchedulingConstraints $constraints,
         private readonly CreditLedger $ledger,
         private readonly Audit $audit,
+        private readonly AvailabilityGuard $guard,
     ) {}
 
     /** @var list<array{code: string, message: string}> Avisos de saldo da última execução. */
@@ -44,8 +46,9 @@ class ScheduleLesson
         ?int $vehicleId = null,
         ?string $category = null,
         ?string $overrideReason = null,
+        ?string $hoursOverrideReason = null,
     ): Lesson {
-        return DB::transaction(function () use ($organization, $enrollment, $instructorId, $startsAt, $endsAt, $notes, $vehicleId, $category, $overrideReason) {
+        return DB::transaction(function () use ($organization, $enrollment, $instructorId, $startsAt, $endsAt, $notes, $vehicleId, $category, $overrideReason, $hoursOverrideReason) {
             if (! $enrollment->status->acceptsLessons()) {
                 throw new BusinessRuleException(
                     'Esta matrícula está encerrada e não aceita novas aulas.',
@@ -71,6 +74,8 @@ class ScheduleLesson
             }
 
             $this->availability->assertAvailable($instructorId, $startsAt, $endsAt);
+            $this->guard->assertInstructorNotBlocked($organization, $instructor, $startsAt, $endsAt);
+            $hoursOverride = $this->guard->assertWithinHours($organization, $instructorId, $startsAt, $endsAt, $hoursOverrideReason);
 
             $vehicle = null;
 
@@ -78,6 +83,7 @@ class ScheduleLesson
                 $vehicle = $this->constraints->lockVehicle($vehicleId);
                 $this->constraints->assertVehicleUsable($vehicle, $enrollment, $instructor, $startsAt, $organization->timezone);
                 $this->constraints->assertVehicleAvailable($vehicleId, $startsAt, $endsAt);
+                $this->guard->assertVehicleNotBlocked($vehicle, $startsAt, $endsAt, $organization->timezone);
             }
 
             $this->constraints->lockStudent($enrollment->student_id);
@@ -111,7 +117,7 @@ class ScheduleLesson
                 'student_id' => $enrollment->student_id,
                 'process_id' => $enrollment->qualification_process_id,
                 'subject' => $lesson,
-                'changes' => ['starts_at' => $lesson->starts_at->toIso8601String(), 'minutes' => $minutes],
+                'changes' => array_filter(['starts_at' => $lesson->starts_at->toIso8601String(), 'minutes' => $minutes, 'hours_override' => $hoursOverride]),
             ]);
 
             return $lesson;

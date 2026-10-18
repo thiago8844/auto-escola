@@ -7,6 +7,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Lesson;
 use App\Models\Enrollment;
 use App\Services\Audit;
+use App\Services\AvailabilityGuard;
 use App\Services\CreditLedger;
 use App\Services\InstructorAvailability;
 use App\Services\SchedulingConstraints;
@@ -24,11 +25,12 @@ class RescheduleLesson
         private readonly SchedulingConstraints $constraints,
         private readonly CreditLedger $ledger,
         private readonly Audit $audit,
+        private readonly AvailabilityGuard $guard,
     ) {}
 
-    public function __invoke(Lesson $lesson, CarbonImmutable $startsAt, CarbonImmutable $endsAt): Lesson
+    public function __invoke(Lesson $lesson, CarbonImmutable $startsAt, CarbonImmutable $endsAt, ?string $hoursOverrideReason = null): Lesson
     {
-        return DB::transaction(function () use ($lesson, $startsAt, $endsAt) {
+        return DB::transaction(function () use ($lesson, $startsAt, $endsAt, $hoursOverrideReason) {
             $current = Lesson::query()->whereKey($lesson->getKey())->lockForUpdate()->firstOrFail();
             $instructor = $this->availability->lockInstructor($current->instructor_id);
 
@@ -46,6 +48,9 @@ class RescheduleLesson
                 $endsAt,
                 ignoreLessonId: $current->getKey(),
             );
+            $organization = $current->organization;
+            $this->guard->assertInstructorNotBlocked($organization, $instructor, $startsAt, $endsAt);
+            $hoursOverride = $this->guard->assertWithinHours($organization, $current->instructor_id, $startsAt, $endsAt, $hoursOverrideReason);
 
             if ($current->vehicle_id !== null) {
                 $vehicle = $this->constraints->lockVehicle($current->vehicle_id);
@@ -57,6 +62,7 @@ class RescheduleLesson
                     $current->organization->timezone,
                 );
                 $this->constraints->assertVehicleAvailable($current->vehicle_id, $startsAt, $endsAt, $current->getKey());
+                $this->guard->assertVehicleNotBlocked($vehicle, $startsAt, $endsAt, $organization->timezone);
             }
 
             $studentId = $current->enrollment->student_id;
@@ -80,7 +86,7 @@ class RescheduleLesson
                 'student_id' => $enrollment->student_id,
                 'process_id' => $enrollment->qualification_process_id,
                 'subject' => $current,
-                'changes' => ['starts_at' => ['from' => $previous, 'to' => $current->starts_at->toIso8601String()]],
+                'changes' => array_filter(['starts_at' => ['from' => $previous, 'to' => $current->starts_at->toIso8601String()], 'hours_override' => $hoursOverride]),
             ]);
 
             return $current;

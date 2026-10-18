@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Espaço de trabalho: uma autoescola (cfc) ou uma operação particular (independent).
  */
-#[Fillable(['name', 'type', 'document', 'email', 'phone', 'address', 'city', 'state', 'timezone'])]
+#[Fillable(['name', 'type', 'document', 'email', 'phone', 'address', 'city', 'state', 'timezone', 'business_hours'])]
 class Organization extends Model
 {
     use HasFactory;
@@ -25,6 +25,7 @@ class Organization extends Model
     {
         return [
             'type' => OrganizationType::class,
+            'business_hours' => 'array',
         ];
     }
 
@@ -44,7 +45,7 @@ class Organization extends Model
     public function instructors(): BelongsToMany
     {
         return $this->belongsToMany(Instructor::class, 'organization_instructor')
-            ->withPivot('active')
+            ->withPivot('active', 'weekly_hours')
             ->withTimestamps();
     }
 
@@ -76,6 +77,16 @@ class Organization extends Model
     public function externalFees(): HasMany
     {
         return $this->hasMany(ExternalFee::class);
+    }
+
+    public function availabilityBlocks(): HasMany
+    {
+        return $this->hasMany(AvailabilityBlock::class);
+    }
+
+    public function maintenances(): HasMany
+    {
+        return $this->hasMany(VehicleMaintenance::class);
     }
 
     public function auditEvents(): HasMany

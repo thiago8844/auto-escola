@@ -22,6 +22,7 @@ class RescheduleLessonRequest extends FormRequest
         return [
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
+            'hours_override_reason' => ['nullable', 'string', 'min:3', 'max:255'],
         ];
     }
 

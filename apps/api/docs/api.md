@@ -1040,3 +1040,29 @@ Todas as rotas ficam sob `/api/v1/organizations/{organization}`. Erros de regra 
 ### Desfecho e histórico (`qualification-processes/{process}`)
 
 `GET /closure-check`, `POST /issuance`, `POST /close`, `POST /reopen` (proprietário/gestor), `POST /categories/{cat}/renunciation[/confirm|/revert]`, `GET /timeline`. O recurso do processo traz `outcome` (resultado por categoria, emissão, encerramento e `next_step`). Também: `GET /students/{student}/timeline` (equipe) e `GET /audit-events` (proprietário/gestor).
+
+## Disponibilidade e frota (módulo 4)
+
+Rotas sob `/api/v1/organizations/{organization}`. Bloqueios, manutenção e disponibilidade nunca cancelam compromissos: devolvem a lista dos afetados (`meta.affected`) para a equipe decidir.
+
+| Método | Rota | Quem | Descrição |
+|---|---|---|---|
+| `GET` | `/availability-blocks` | Membro (instrutor: só os próprios) | Filtros `resource_type`, `vehicle_id`, `instructor_id`, `status`, `current=1`. Indisponibilidade pessoal criada em outro espaço aparece só como janela (`external: true`, sem motivo nem responsável). |
+| `POST` | `/availability-blocks` | Equipe (veículo e instrutor do espaço); o próprio instrutor (`scope: personal`) | `resource_type`, `vehicle_id`/`instructor_id`, `scope` (`organization`\|`personal`), `kind` (`maintenance`, `absence`, `vacation`, `other`), `starts_at`, `ends_at`, `reason`. Resposta: `meta.affected` e `meta.external_affected` (só a contagem de outros espaços). |
+| `PATCH` | `/availability-blocks/{id}` | Equipe / instrutor dono (pessoal) | Tipo, período e motivo. Recalcula `meta.affected`. |
+| `POST` | `/availability-blocks/{id}/release` | Equipe / instrutor dono (pessoal) | `note` opcional. O bloqueio vira `released` e permanece no histórico. |
+| `GET` | `/availability-blocks/impact` | Equipe | Prévia (`vehicle_id` ou `instructor_id`, `starts_at`, `ends_at`) sem gravar. |
+| `GET`/`POST` | `/maintenances` | Equipe | `vehicle_id`, `type`, `scheduled_on`, `provider`, `odometer_km`, `estimated_cost_cents`, `notes` e `block: {starts_at, ends_at}` opcional (bloqueia a agenda na mesma transação). Cada manutenção recebe `finance_ref` (uuid único) para a futura conta a pagar. |
+| `PATCH` | `/maintenances/{id}` | Equipe | Só enquanto `scheduled`. |
+| `POST` | `/maintenances/{id}/complete` | Equipe | Registra realizado (`performed_on`, `actual_cost_cents`, `odometer_km`, `next_due_date`, `next_due_km`, `document_id`) e libera o bloqueio ligado. |
+| `POST` | `/maintenances/{id}/cancel` | Equipe | `reason` opcional; libera o bloqueio ligado. |
+| `GET` | `/vehicles/{vehicle}/overview` | Equipe | Veículo, documentos e versões, bloqueios, manutenções, próximas revisões (`maintenance_due`) e compromissos futuros com `issues` (`blocked`, `crlv_expired`, `inactive`). |
+| `GET` | `/vehicles/{vehicle}/commitments`, `/instructors/{instructor}/commitments` | Equipe | Aulas e exames futuros do recurso. |
+| `GET` | `/instructors/{instructor}/availability` | Equipe / o próprio instrutor | Regra (`free`\|`restricted`), horários, bloqueios e próximos compromissos. |
+| `PUT` | `/instructors/{instructor}/weekly-hours` | Equipe | `weekly_hours` (`{"1":[{"start":"08:00","end":"12:00"}]}`, 1 = segunda) ou `null`. |
+| `POST` | `/lessons/{lesson}/reassign` | Equipe | Troca `vehicle_id` e/ou `instructor_id` mantendo horário e saldo; confere bloqueios e conflitos. |
+
+- `PATCH /organizations/{id}` aceita `business_hours` (mesmo formato; `null` = agenda livre). A aula precisa caber no horário do espaço e no do instrutor, se definidos; fora dele, envie `hours_override_reason` em `POST /lessons` ou `/lessons/{id}/reschedule` (fica na auditoria).
+- Agendar ou remarcar aula/exame responde `409` com `vehicle_blocked` ou `instructor_blocked` (mensagem indica como resolver). Indisponibilidade pessoal de outro espaço responde o genérico `instructor_unavailable`.
+- `PATCH /vehicles/{id}` (inativar ou antecipar o CRLV) e `PATCH /instructors/{id}/link` (desativar) devolvem `meta.affected`. `DELETE /vehicles/{id}` com compromissos futuros responde `422 vehicle_has_commitments`.
+- `GET /lessons/{id}` (equipe, aula agendada) traz `meta.blockers`: o que impediria a execução hoje. Concluir a aula revalida liberação, validade dos documentos do checklist, veículo ativo, sem bloqueio e CRLV vigente (`practice_document_expired`, `vehicle_inactive`, `vehicle_blocked`, `vehicle_document_expired`).

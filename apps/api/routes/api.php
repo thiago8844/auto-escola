@@ -1,15 +1,18 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\AvailabilityBlockController;
 use App\Http\Controllers\Api\V1\ChecklistItemController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\ExternalFeeController;
 use App\Http\Controllers\Api\V1\EnrollmentBalanceController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\FleetOverviewController;
 use App\Http\Controllers\Api\V1\InvitationAcceptController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\LessonController;
+use App\Http\Controllers\Api\V1\MaintenanceController;
 use App\Http\Controllers\Api\V1\MeInstructorController;
 use App\Http\Controllers\Api\V1\MyLessonController;
 use App\Http\Controllers\Api\V1\OrganizationController;
@@ -109,6 +112,24 @@ Route::prefix('v1')->group(function () {
                 // Veículos
                 Route::apiResource('vehicles', VehicleController::class);
 
+                // Disponibilidade e frota: bloqueios, manutenção, detalhe do veículo e do instrutor
+                Route::get('availability-blocks', [AvailabilityBlockController::class, 'index']);
+                Route::get('availability-blocks/impact', [AvailabilityBlockController::class, 'impact']);
+                Route::post('availability-blocks', [AvailabilityBlockController::class, 'store']);
+                Route::patch('availability-blocks/{availability_block}', [AvailabilityBlockController::class, 'update']);
+                Route::post('availability-blocks/{availability_block}/release', [AvailabilityBlockController::class, 'release']);
+                Route::get('maintenances', [MaintenanceController::class, 'index']);
+                Route::post('maintenances', [MaintenanceController::class, 'store']);
+                Route::get('maintenances/{maintenance}', [MaintenanceController::class, 'show']);
+                Route::patch('maintenances/{maintenance}', [MaintenanceController::class, 'update']);
+                Route::post('maintenances/{maintenance}/complete', [MaintenanceController::class, 'complete']);
+                Route::post('maintenances/{maintenance}/cancel', [MaintenanceController::class, 'cancel']);
+                Route::get('vehicles/{vehicle}/overview', [FleetOverviewController::class, 'vehicle']);
+                Route::get('vehicles/{vehicle}/commitments', [FleetOverviewController::class, 'vehicleCommitments']);
+                Route::get('instructors/{instructor}/availability', [FleetOverviewController::class, 'instructor']);
+                Route::put('instructors/{instructor}/weekly-hours', [FleetOverviewController::class, 'updateWeeklyHours']);
+                Route::get('instructors/{instructor}/commitments', [FleetOverviewController::class, 'instructorCommitments']);
+
                 // Processos de habilitação e checklist de liberação para a prática
                 Route::apiResource('qualification-processes', QualificationProcessController::class)
                     ->only(['index', 'store', 'show', 'update']);
@@ -156,6 +177,7 @@ Route::prefix('v1')->group(function () {
                 Route::patch('lessons/{lesson}', [LessonController::class, 'update']);
                 Route::patch('lessons/{lesson}/registry', [LessonController::class, 'registry']);
                 Route::post('lessons/{lesson}/reschedule', [LessonController::class, 'reschedule']);
+                Route::post('lessons/{lesson}/reassign', [LessonController::class, 'reassign']);
                 Route::patch('lessons/{lesson}/status', [LessonController::class, 'updateStatus']);
             });
     });
