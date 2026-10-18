@@ -63,7 +63,7 @@ Seu perfil profissional e o vínculo ao particular são criados ao abrir o espa�
 
 ## 4. Cadastre o aluno e prepare a prática
 
-1. Em **Alunos → Novo aluno**, informe o nome. CPF, e-mail, telefone e nascimento são opcionais. Ao abrir o aluno, você vê dados, matrículas, aulas, documentos e o histórico. O botão **Resumo** abre uma folha para atendimento e impressão, com contratação, minutos, faltas, evolução, exames e situação do processo.
+1. Em **Alunos → Novo aluno**, informe o nome e a **autoescola parceira** do aluno (obrigatória no espaço particular). CPF, e-mail, telefone, nascimento, identidade e órgão expedidor são opcionais, mas a inscrição do exame os pede. Ao abrir o aluno, você vê dados, matrículas, aulas, documentos e o histórico. O botão **Resumo** abre uma folha para atendimento e impressão, com contratação, minutos, faltas, evolução, exames e situação do processo.
 2. Se quiser acompanhar o processo de habilitação, abra **Alunos → [nome] → Nova matrícula → Criar processo para este aluno**. Esse link abre o formulário de processo; crie-o antes de preencher a matrícula, pois a navegação não guarda um rascunho dela. Escolha tipo, UF e categorias pretendidas. Para adição, mudança ou aperfeiçoamento, informe também as categorias atuais. RENACH, protocolo e data de abertura são opcionais.
 3. Abra o processo e atualize os itens do **Checklist de liberação para a prática**. Você pode acrescentar itens exigidos e anexar a evidência no próprio item. Para marcar **Conferido**, informe uma origem confiável; a simples declaração do aluno não basta. Para **Não se aplica** ou **Bloqueado**, informe o motivo. Só itens conferidos ou marcados como não aplicáveis liberam a prática. Anexar um arquivo não conclui o item: a conferência é uma ação separada.
 4. Em **Alunos → [nome] → Anexar documento**, envie PDF, JPG, PNG ou WebP de até 10 MB. Escolha o tipo, registre validade quando houver e altere a situação para **Conferido** ou **Rejeitado** após análise. Se o documento mudar, use **Substituir**: a versão anterior fica no histórico de versões.
@@ -118,7 +118,7 @@ Se a aula pertence a uma autoescola e seu papel lá é **Instrutor**, você pode
 
 ### Exames
 
-Na tela **Exames**, cada tentativa tem data e hora, local, protocolo, veículo e instrutor responsável. Os resultados possíveis são **Agendado**, **Aprovado**, **Reprovado**, **Ausente**, **Não concluído** e **Cancelado**. Ausência não é reprovação, e uma nova tentativa não apaga a anterior. Você vê os exames em que é o responsável. Taxas e comprovantes ficam no seu espaço particular ou com a equipe da autoescola.
+Na tela **Exames**, cada tentativa tem categoria, autoescola do exame, data e hora, local, veículo e instrutor responsável (sem protocolo nem duração). Para corrigir uma data digitada errada use **Editar**; **Remarcar** é para imprevistos e guarda o motivo no histórico. Os resultados possíveis são **Agendado**, **Aprovado**, **Reprovado**, **Ausente**, **Não concluído** e **Cancelado**. Ausência não é reprovação, e uma nova tentativa não apaga a anterior. Você vê os exames em que é o responsável. Taxas e comprovantes ficam no seu espaço particular ou com a equipe da autoescola.
 
 ## 7. Pendências e rotina sugerida
 

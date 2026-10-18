@@ -106,7 +106,7 @@ Ao criar um bloqueio com compromissos futuros, o sistema lista as aulas e os exa
 
 ## 10. Alunos
 
-**Alunos:** busque por nome e navegue pelas páginas. **Novo aluno:** informe nome e, opcionalmente, CPF, telefone, e-mail e nascimento. Na ficha você consulta e edita dados, matrículas, aulas, documentos e o histórico do aluno.
+**Alunos:** busque por nome e navegue pelas páginas. **Novo aluno:** informe nome e a **autoescola do aluno** (o próprio espaço ou uma parceira; no espaço particular a parceira é obrigatória) e, opcionalmente, CPF, telefone, e-mail, nascimento, identidade e órgão expedidor (pedidos na inscrição do exame). Na ficha você consulta e edita dados, matrículas, aulas, documentos e o histórico do aluno.
 
 - **Resumo** (só equipe): folha para atendimento e impressão, com contratação, minutos reservados, realizados, consumidos e disponíveis, faltas, cancelamentos, evolução, exames e situação do processo e da emissão do documento.
 - **Arquivar** tira o aluno da operação sem apagar o histórico. Antes de arquivar, a tela explica o que acontece com o CPF e com os compromissos futuros.
@@ -174,12 +174,12 @@ Em **Observações e evolução**, salve notas e, após a realização, evoluç�
 
 ## 15. Exames práticos
 
-Na tela **Exames**, cada tentativa fica numerada dentro do processo e da categoria, com data e hora no fuso do espaço, local, protocolo, veículo, instrutor responsável e observações.
+Na tela **Exames**, cada tentativa fica numerada dentro do processo e da categoria, com a categoria pretendida, a autoescola do exame (o próprio espaço ou uma parceira), data e hora no fuso do espaço, local, veículo, instrutor responsável e observações. O exame não tem protocolo nem duração. Nome, CPF, nascimento, identidade e órgão expedidor vêm da ficha do aluno e aparecem em **Dados da inscrição**; o que faltar vira pendência. O veículo só aparece depois de escolher a categoria.
 
-- **Situações:** Agendado, Aprovado, Reprovado, Ausente, Não concluído e Cancelado. Ausência não é reprovação. Remarcar mantém a data e o local anteriores no histórico.
+- **Situações:** Agendado, Aprovado, Reprovado, Ausente, Não concluído e Cancelado. Ausência não é reprovação. **Editar** corrige qualquer informação, inclusive uma data digitada errada, sem poluir o histórico. **Remarcar** serve para imprevistos: só a nova data, com o motivo, e a data anterior fica no histórico.
 - **Resultado por categoria:** em processo AB, A e B têm resultados independentes. Uma reprovação em B não altera o resultado de A.
 - **Anexos:** comprovantes e documentos do exame ficam privados.
-- **Taxas (guias):** cada taxa externa tem tipo, número da guia, valor, vencimento, pagador e comprovante. A situação pode ser desconhecida, pendente, pagamento informado, confirmada, isenta (com motivo) ou cancelada. Quem conferiu, quando e a fonte ficam registrados. Taxa externa **não entra no caixa** do espaço; se alguém adiantou o valor, o reembolso aparece no financeiro.
+- **Taxas (guias):** cada taxa externa tem tipo, número da guia, valor, vencimento, pagador e comprovante. A situação pode ser desconhecida, pendente, pagamento informado, pagamento confirmado, isenta (com motivo) ou cancelada. Ao confirmar o pagamento, você pode anexar o comprovante (opcional) para garantir que o aluno pagou; ficam registrados quem conferiu e quando. Taxa externa **não entra no caixa** do espaço; se alguém adiantou o valor, o reembolso aparece no financeiro.
 
 O instrutor vê os exames em que é o responsável. Taxas, comprovantes e laudos são da equipe.
 

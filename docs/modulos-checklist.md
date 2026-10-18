@@ -115,11 +115,11 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 - [x] Criar tentativas por processo, percurso/categoria e matrícula quando aplicável, com número, data/hora no fuso do espaço, local, protocolo, observações e anexos privados.
 - [x] Separar agendado, cancelado/remarcado, aprovado, reprovado, ausente e não concluído. Definir transições e resultado por tentativa; ausência não é reprovação.
-- [x] Remarcar preservando data/local anteriores; nova tentativa de exame não pode sobrescrever a tentativa anterior nem duplicar a numeração por concorrência.
+- [x] Remarcar (só data e motivo) preservando a data anterior; editar corrige data e demais dados sem histórico; exame leva categoria e autoescola e usa a identidade do cadastro do aluno; nova tentativa de exame não pode sobrescrever a tentativa anterior nem duplicar a numeração por concorrência.
 - [x] Registrar veículo e instrutor responsáveis quando houver; reservar sua janela de indisponibilidade e considerar conflitos com aulas e outros exames, inclusive entre espaços para o instrutor, sem revelar dados externos.
 - [x] Exibir pendências para exame conforme processo e conferência aplicável. Não inventar mínimo nacional de aulas, prazo de reteste ou reconhecimento oficial automático.
 - [x] Criar taxas externas por processo e/ou tentativa: tipo, guia, valor emitido, emissão, vencimento, pagador, referência e comprovante; permitir várias taxas por tentativa sem contar duas vezes uma taxa compartilhada.
-- [x] Diferenciar situação desconhecida, pendente, pagamento informado, confirmado, isenta com motivo e cancelada. Registrar quem conferiu, quando e a fonte da confirmação.
+- [x] Diferenciar situação desconhecida, pendente, pagamento informado, confirmado, isenta com motivo e cancelada. Registrar quem conferiu e quando; ao confirmar o pagamento, o comprovante é opcional.
 - [x] Separar responsável pela obrigação, quem efetivamente pagou e eventual adiantamento/reembolso a acertar no financeiro. Pagamento direto pelo aluno ao órgão não entra no caixa do CFC.
 - [x] Entregar agenda/lista de exames, cadastro, remarcação, resultado, histórico de tentativas e taxas no aluno/processo, com busca e filtros de período, categoria e situação.
 - [x] Restringir taxas e documentos à equipe; definir o resumo operacional necessário ao instrutor responsável, sem expor laudos, caixa ou exames de colegas.
