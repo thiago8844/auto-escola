@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\PracticalExamController;
 use App\Http\Controllers\Api\V1\ProcessOutcomeController;
 use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\QualificationProcessController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\VehicleController;
 use Illuminate\Support\Facades\Route;
@@ -185,6 +186,20 @@ Route::prefix('v1')->group(function () {
                 Route::post('alerts/{alert}/unarchive', [AlertController::class, 'unarchive']);
                 Route::get('alert-settings', [AlertController::class, 'settings']);
                 Route::patch('alert-settings', [AlertController::class, 'updateSettings']);
+
+                // Relatórios e painel (equipe; o instrutor só tem o painel e o próprio resumo)
+                Route::get('reports/dashboard', [ReportController::class, 'dashboard']);
+                Route::get('reports/my-summary', [ReportController::class, 'mySummary']);
+                Route::get('reports/lessons', [ReportController::class, 'lessons']);
+                Route::get('reports/lessons/detail', [ReportController::class, 'lessonDetail']);
+                Route::get('reports/lessons/export', [ReportController::class, 'lessonExport'])->middleware('throttle:20,1');
+                Route::get('reports/exams', [ReportController::class, 'exams']);
+                Route::get('reports/exams/detail', [ReportController::class, 'examDetail']);
+                Route::get('reports/exams/export', [ReportController::class, 'examExport'])->middleware('throttle:20,1');
+                Route::get('reports/utilization', [ReportController::class, 'utilization']);
+                Route::get('reports/processes', [ReportController::class, 'processes']);
+                Route::get('reports/partners', [ReportController::class, 'partners']);
+                Route::get('students/{student}/summary', [ReportController::class, 'studentSummary']);
 
                 // Documentos privados
                 Route::get('documents', [DocumentController::class, 'index']);

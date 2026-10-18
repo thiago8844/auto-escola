@@ -1104,3 +1104,22 @@ Rotas sob `/api/v1/organizations/{organization}`. O alerta pertence ao espaço (
 - **Documentos:** `GET /documents/{id}/versions` devolve a cadeia de substituições; `download` de arquivo ausente responde `404 document_file_missing` com orientação para anexar de novo.
 - **Filtros:** `GET /enrollments` aceita `status`, `category`, `partner_id`, `search` (nome do aluno); `GET /qualification-processes` aceita `category` e `search`.
 - **Primeiros passos:** `GET /onboarding` (equipe) devolve os 7 passos com `done`, `done`/`total` e `support_email`.
+
+## Relatórios e painel de gestão (módulo 7)
+
+Rotas sob `/api/v1/organizations/{organization}/reports`. Exceto `dashboard` e `my-summary`, são **só da equipe de operação** (o instrutor recebe 403). Os filtros são aplicados na API sobre todos os registros elegíveis; totais, detalhe paginado e exportação usam a mesma consulta, então conciliam em qualquer página. `from`/`to` são **dias no fuso do espaço** (do início do primeiro ao fim do último); a data de referência é o início da aula ou do exame.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/reports/dashboard` | Equipe: aulas de hoje e da semana, alunos em atendimento, pendências (abertas/urgentes), saldo baixo, próximos exames e aulas. Instrutor: só as próprias aulas e pendências. |
+| `GET` | `/reports/lessons` | Filtros: `from`, `to`, `instructor_id`, `vehicle_id`, `category`, `status`, `partner_id`, `include_cancelled`. `group_by`: `status` (padrão), `instructor`, `vehicle`, `category`, `partner`, `day`. Devolve `totals` e `groups` com duração agendada, real (aulas realizadas) e com registro oficial confirmado. |
+| `GET` | `/reports/lessons/detail` | Mesmos filtros, paginado (`per_page`/`page`), com `totals` idênticos aos do resumo. |
+| `GET` | `/reports/lessons/export` | CSV completo dos mesmos filtros (UTF-8 com BOM, separador `;`, datas `dd/mm/aaaa hh:mm`). Gera um evento `report.exported` na auditoria. |
+| `GET` | `/reports/exams`, `/exams/detail`, `/exams/export` | Por categoria e tentativa: agendados, aprovados, reprovados, ausentes, não concluídos, cancelados e sem resultado. `approval_rate` traz `numerator`, `denominator` e `percent`; denominador = aprovados + reprovados (ausência não é reprovação). |
+| `GET` | `/reports/utilization` | Instrutores e veículos ativos: horas disponíveis, bloqueadas e utilizadas, com a base de cálculo no campo `basis`. Período máximo de 93 dias. |
+| `GET` | `/reports/processes` | Processos por situação e emissão, sem movimentação há `stalled_days` (padrão 15), documentos vencidos/a vencer e taxas externas por situação (cada guia conta uma vez). |
+| `GET` | `/reports/partners` | Operação por CFC parceiro: alunos (distintos), aulas, minutos realizados e exames. Sem receita/repasse. |
+| `GET` | `/reports/my-summary` | O instrutor vê só as próprias aulas no período (contagens e minutos; sem alunos, preço ou saúde). |
+| `GET` | `/students/{student}/summary` | Resumo do aluno (equipe): minutos por matrícula (contratado, reservado, realizado, consumido, disponível), faltas, cancelamentos, evolução, exames e processo/emissão. |
+
+**Definições:** duração agendada = fim − início; duração real = minutos informados (ou a agendada) das aulas **realizadas**; AB conta cada aula uma vez, na categoria da aula (`lessons.category`, ou a da matrícula); cancelamentos aparecem como situação própria (`include_cancelled=0` os exclui); alunos de parceiro são contados uma vez por parceiro.
