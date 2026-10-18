@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Form, Table } from 'react-bootstrap'
+import { Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { DataTable } from '../../components/DataTable'
+import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
 import { PAGE_SIZE } from '../../config/organization'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
-import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useStudents } from '../../hooks/useStudents'
 import { formatDate } from '../../utils/formatDate'
 import { formatDocument } from '../../utils/formatDocument'
@@ -25,15 +27,17 @@ export default function StudentsPage() {
 
   return (
     <>
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <h1 className="mb-0">Alunos</h1>
-        {canOperate(organization.role) && (
-          <Link to={links.studentNew} className="btn btn-primary">
-            <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-            Novo aluno
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Alunos"
+        actions={
+          canOperate(organization.role) && (
+            <Link to={links.studentNew} className="btn btn-primary">
+              <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+              Novo aluno
+            </Link>
+          )
+        }
+      />
 
       <Form.Group controlId="student-search" className="mb-4 form-narrow">
         <Form.Label className="visually-hidden">Buscar aluno por nome</Form.Label>
@@ -55,28 +59,16 @@ export default function StudentsPage() {
       >
         {(data) => (
           <>
-            <Table responsive hover className="align-middle bg-white">
-              <thead>
-                <tr>
-                  <th scope="col">Nome</th>
-                  <th scope="col">Telefone</th>
-                  <th scope="col">CPF</th>
-                  <th scope="col">Cadastro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.data.map((student) => (
-                  <tr key={student.id}>
-                    <td>
-                      <Link to={links.student(student.id)}>{student.name}</Link>
-                    </td>
-                    <td className="tabular-nums">{student.phone ?? '—'}</td>
-                    <td className="tabular-nums">{student.cpf ? formatDocument(student.cpf) : '—'}</td>
-                    <td className="tabular-nums">{formatDate(student.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <DataTable
+              rows={data.data}
+              getKey={(student) => student.id}
+              columns={[
+                { header: 'Nome', primary: true, cell: (student) => <Link to={links.student(student.id)}>{student.name}</Link> },
+                { header: 'Telefone', cell: (student) => <span className="tabular-nums">{student.phone ?? '—'}</span> },
+                { header: 'CPF', cell: (student) => <span className="tabular-nums">{student.cpf ? formatDocument(student.cpf) : '—'}</span> },
+                { header: 'Cadastro', cell: (student) => <span className="tabular-nums">{formatDate(student.created_at)}</span> },
+              ]}
+            />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>
         )}

@@ -50,7 +50,7 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
           </Navbar.Offcanvas>
         </Container>
       </Navbar>
-      <main className="app-content flex-grow-1 p-4">{children ?? <Outlet />}</main>
+      <main className="app-content flex-grow-1 p-3 p-lg-4">{children ?? <Outlet />}</main>
     </div>
   )
 }

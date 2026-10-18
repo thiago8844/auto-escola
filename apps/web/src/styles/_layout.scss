@@ -25,3 +25,13 @@
 .role-select {
   min-width: 140px;
 }
+
+// Permite que textos longos quebrem dentro de flex
+.min-w-0 {
+  min-width: 0;
+}
+
+// Cartões da versão mobile das tabelas: divisor leve entre os campos
+.data-card-list > div + div {
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}

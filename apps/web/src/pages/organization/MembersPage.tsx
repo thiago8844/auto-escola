@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { Button, Form, Spinner, Table } from 'react-bootstrap'
+import { Button, Form } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmModal } from '../../components/ConfirmModal'
+import { DataTable } from '../../components/DataTable'
+import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
-import { QueryErrorAlert } from '../../components/QueryErrorAlert'
+import { QueryState } from '../../components/QueryState'
 import { RoleBadge } from '../../components/RoleBadge'
 import { PAGE_SIZE, ROLE_LABELS } from '../../config/organization'
 import { paths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
-import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useChangeMemberRole, useMembers, useRemoveMember } from '../../hooks/useMembers'
+import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useAuthStore } from '../../stores/authStore'
 import type { Member, Role } from '../../types/organization'
 import { formatDate } from '../../utils/formatDate'
@@ -27,10 +29,10 @@ export default function MembersPage() {
   const [toRemove, setToRemove] = useState<Member | null>(null)
 
   const roleOptions = assignableRoles(organization.role)
+  const removingSelf = toRemove?.id === currentUserId
 
   function confirmRemove() {
     if (!toRemove) return
-    const removingSelf = toRemove.id === currentUserId
     remove.mutate(toRemove.id, {
       onSuccess: () => {
         setToRemove(null)
@@ -42,94 +44,75 @@ export default function MembersPage() {
 
   return (
     <>
-      <h1 className="mb-4">Membros</h1>
+      <PageHeader title="Membros" />
 
-      {members.isPending && !members.error && <Spinner animation="border" role="status" variant="primary" />}
-      {members.error && <QueryErrorAlert error={members.error} onRetry={() => void members.refetch()} />}
-
-      {members.data && (
-        <>
-          <Table responsive hover className="align-middle bg-white">
-            <thead>
-              <tr>
-                <th scope="col">Nome</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">Papel</th>
-                <th scope="col">Desde</th>
-                <th scope="col" className="text-end">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.data.data.map((member) => {
-                const manageable = canManageMember(organization.role, member.role)
-                const isSelf = member.id === currentUserId
-                const changing = changeRole.isPending && changeRole.variables.userId === member.id
-
-                return (
-                  <tr key={member.id}>
-                    <td>
-                      {member.name} {isSelf && <span className="text-secondary small">(você)</span>}
-                    </td>
-                    <td className="text-break">{member.email}</td>
-                    <td>
-                      {manageable ? (
-                        <Form.Select
-                          size="sm"
-                          className="role-select"
-                          aria-label={`Papel de ${member.name}`}
-                          value={member.role}
-                          disabled={changing}
-                          onChange={(event) => changeRole.mutate({ userId: member.id, role: event.target.value as Role })}
-                        >
-                          {roleOptions.map((role) => (
-                            <option key={role} value={role}>
-                              {ROLE_LABELS[role]}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      ) : (
-                        <RoleBadge role={member.role} />
-                      )}
-                    </td>
-                    <td className="tabular-nums">{formatDate(member.joined_at)}</td>
-                    <td className="text-end">
-                      {manageable && (
-                        <Button variant="outline-danger" size="sm" onClick={() => setToRemove(member)}>
-                          {isSelf ? 'Sair do espaço' : 'Remover'}
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </Table>
-          <Pagination
-            page={page}
-            lastPage={members.data.meta.last_page}
-            total={members.data.meta.total}
-            perPage={PAGE_SIZE}
-            onPageChange={setPage}
-          />
-          {organization.role === 'admin' && (
-            <p className="small text-secondary mt-3">Gestores só alteram membros com papel de equipe ou instrutor.</p>
-          )}
-        </>
-      )}
+      <QueryState query={members} isEmpty={(data) => data.data.length === 0} empty="Nenhum membro encontrado.">
+        {(data) => (
+          <>
+            <DataTable
+              rows={data.data}
+              getKey={(member) => member.id}
+              columns={[
+                {
+                  header: 'Nome',
+                  primary: true,
+                  cell: (member) => (
+                    <>
+                      {member.name} {member.id === currentUserId && <span className="text-secondary small fw-normal">(você)</span>}
+                    </>
+                  ),
+                },
+                { header: 'E-mail', cell: (member) => <span className="text-break">{member.email}</span> },
+                {
+                  header: 'Papel',
+                  cell: (member, { mobile }) =>
+                    canManageMember(organization.role, member.role) ? (
+                      <Form.Select
+                        size={mobile ? undefined : 'sm'}
+                        className="role-select"
+                        aria-label={`Papel de ${member.name}`}
+                        value={member.role}
+                        disabled={changeRole.isPending && changeRole.variables.userId === member.id}
+                        onChange={(event) => changeRole.mutate({ userId: member.id, role: event.target.value as Role })}
+                      >
+                        {roleOptions.map((role) => (
+                          <option key={role} value={role}>
+                            {ROLE_LABELS[role]}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    ) : (
+                      <RoleBadge role={member.role} />
+                    ),
+                },
+                { header: 'Desde', cell: (member) => <span className="tabular-nums">{formatDate(member.joined_at)}</span> },
+                {
+                  header: 'Ações',
+                  actions: true,
+                  cell: (member, { mobile }) =>
+                    canManageMember(organization.role, member.role) && (
+                      <Button variant="outline-danger" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill' : undefined} onClick={() => setToRemove(member)}>
+                        {member.id === currentUserId ? 'Sair do espaço' : 'Remover'}
+                      </Button>
+                    ),
+                },
+              ]}
+            />
+            <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
+            {organization.role === 'admin' && <p className="small text-secondary mt-3">Gestores só alteram membros com papel de equipe ou instrutor.</p>}
+          </>
+        )}
+      </QueryState>
 
       <ConfirmModal
         show={toRemove !== null}
-        title={toRemove?.id === currentUserId ? 'Sair do espaço' : 'Remover acesso'}
-        confirmLabel={toRemove?.id === currentUserId ? 'Sair' : 'Remover'}
+        title={removingSelf ? 'Sair do espaço' : 'Remover acesso'}
+        confirmLabel={removingSelf ? 'Sair' : 'Remover'}
         pending={remove.isPending}
         onConfirm={confirmRemove}
         onCancel={() => setToRemove(null)}
       >
-        {toRemove?.id === currentUserId
-          ? 'Você perderá o acesso a este espaço.'
-          : `${toRemove?.name} perderá o acesso a este espaço. Alunos e aulas continuam cadastrados.`}
+        {removingSelf ? 'Você perderá o acesso a este espaço.' : `${toRemove?.name} perderá o acesso a este espaço. Alunos e aulas continuam cadastrados.`}
       </ConfirmModal>
     </>
   )

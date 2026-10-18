@@ -1,5 +1,6 @@
 import { Alert, Card, Col, Row, Spinner } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { PageHeader } from '../../components/PageHeader'
 import { QueryErrorAlert } from '../../components/QueryErrorAlert'
 import { RoleBadge } from '../../components/RoleBadge'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
@@ -12,13 +13,15 @@ export default function OrganizationsPage() {
 
   return (
     <>
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <h1 className="mb-0">Meus espaços</h1>
-        <Link to={paths.organizationNew} className="btn btn-primary">
-          <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-          Novo espaço
-        </Link>
-      </div>
+      <PageHeader
+        title="Meus espaços"
+        actions={
+          <Link to={paths.organizationNew} className="btn btn-primary">
+            <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+            Novo espaço
+          </Link>
+        }
+      />
 
       {isPending && !error && <Spinner animation="border" role="status" variant="primary" />}
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}

@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { Alert, Badge, Button, Card, Form, Spinner, Table } from 'react-bootstrap'
+import { Alert, Badge, Button, Card, Form } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { ConfirmModal } from '../../components/ConfirmModal'
 import { FormField } from '../../components/FormField'
 import { Pagination } from '../../components/Pagination'
-import { QueryErrorAlert } from '../../components/QueryErrorAlert'
+import { DataTable } from '../../components/DataTable'
+import { PageHeader } from '../../components/PageHeader'
+import { QueryState } from '../../components/QueryState'
 import { SubmitButton } from '../../components/SubmitButton'
 import { INVITATION_STATUS, PAGE_SIZE, ROLE_LABELS } from '../../config/organization'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
@@ -53,7 +55,7 @@ export default function InvitationsPage() {
 
   return (
     <>
-      <h1 className="mb-4">Convites</h1>
+      <PageHeader title="Convites" />
 
       <Card className="mb-4">
         <Card.Body>
@@ -86,62 +88,44 @@ export default function InvitationsPage() {
         </Card.Body>
       </Card>
 
-      {invitations.isPending && !invitations.error && <Spinner animation="border" role="status" variant="primary" />}
-      {invitations.error && <QueryErrorAlert error={invitations.error} onRetry={() => void invitations.refetch()} />}
-
-      {invitations.data && (
-        <>
-          {invitations.data.data.length === 0 ? (
-            <p className="text-secondary">Nenhum convite enviado ainda.</p>
-          ) : (
-            <Table responsive hover className="align-middle bg-white">
-              <thead>
-                <tr>
-                  <th scope="col">E-mail</th>
-                  <th scope="col">Papel</th>
-                  <th scope="col">Situação</th>
-                  <th scope="col">Validade</th>
-                  <th scope="col" className="text-end">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {invitations.data.data.map((invitation) => {
-                  const status = INVITATION_STATUS[invitation.status]
-                  return (
-                    <tr key={invitation.id}>
-                      <td className="text-break">{invitation.email}</td>
-                      <td>{ROLE_LABELS[invitation.role]}</td>
-                      <td>
-                        <Badge bg={status.bg} text={status.bg === 'warning' ? 'dark' : undefined}>
-                          <i className={`bi ${status.icon} me-1`} aria-hidden="true" />
-                          {status.label}
-                        </Badge>
-                      </td>
-                      <td className="tabular-nums">{formatDate(invitation.expires_at)}</td>
-                      <td className="text-end">
-                        {invitation.status === 'pending' && (
-                          <Button variant="outline-danger" size="sm" onClick={() => setToRevoke(invitation)}>
-                            Cancelar
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
-          )}
-          <Pagination
-            page={page}
-            lastPage={invitations.data.meta.last_page}
-            total={invitations.data.meta.total}
-            perPage={PAGE_SIZE}
-            onPageChange={setPage}
-          />
-        </>
-      )}
+      <QueryState query={invitations} isEmpty={(data) => data.data.length === 0} empty="Nenhum convite enviado ainda.">
+        {(data) => (
+          <>
+            <DataTable
+              rows={data.data}
+              getKey={(invitation) => invitation.id}
+              columns={[
+                { header: 'E-mail', primary: true, cell: (invitation) => <span className="text-break">{invitation.email}</span> },
+                { header: 'Papel', cell: (invitation) => ROLE_LABELS[invitation.role] },
+                {
+                  header: 'Situação',
+                  cell: (invitation) => {
+                    const status = INVITATION_STATUS[invitation.status]
+                    return (
+                      <Badge bg={status.bg} text={status.bg === 'warning' ? 'dark' : undefined}>
+                        <i className={`bi ${status.icon} me-1`} aria-hidden="true" />
+                        {status.label}
+                      </Badge>
+                    )
+                  },
+                },
+                { header: 'Validade', cell: (invitation) => <span className="tabular-nums">{formatDate(invitation.expires_at)}</span> },
+                {
+                  header: 'Ações',
+                  actions: true,
+                  cell: (invitation, { mobile }) =>
+                    invitation.status === 'pending' && (
+                      <Button variant="outline-danger" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill' : undefined} onClick={() => setToRevoke(invitation)}>
+                        Cancelar
+                      </Button>
+                    ),
+                },
+              ]}
+            />
+            <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
+          </>
+        )}
+      </QueryState>
 
       <ConfirmModal
         show={toRevoke !== null}
