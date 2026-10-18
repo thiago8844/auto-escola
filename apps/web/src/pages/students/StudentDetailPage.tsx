@@ -12,6 +12,7 @@ import { DocumentStatusBadge, EnrollmentStatusBadge, LessonStatusBadge, ReleaseB
 import { DOCUMENT_STATUS, DOCUMENT_TYPE_LABELS } from '../../config/domain'
 import type { DocumentStatus, StudentDocument } from '../../types/document'
 import { Timeline } from '../../components/Timeline'
+import { StudentCommunicationHistory } from '../../components/StudentCommunicationHistory'
 import { ExamsSummary } from '../exams/ExamsSummary'
 import { DocumentVersionsModal } from './DocumentVersionsModal'
 import { UploadDocumentModal } from './UploadDocumentModal'
@@ -205,6 +206,12 @@ function StudentDetail({ student }: { student: Student }) {
           </>
         )}
       </RecordSection>
+
+      {operate && (
+        <RecordSection title="Comunicações com o aluno">
+          <StudentCommunicationHistory organizationId={organization.id} studentId={student.id} />
+        </RecordSection>
+      )}
 
       {operate && <ExamsSummary organizationId={organization.id} timezone={organization.timezone} filter={{ studentId: student.id }} />}
 

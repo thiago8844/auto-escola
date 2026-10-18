@@ -12,6 +12,7 @@ import { SelectField } from '../../components/SelectField'
 import { LessonStatusBadge } from '../../components/StatusBadges'
 import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
+import { LessonCommunicationCard } from '../../components/LessonCommunicationCard'
 import { DOCUMENT_TYPE_LABELS, REGISTRY_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
@@ -126,6 +127,8 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
           </dl>
         </Card.Body>
       </Card>
+
+      {operate && <LessonCommunicationCard organizationId={organization.id} lesson={lesson} />}
 
       <NotesForm key={`${lesson.notes}-${lesson.evolution}-${lesson.actual_minutes}`} lesson={lesson} completed={completed} />
 
