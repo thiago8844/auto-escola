@@ -21,7 +21,7 @@ export function ApiErrorScreen({ error, retrying, onRetry }: ApiErrorScreenProps
       </p>
       {offline && (
         <p className="small text-secondary">
-          Endereço configurado: <code>{API_URL}</code>
+          Endereço configurado: <code>{API_URL || window.location.origin}</code>
         </p>
       )}
       <Button onClick={onRetry} disabled={retrying}>
