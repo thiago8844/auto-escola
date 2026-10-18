@@ -1,4 +1,4 @@
-import type { Dashboard, ExamDetail, ExamsReport, LessonDetail, LessonGroupBy, LessonsReport, PartnersReport, ProcessesReport, StudentSummary, UtilizationReport } from '../types/reports'
+import type { Dashboard, ExamDetail, ExamsReport, LessonDetail, LessonGroupBy, LessonsReport, PartnersReport, ProcessesReport, StudentsDetail, StudentsReport, StudentSummary, UtilizationReport } from '../types/reports'
 import { http } from './client'
 
 const base = (organizationId: number | string) => `/organizations/${organizationId}`
@@ -18,11 +18,17 @@ export const getLessonsReport = (organizationId: number | string, params: Report
 export const getExamsReport = (organizationId: number | string, params: ReportParams) => get<ExamsReport>(organizationId, 'exams', params)
 export const getUtilizationReport = (organizationId: number | string, params: ReportParams) => get<UtilizationReport>(organizationId, 'utilization', params)
 export const getProcessesReport = (organizationId: number | string, params: ReportParams) => get<ProcessesReport>(organizationId, 'processes', params)
+export const getStudentsReport = (organizationId: number | string, params: ReportParams) => get<StudentsReport>(organizationId, 'students', params)
 export const getPartnersReport = (organizationId: number | string, params: ReportParams) => get<PartnersReport>(organizationId, 'partners', params)
 
 // Detalhe paginado: mesma consulta do indicador, então o total confere com o resumo
 export async function getLessonDetail(organizationId: number | string, params: ReportParams): Promise<LessonDetail> {
   const { data } = await http.get<LessonDetail>(`${base(organizationId)}/reports/lessons/detail`, { params: clean(params), ...handledByScreen })
+  return data
+}
+
+export async function getStudentsDetail(organizationId: number | string, params: ReportParams): Promise<StudentsDetail> {
+  const { data } = await http.get<StudentsDetail>(`${base(organizationId)}/reports/students/detail`, { params: clean(params), ...handledByScreen })
   return data
 }
 
@@ -37,12 +43,12 @@ export async function getStudentSummary(organizationId: number | string, student
 }
 
 // CSV completo conforme os filtros: baixado com a sessão (não existe link público)
-export async function downloadReport(organizationId: number | string, path: 'lessons' | 'exams', params: ReportParams): Promise<void> {
+export async function downloadReport(organizationId: number | string, path: 'lessons' | 'exams' | 'students', params: ReportParams): Promise<void> {
   const response = await http.get<Blob>(`${base(organizationId)}/reports/${path}/export`, { params: clean(params), responseType: 'blob', ...handledByScreen })
   const url = URL.createObjectURL(response.data)
   const link = document.createElement('a')
   link.href = url
-  link.download = `${path === 'lessons' ? 'aulas' : 'exames'}-${new Date().toISOString().slice(0, 10)}.csv`
+  link.download = `${{ lessons: 'aulas', exams: 'exames', students: 'alunos' }[path]}-${new Date().toISOString().slice(0, 10)}.csv`
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }

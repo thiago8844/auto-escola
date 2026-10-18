@@ -18,6 +18,8 @@ type Key = string | number
 export type TableSelection<T> = {
   selected: ReadonlySet<Key>
   canSelect?: (row: T) => boolean
+  // Nome do checkbox para leitores de tela; o padrão serve às listas de aulas
+  label?: (row: T) => string
   onToggle: (row: T) => void
 }
 
@@ -99,7 +101,7 @@ export function DataTable<T>({ columns, rows, getKey, selection, expansion, open
                   <td>
                     {canSelect(row) && (
                       <Form.Check
-                        aria-label="Selecionar aula"
+                        aria-label={selection.label?.(row) ?? 'Selecionar aula'}
                         checked={selection.selected.has(getKey(row))}
                         onChange={() => selection.onToggle(row)}
                       />
@@ -137,7 +139,7 @@ export function DataTable<T>({ columns, rows, getKey, selection, expansion, open
                   {selection && canSelect(row) && (
                     <Form.Check
                       className="mt-1"
-                      aria-label="Selecionar aula"
+                      aria-label={selection.label?.(row) ?? 'Selecionar aula'}
                       checked={selection.selected.has(getKey(row))}
                       onChange={() => selection.onToggle(row)}
                     />

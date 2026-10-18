@@ -109,3 +109,95 @@ export type StudentSummary = {
   exams: Array<{ category: string; attempt: number; status: ExamStatus; date: string; location: string | null }>
   processes: Array<{ id: number; type: string; status: string; issuance_status: string; next_step: { label?: string; message?: string } | string | null; practice_released: boolean }>
 }
+
+export type StudentSituation = 'in_progress' | 'prospect' | 'qualified' | 'dropped' | 'registered' | 'archived'
+export type StudentAgenda = 'with_lesson' | 'exam_only' | 'finishing' | 'no_schedule'
+export type StudentStall = 'practice_blocked' | 'no_package' | 'no_balance' | 'ready_to_schedule'
+export type StudentArchive = 'ready' | 'blocked_enrollment' | 'blocked_agenda'
+export type StudentBalanceState = 'exhausted' | 'low' | 'ok' | 'none'
+
+export type StudentTotals = {
+  count: number
+  in_progress: number
+  prospect: number
+  qualified: number
+  dropped: number
+  registered: number
+  with_lesson: number
+  exam_only: number
+  finishing: number
+  no_schedule: number
+  archive_ready: number
+  archive_blocked: number
+}
+
+export type StudentInstructorRow = {
+  id: number | null
+  key: string
+  name: string
+  selected: boolean
+  students: number
+  in_progress: number
+  with_lesson: number
+  no_schedule: number
+  qualified: number
+  archive_ready: number
+  share_students: number | null
+  share_in_progress: number | null
+  share_with_lesson: number | null
+}
+
+export type Counted<K extends string = string> = { key: K; count: number }
+
+export type StudentsReport = {
+  as_of: string
+  timezone: string
+  filtered: boolean
+  overview: StudentTotals & { archived: number }
+  totals: StudentTotals
+  share: Record<'students' | 'in_progress' | 'with_lesson' | 'no_schedule' | 'qualified' | 'archive_ready', number | null>
+  situations: Counted<StudentSituation>[]
+  agenda: Counted<StudentAgenda>[]
+  stall: Counted<StudentStall>[]
+  archive: Counted<StudentArchive>[]
+  idle: Counted<'d7' | 'd15' | 'd30' | 'd60'>[]
+  balance: Counted<StudentBalanceState>[]
+  exams: { scheduled: number; retry: number }
+  categories: Counted[]
+  instructors: StudentInstructorRow[]
+  partners: Array<{ key: string; name: string; students: number; in_progress: number; with_lesson: number; no_schedule: number; qualified: number }>
+  movement: { new: number; qualified: number; archived: number }
+  basis: string
+}
+
+export type StudentReportRow = {
+  id: number
+  name: string
+  phone: string | null
+  situation: StudentSituation
+  agenda: StudentAgenda | null
+  stall: StudentStall | null
+  archive: StudentArchive | null
+  categories: string[]
+  partner_id: number | null
+  partner: string | null
+  instructor_id: number | null
+  instructor: string | null
+  instructor_source: 'assigned' | 'next_lesson' | 'last_lesson' | null
+  upcoming_lessons: number
+  next_lesson_at: string | null
+  last_lesson_at: string | null
+  idle_days: number | null
+  completed_lessons: number
+  missed_lessons: number
+  realized_minutes: number
+  available_minutes: number | null
+  balance_state: StudentBalanceState | null
+  next_exam_at: string | null
+  exam_retry: boolean
+  qualified_at: string | null
+  created_at: string
+  archived_at: string | null
+}
+
+export type StudentsDetail = { data: StudentReportRow[]; meta: { current_page: number; last_page: number; per_page: number; total: number; timezone: string } }

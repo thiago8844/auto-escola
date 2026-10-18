@@ -9,6 +9,8 @@ import {
   getPartnersReport,
   getProcessesReport,
   getStudentSummary,
+  getStudentsDetail,
+  getStudentsReport,
   getUtilizationReport,
   type ReportParams,
 } from '../api/reports'
@@ -42,10 +44,16 @@ export const useProcessesReport = (organizationId: number, params: ReportParams,
 export const usePartnersReport = (organizationId: number, params: ReportParams, enabled = true) =>
   useReportQuery(organizationId, 'partners', params, () => getPartnersReport(organizationId, params), enabled)
 
+export const useStudentsReport = (organizationId: number, params: ReportParams, enabled = true) =>
+  useReportQuery(organizationId, 'students', params, () => getStudentsReport(organizationId, params), enabled)
+
+export const useStudentsDetail = (organizationId: number, params: ReportParams, enabled = true) =>
+  useReportQuery(organizationId, 'students-detail', params, () => getStudentsDetail(organizationId, params), enabled)
+
 export const useStudentSummary = (organizationId: number, studentId: string) =>
   useQuery({ queryKey: queryKeys.organizations.report(organizationId, 'student-summary', { studentId }), queryFn: () => getStudentSummary(organizationId, studentId) })
 
-export function useExportReport(organizationId: number, path: 'lessons' | 'exams') {
+export function useExportReport(organizationId: number, path: 'lessons' | 'exams' | 'students') {
   return useMutation({
     mutationFn: (params: ReportParams) => downloadReport(organizationId, path, params),
     meta: { toastOnError: true },
