@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { AuthGate } from '../components/AuthGate'
+import { RootLayout } from '../components/RootLayout'
 import { GuestOnly } from '../components/GuestOnly'
 import { RequireAuth } from '../components/RequireAuth'
 import { RequirePermission } from '../components/RequirePermission'
@@ -39,12 +39,13 @@ import OrganizationSettingsPage from '../pages/organization/OrganizationSettings
 import OrganizationCreatePage from '../pages/organizations/OrganizationCreatePage'
 import OrganizationsPage from '../pages/organizations/OrganizationsPage'
 import { canManageMembers, canOperate } from '../utils/permissions'
+import { testRoutes } from './testRoutes'
 import { organizationSections, paths } from './paths'
 
 export const router = createBrowserRouter([
   {
     // Raiz: descobre a sessão antes de decidir qualquer rota
-    element: <AuthGate />,
+    element: <RootLayout />,
     children: [
       {
         element: <AuthLayout />,
@@ -80,6 +81,8 @@ export const router = createBrowserRouter([
               { path: paths.settings, element: <SettingsPage /> },
               { path: paths.myLessons, element: <MyLessonsPage /> },
               { path: paths.myProfile, element: <MyProfilePage /> },
+              // Área de testes (só em desenvolvimento; ver testRoutes.tsx)
+              ...testRoutes,
             ],
           },
           {

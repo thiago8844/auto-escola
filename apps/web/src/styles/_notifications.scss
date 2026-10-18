@@ -1,0 +1,317 @@
+@use 'sass:map';
+
+// Avisos: toasts (canto superior direito), sino com central de notificações e alerta máximo (modal).
+// Cada tipo define só --notice-color; ícones, barras e destaques derivam dela.
+
+$notice-colors: (
+  'success': #15803d,
+  'info': #1d4ed8,
+  'warning': #d97706,
+  'error': #b91c1c,
+  'reminder': #7c3aed,
+);
+
+// No escuro as cores ficam mais claras para manter o contraste
+$notice-colors-dark: (
+  'success': #4ade80,
+  'info': #60a5fa,
+  'warning': #fbbf24,
+  'error': #f87171,
+  'reminder': #a78bfa,
+);
+
+@each $type, $color in $notice-colors {
+  .toast-#{$type},
+  .notice-#{$type} {
+    --notice-color: #{$color};
+  }
+}
+
+@each $type, $color in $notice-colors-dark {
+  [data-bs-theme='dark'] .toast-#{$type},
+  [data-bs-theme='dark'] .notice-#{$type} {
+    --notice-color: #{$color};
+  }
+}
+
+.critical-danger {
+  --notice-color: #{map.get($notice-colors, 'error')};
+}
+
+.critical-warning {
+  --notice-color: #{map.get($notice-colors, 'warning')};
+}
+
+[data-bs-theme='dark'] .critical-danger {
+  --notice-color: #{map.get($notice-colors-dark, 'error')};
+}
+
+[data-bs-theme='dark'] .critical-warning {
+  --notice-color: #{map.get($notice-colors-dark, 'warning')};
+}
+
+// Círculo com o ícone do tipo
+@mixin notice-icon($size) {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  color: var(--notice-color);
+  background-color: color-mix(in srgb, var(--notice-color) 16%, transparent);
+}
+
+// ---- Toasts ----
+
+.toast-stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1090;
+  display: flex;
+  flex-direction: column; // o aviso novo entra embaixo dos que já estão na tela
+  gap: 12px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  overflow: hidden;
+  padding: 14px 12px 14px 16px;
+  color: var(--bs-body-color);
+  pointer-events: auto;
+  background-color: var(--rc-surface);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-left: 4px solid var(--notice-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 16%);
+  transition: opacity 0.5s ease;
+  animation: toast-in 0.25s ease-out;
+
+  &.is-faded {
+    opacity: 0.55;
+  }
+
+  &.is-leaving {
+    animation: toast-out 0.2s ease-in forwards;
+  }
+}
+
+.toast-icon {
+  @include notice-icon(36px);
+  font-size: 1.1rem;
+}
+
+.toast-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.toast-message {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: var(--bs-secondary-color);
+  overflow-wrap: anywhere;
+}
+
+.toast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 8px;
+}
+
+.toast-link {
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bs-link-color);
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.toast-link-muted {
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+}
+
+.toast-close {
+  padding: 6px;
+  line-height: 1;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+}
+
+// Barra de tempo do toast que fecha sozinho: some ao fim da animação, que também fecha o aviso.
+// Pausa com o mouse ou o foco em cima.
+.toast-progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--notice-color);
+  transform-origin: left;
+  animation: toast-progress linear forwards;
+}
+
+.toast-card:hover .toast-progress,
+.toast-card:focus-within .toast-progress {
+  animation-play-state: paused;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-card {
+    animation: none;
+  }
+}
+
+// ---- Sino e central de notificações ----
+
+.bell-toggle {
+  padding: 6px 10px;
+  line-height: 1;
+}
+
+// Sem a setinha do dropdown (maior especificidade: este arquivo vem antes do Bootstrap na compilação)
+.bell-toggle.dropdown-toggle::after {
+  display: none;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #fff;
+  text-align: center;
+  background-color: #b91c1c;
+  border-radius: 9px;
+}
+
+.notification-menu {
+  width: 380px;
+  max-width: calc(100vw - 16px);
+}
+
+// No celular o painel ocupa a largura da tela, abaixo da barra superior
+@media (max-width: 575.98px) {
+  .notification-menu {
+    position: fixed !important;
+    top: 64px !important;
+    right: 8px !important;
+    left: 8px !important;
+    width: auto;
+    max-width: none;
+    transform: none !important;
+  }
+}
+
+.notification-list {
+  max-height: min(60vh, 440px);
+  overflow-y: auto;
+}
+
+.notification-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &.is-unread {
+    background-color: var(--rc-active-bg);
+  }
+}
+
+.notification-icon {
+  @include notice-icon(32px);
+}
+
+.notification-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.notification-message {
+  margin: 2px 0 4px;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  overflow-wrap: anywhere;
+}
+
+.notification-remove {
+  flex: none;
+  font-size: 0.7rem;
+}
+
+// ---- Alerta máximo (modal) ----
+
+.critical-modal {
+  border-top: 6px solid var(--notice-color);
+}
+
+.critical-icon {
+  @include notice-icon(48px);
+  font-size: 1.5rem;
+}

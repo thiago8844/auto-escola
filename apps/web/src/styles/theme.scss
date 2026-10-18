@@ -4,6 +4,7 @@
 @use 'layout';
 @use 'auth';
 @use 'logo';
+@use 'notifications';
 
 // Configura o Bootstrap com a identidade antes de carregá-lo.
 // Modo claro por enquanto; as cores ficam em variáveis (--rc-*) para o modo escuro depois.

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Button, Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import { NotificationBell } from '../components/NotificationBell'
 import { Logo } from '../components/Logo'
 import { NavItem, type NavItemProps } from '../components/NavItem'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -30,6 +31,9 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
           <Navbar.Brand as={Link} to={paths.home} aria-label={APP_NAME}>
             <Logo height={32} />
           </Navbar.Brand>
+          <div className="ms-auto me-2 d-lg-none">
+            <NotificationBell />
+          </div>
           <Navbar.Toggle aria-controls="app-menu" aria-label="Abrir menu" />
           <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg" className="flex-lg-grow-1">
             <Offcanvas.Header closeButton>
@@ -65,7 +69,12 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
           </Navbar.Offcanvas>
         </Container>
       </Navbar>
-      <main className="app-content flex-grow-1 p-3 p-lg-4">{children ?? <Outlet />}</main>
+      <main className="app-content flex-grow-1 p-3 p-lg-4">
+        <div className="d-none d-lg-flex justify-content-end mb-3">
+          <NotificationBell />
+        </div>
+        {children ?? <Outlet />}
+      </main>
     </div>
   )
 }

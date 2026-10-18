@@ -1,21 +1,15 @@
-import { Toast, ToastContainer } from 'react-bootstrap'
-import { useToastStore } from '../stores/toastStore'
+import { useToastStore, visibleToasts } from '../stores/toastStore'
+import { ToastItem } from './ToastItem'
 
-// Avisos globais (403, 5xx, rede). Montado uma vez, na raiz do app.
+// Canto superior direito. O aviso novo entra embaixo dos que já estão na tela.
 export function ToastHost() {
   const toasts = useToastStore((state) => state.toasts)
-  const dismiss = useToastStore((state) => state.dismiss)
 
   return (
-    <ToastContainer position="top-end" className="p-3 position-fixed">
-      {toasts.map((toast) => (
-        <Toast key={toast.id} bg={toast.variant} autohide delay={6000} onClose={() => dismiss(toast.id)}>
-          <Toast.Body className={`d-flex text-white`}>
-            <span className="flex-grow-1">{toast.message}</span>
-            <button type="button" className="btn-close btn-close-white ms-3" aria-label="Fechar" onClick={() => dismiss(toast.id)} />
-          </Toast.Body>
-        </Toast>
+    <div className="toast-stack" role="region" aria-label="Avisos">
+      {visibleToasts(toasts).map((toast) => (
+        <ToastItem key={toast.id} toast={toast} />
       ))}
-    </ToastContainer>
+    </div>
   )
 }
