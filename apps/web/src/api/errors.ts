@@ -36,6 +36,7 @@ const CODE_MESSAGES: Record<string, string> = {
   invitation_revoked: 'Este convite foi cancelado pela equipe do espaço.',
   invitation_expired: 'Este convite expirou. Peça um novo à equipe do espaço.',
   invitation_recipient_mismatch: 'Este convite foi enviado para outro e-mail. Entre com a conta do e-mail convidado.',
+  instructor_identity_locked: 'Este instrutor tem conta própria: só ele altera nome, credencial e categorias, no próprio perfil.',
   email_not_verified: 'Confirme seu e-mail antes de aceitar o convite.',
 }
 

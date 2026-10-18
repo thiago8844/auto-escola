@@ -73,3 +73,18 @@ export function VehicleStatusBadge({ status }: { status: VehicleStatus }) {
     </Badge>
   )
 }
+
+// Vínculo do instrutor com o espaço (ativar/desativar não mexe na identidade nem nas aulas antigas)
+export function LinkStatusBadge({ active }: { active: boolean }) {
+  return active ? (
+    <Badge bg="success">
+      <i className="bi bi-check-circle-fill me-1" aria-hidden="true" />
+      Ativo
+    </Badge>
+  ) : (
+    <Badge bg="secondary">
+      <i className="bi bi-pause-circle me-1" aria-hidden="true" />
+      Desativado
+    </Badge>
+  )
+}

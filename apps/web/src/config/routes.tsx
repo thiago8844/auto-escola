@@ -20,6 +20,8 @@ import ProcessFormPage from '../pages/processes/ProcessFormPage'
 import StudentDetailPage from '../pages/students/StudentDetailPage'
 import StudentFormPage from '../pages/students/StudentFormPage'
 import StudentsPage from '../pages/students/StudentsPage'
+import InstructorFormPage from '../pages/instructors/InstructorFormPage'
+import InstructorsPage from '../pages/instructors/InstructorsPage'
 import VehicleFormPage from '../pages/vehicles/VehicleFormPage'
 import VehiclesPage from '../pages/vehicles/VehiclesPage'
 import InvitationsPage from '../pages/organization/InvitationsPage'
@@ -87,6 +89,9 @@ export const router = createBrowserRouter([
                 element: <RequirePermission allow={canOperate} />,
                 children: [
                   { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
+                  { path: organizationSections.instructors, element: <InstructorsPage /> },
+                  { path: `${organizationSections.instructors}/novo`, element: <InstructorFormPage /> },
+                  { path: `${organizationSections.instructors}/:instructorId`, element: <InstructorFormPage /> },
                   { path: `${organizationSections.students}/novo`, element: <StudentFormPage /> },
                   { path: `${organizationSections.students}/:studentId/editar`, element: <StudentFormPage /> },
                   { path: `${organizationSections.students}/:studentId/matriculas/nova`, element: <EnrollmentFormPage /> },

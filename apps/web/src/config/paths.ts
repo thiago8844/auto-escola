@@ -21,6 +21,7 @@ export const organizationSections = {
   enrollments: 'matriculas',
   processes: 'processos',
   vehicles: 'veiculos',
+  instructors: 'instrutores',
 } as const
 
 // O espaço ativo está sempre na URL
@@ -43,6 +44,9 @@ export function organizationPaths(organizationId: number | string) {
     vehicles: `${base}/${organizationSections.vehicles}`,
     vehicleNew: `${base}/${organizationSections.vehicles}/novo`,
     vehicle: (vehicleId: number | string) => `${base}/${organizationSections.vehicles}/${vehicleId}`,
+    instructors: `${base}/${organizationSections.instructors}`,
+    instructorNew: `${base}/${organizationSections.instructors}/novo`,
+    instructor: (instructorId: number | string) => `${base}/${organizationSections.instructors}/${instructorId}`,
     processNew: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}/processos/novo`,
   }
 }
