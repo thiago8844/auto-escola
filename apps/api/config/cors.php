@@ -22,7 +22,7 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN'],
+    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'Idempotency-Key', 'X-Requested-With', 'X-XSRF-TOKEN'],
 
     'exposed_headers' => [],
 
