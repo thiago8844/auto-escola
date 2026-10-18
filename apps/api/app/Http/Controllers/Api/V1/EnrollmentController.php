@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Enrollments\UpdateEnrollment;
+use App\Enums\EnrollmentStatus;
+use App\Enums\LicenseCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Enrollments\EnrollmentRequest;
 use App\Http\Resources\EnrollmentResource;
 use App\Models\Enrollment;
 use App\Models\Organization;
-use App\Actions\Enrollments\UpdateEnrollment;
-use App\Services\Audit;
 use App\Services\AssignmentScope;
+use App\Services\Audit;
 use App\Services\CreditLedger;
-use Illuminate\Support\Facades\DB;
+use App\Services\StaleGuard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class EnrollmentController extends Controller
 {
-    private const RELATIONS = ['student', 'partner', 'process.checklistItems'];
+    private const RELATIONS = ['student', 'partner', 'process.checklistItems', 'assignedInstructor'];
 
     public function index(Request $request, Organization $organization, AssignmentScope $scope, CreditLedger $ledger): AnonymousResourceCollection
     {
@@ -29,8 +33,8 @@ class EnrollmentController extends Controller
             : $this->assignedOnly($request, $organization, $scope);
 
         $request->validate([
-            'status' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\EnrollmentStatus::class)],
-            'category' => ['nullable', \Illuminate\Validation\Rule::enum(\App\Enums\LicenseCategory::class)],
+            'status' => ['nullable', Rule::enum(EnrollmentStatus::class)],
+            'category' => ['nullable', Rule::enum(LicenseCategory::class)],
             'partner_id' => ['nullable', 'integer'],
             'search' => ['nullable', 'string', 'max:100'],
         ]);
@@ -93,7 +97,7 @@ class EnrollmentController extends Controller
     {
         $this->authorize('update', [$enrollment, $organization]);
 
-        app(\App\Services\StaleGuard::class)->assertFresh($enrollment, $request);
+        app(StaleGuard::class)->assertFresh($enrollment, $request);
 
         $update($enrollment, $request->validated());
 

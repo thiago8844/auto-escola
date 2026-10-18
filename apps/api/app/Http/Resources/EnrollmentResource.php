@@ -33,6 +33,11 @@ class EnrollmentResource extends JsonResource
             'price_cents' => $this->when($canSeeFinancial, $this->price_cents),
             'notes' => $this->when($canSeeFinancial, $this->notes),
             'qualification_process_id' => $this->qualification_process_id,
+            'assignment' => $this->whenLoaded('assignedInstructor', fn () => $this->assignedInstructor ? [
+                'instructor_id' => $this->assigned_instructor_id,
+                'instructor_name' => $this->assignedInstructor->full_name,
+                'assigned_at' => $this->assigned_at?->toIso8601String(),
+            ] : null),
             'practice_release' => $this->when(
                 $this->relationLoaded('process') && $this->process !== null && $this->process->relationLoaded('checklistItems'),
                 fn () => PracticeReleaseSummary::of($this->process),

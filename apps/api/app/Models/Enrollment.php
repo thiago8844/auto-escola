@@ -31,6 +31,7 @@ class Enrollment extends Model
         return [
             'category' => LicenseCategory::class,
             'status' => EnrollmentStatus::class,
+            'assigned_at' => 'datetime',
         ];
     }
 
@@ -42,6 +43,11 @@ class Enrollment extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function assignedInstructor(): BelongsTo
+    {
+        return $this->belongsTo(Instructor::class, 'assigned_instructor_id');
     }
 
     public function partner(): BelongsTo

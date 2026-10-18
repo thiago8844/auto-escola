@@ -6,9 +6,14 @@ use App\Http\Controllers\Api\V1\AvailabilityBlockController;
 use App\Http\Controllers\Api\V1\ChecklistItemController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
-use App\Http\Controllers\Api\V1\ExternalFeeController;
+use App\Http\Controllers\Api\V1\EnrollmentAssignmentController;
 use App\Http\Controllers\Api\V1\EnrollmentBalanceController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
+use App\Http\Controllers\Api\V1\ExternalFeeController;
+use App\Http\Controllers\Api\V1\Finance\CatalogController as FinanceCatalog;
+use App\Http\Controllers\Api\V1\Finance\EntryController as FinanceEntries;
+use App\Http\Controllers\Api\V1\Finance\IntegrationController as FinanceIntegration;
+use App\Http\Controllers\Api\V1\Finance\ReportController as FinanceReport;
 use App\Http\Controllers\Api\V1\FleetOverviewController;
 use App\Http\Controllers\Api\V1\InvitationAcceptController;
 use App\Http\Controllers\Api\V1\InvitationController;
@@ -18,21 +23,17 @@ use App\Http\Controllers\Api\V1\MeInstructorController;
 use App\Http\Controllers\Api\V1\MyLessonController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\OrganizationController;
-use App\Http\Controllers\Api\V1\PasswordController;
 use App\Http\Controllers\Api\V1\OrganizationInstructorController;
 use App\Http\Controllers\Api\V1\OrganizationMemberController;
 use App\Http\Controllers\Api\V1\PartnerController;
+use App\Http\Controllers\Api\V1\PasswordController;
 use App\Http\Controllers\Api\V1\PracticalExamController;
 use App\Http\Controllers\Api\V1\ProcessOutcomeController;
-use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\QualificationProcessController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\StudentController;
+use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\VehicleController;
-use App\Http\Controllers\Api\V1\Finance\CatalogController as FinanceCatalog;
-use App\Http\Controllers\Api\V1\Finance\EntryController as FinanceEntries;
-use App\Http\Controllers\Api\V1\Finance\IntegrationController as FinanceIntegration;
-use App\Http\Controllers\Api\V1\Finance\ReportController as FinanceReport;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -117,6 +118,8 @@ Route::prefix('v1')->group(function () {
                 Route::post('students/{student}/restore', [StudentController::class, 'restore'])->withTrashed();
                 Route::apiResource('enrollments', EnrollmentController::class)
                     ->only(['index', 'store', 'show', 'update']);
+
+                Route::put('enrollments/{enrollment}/assignment', EnrollmentAssignmentController::class);
 
                 // Pacotes e saldo de aulas
                 Route::get('enrollments/{enrollment}/balance', [EnrollmentBalanceController::class, 'show']);

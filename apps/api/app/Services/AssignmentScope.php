@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Restringe a visão de instrutores aos registros necessários aos seus atendimentos.
  *
- * Um aluno ou matrícula é visível ao instrutor somente se houver aula dele
+ * Um aluno ou matrícula é visível ao instrutor se houver encaminhamento ativo ou aula dele
  * (em qualquer status) naquela organização. Não remove o isolamento entre organizações:
  * todas as consultas partem de $organization.
  */
@@ -23,7 +23,9 @@ class AssignmentScope
     public function studentsFor(Organization $organization, Instructor $instructor): Builder
     {
         return $organization->students()->getQuery()->whereHas('enrollments', fn (Builder $q) => $q
-            ->whereHas('lessons', fn (Builder $l) => $l->where('instructor_id', $instructor->getKey())));
+            ->where(fn (Builder $assigned) => $assigned
+                ->where('assigned_instructor_id', $instructor->getKey())
+                ->orWhereHas('lessons', fn (Builder $l) => $l->where('instructor_id', $instructor->getKey()))));
     }
 
     /**
@@ -31,8 +33,9 @@ class AssignmentScope
      */
     public function enrollmentsFor(Organization $organization, Instructor $instructor): Builder
     {
-        return $organization->enrollments()->getQuery()->whereHas('lessons', fn (Builder $l) => $l
-            ->where('instructor_id', $instructor->getKey()));
+        return $organization->enrollments()->getQuery()->where(fn (Builder $assigned) => $assigned
+            ->where('assigned_instructor_id', $instructor->getKey())
+            ->orWhereHas('lessons', fn (Builder $l) => $l->where('instructor_id', $instructor->getKey())));
     }
 
     public function studentIsAssigned(Organization $organization, Instructor $instructor, Student $student): bool
