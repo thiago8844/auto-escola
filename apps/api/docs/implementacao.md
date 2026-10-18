@@ -19,7 +19,7 @@ Registro do que foi construído nesta etapa, das decisões tomadas, do que **nã
 | Aulas: agenda, conflito, remarcação, status | ✅ |
 | Agenda pessoal consolidada (`/me/lessons`) | ✅ |
 | Seeder de demonstração | ✅ |
-| Testes automatizados | ✅ 152 testes, 584 asserções (17/10/2026) |
+| Testes automatizados | ✅ 270 testes, 1.834 asserções (18/10/2026) |
 | Documentação geral em `docs/` e técnica em `apps/api/docs/` | ✅ |
 | **Fase 1 do MVP** (ver [lacunas-mvp-api.md](lacunas-mvp-api.md)) | ✅ |
 | Processo de habilitação e checklist de liberação para a prática | ✅ |
