@@ -122,7 +122,7 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
             },
             {
               header: 'Conferido por',
-              cell: (item) => (item.checked_by ? `${item.checked_by.name}${item.checked_at ? ` em ${formatDate(item.checked_at)}` : ''}` : '—'),
+              cell: (item) => (item.checked_by ? `${item.checked_by.name}${item.checked_at ? ` em ${formatDate(item.checked_at, organization.timezone)}` : ''}` : '—'),
             },
             {
               header: 'Ações',

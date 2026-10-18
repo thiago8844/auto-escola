@@ -66,7 +66,7 @@ export default function StudentsPage() {
                 { header: 'Nome', primary: true, cell: (student) => <Link to={links.student(student.id)}>{student.name}</Link> },
                 { header: 'Telefone', cell: (student) => <span className="tabular-nums">{student.phone ?? '—'}</span> },
                 { header: 'CPF', cell: (student) => <span className="tabular-nums">{student.cpf ? formatDocument(student.cpf) : '—'}</span> },
-                { header: 'Cadastro', cell: (student) => <span className="tabular-nums">{formatDate(student.created_at)}</span> },
+                { header: 'Cadastro', cell: (student) => <span className="tabular-nums">{formatDate(student.created_at, organization.timezone)}</span> },
               ]}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />

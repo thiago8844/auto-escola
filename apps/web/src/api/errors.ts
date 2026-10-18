@@ -62,11 +62,34 @@ function kindFromStatus(status: number | undefined): ApiErrorKind {
   return 'unknown'
 }
 
+// A API devolve as mensagens de validação do Laravel em inglês. Traduzimos os padrões mais comuns;
+// o que não casar segue como veio (a validação do formulário no navegador cobre quase tudo antes).
+const VALIDATION_TRANSLATIONS: Array<[RegExp, string]> = [
+  [/must not be greater than (\d+) kilobytes/i, 'O arquivo é maior que o limite permitido.'],
+  [/must be a file of type/i, 'Tipo de arquivo não permitido. Use PDF, JPG, PNG ou WebP.'],
+  [/must be a file/i, 'Escolha um arquivo.'],
+  [/failed to upload/i, 'Não foi possível enviar o arquivo. Ele pode ser maior que o limite do servidor.'],
+  [/has already been taken/i, 'Este valor já está em uso.'],
+  [/field is required/i, 'Campo obrigatório.'],
+  [/must be a valid email/i, 'Informe um e-mail válido.'],
+  [/must be at least (\d+) characters/i, 'Muito curto.'],
+  [/must not be greater than (\d+) characters/i, 'Muito longo.'],
+  [/confirmation does not match/i, 'A confirmação não confere.'],
+  [/must be a date before/i, 'A data deve ser anterior à permitida.'],
+  [/must be a date after/i, 'A data deve ser posterior à permitida.'],
+  [/selected .* is invalid/i, 'Opção inválida.'],
+  [/must be a valid timezone/i, 'Fuso horário inválido.'],
+]
+
+export function translateValidationMessage(message: string): string {
+  return VALIDATION_TRANSLATIONS.find(([pattern]) => pattern.test(message))?.[1] ?? message
+}
+
 // Primeiro erro de cada campo, no formato { campo: 'mensagem' }
 function firstFieldErrors(errors: ApiErrorBody['errors']): Record<string, string> {
   const result: Record<string, string> = {}
   for (const [field, messages] of Object.entries(errors ?? {})) {
-    if (messages[0]) result[field] = messages[0]
+    if (messages[0]) result[field] = translateValidationMessage(messages[0])
   }
   return result
 }

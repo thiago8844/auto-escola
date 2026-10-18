@@ -15,6 +15,7 @@ export const organizationSchema = z.object({
     .toLowerCase()
     .refine((value) => value === '' || z.email().safeParse(value).success, 'Informe um e-mail válido.'),
   phone: z.string().trim().max(30, 'O telefone deve ter no máximo 30 caracteres.'),
+  timezone: z.string().min(1, 'Escolha o fuso horário.'),
 })
 
 // O tipo do espaço não muda depois de criado

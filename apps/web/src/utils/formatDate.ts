@@ -1,13 +1,9 @@
-const dateFormatter = new Intl.DateTimeFormat('pt-BR')
-
 const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/
 
-// Aceita Date, timestamp ou texto ISO. Datas sem hora ('2026-10-17') são lidas como
-// data local, para não recuar um dia por causa do fuso.
-export function formatDate(value: Date | string | number): string {
+// Datas sem hora ('2026-10-17') são dias de calendário: não passam por fuso, para não recuar um dia.
+// Instantes (ISO com hora, vindos em UTC) são mostrados no fuso informado, que é o do espaço.
+export function formatDate(value: Date | string | number, timeZone?: string): string {
   const match = typeof value === 'string' ? DATE_ONLY.exec(value) : null
-  const date = match
-    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-    : new Date(value)
-  return dateFormatter.format(date)
+  if (match) return `${match[3]}/${match[2]}/${match[1]}`
+  return new Intl.DateTimeFormat('pt-BR', { timeZone }).format(new Date(value))
 }

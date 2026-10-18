@@ -85,7 +85,7 @@ export default function MembersPage() {
                       <RoleBadge role={member.role} />
                     ),
                 },
-                { header: 'Desde', cell: (member) => <span className="tabular-nums">{formatDate(member.joined_at)}</span> },
+                { header: 'Desde', cell: (member) => <span className="tabular-nums">{formatDate(member.joined_at, organization.timezone)}</span> },
                 {
                   header: 'Ações',
                   actions: true,

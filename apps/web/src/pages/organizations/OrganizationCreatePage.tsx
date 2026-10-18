@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
+import { TimezoneField } from '../../components/TimezoneField'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
 import { organizationPaths } from '../../config/paths'
@@ -27,7 +28,7 @@ export default function OrganizationCreatePage() {
     formState: { errors },
   } = useForm<OrganizationInput>({
     resolver: zodResolver(organizationSchema),
-    defaultValues: { name: '', type: 'cfc', document: '', email: '', phone: '' },
+    defaultValues: { name: '', type: 'cfc', document: '', email: '', phone: '', timezone: 'America/Sao_Paulo' },
   })
 
   const onSubmit = handleSubmit((values) =>
@@ -68,6 +69,7 @@ export default function OrganizationCreatePage() {
           <DocumentField control={control} name="document" label="CPF ou CNPJ (opcional)" error={errors.document?.message} />
           <FormField label="E-mail de contato (opcional)" type="email" error={errors.email?.message} {...register('email')} />
           <FormField label="Telefone (opcional)" type="tel" error={errors.phone?.message} {...register('phone')} />
+          <TimezoneField error={errors.timezone?.message} {...register('timezone')} />
 
           <SubmitButton loading={create.isPending}>Criar espaço</SubmitButton>
         </form>

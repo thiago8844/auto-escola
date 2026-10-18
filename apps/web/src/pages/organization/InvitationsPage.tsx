@@ -109,7 +109,7 @@ export default function InvitationsPage() {
                     )
                   },
                 },
-                { header: 'Validade', cell: (invitation) => <span className="tabular-nums">{formatDate(invitation.expires_at)}</span> },
+                { header: 'Validade', cell: (invitation) => <span className="tabular-nums">{formatDate(invitation.expires_at, organization.timezone)}</span> },
                 {
                   header: 'Ações',
                   actions: true,

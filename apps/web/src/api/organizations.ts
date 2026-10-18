@@ -30,6 +30,7 @@ export async function createOrganization(input: OrganizationInput): Promise<Orga
       document: orNull(input.document),
       email: orNull(input.email),
       phone: orNull(input.phone),
+      timezone: input.timezone,
     },
     handledByScreen,
   )
@@ -44,6 +45,7 @@ export async function updateOrganization(id: number | string, input: Organizatio
       document: orNull(input.document),
       email: orNull(input.email),
       phone: orNull(input.phone),
+      timezone: input.timezone,
     },
     handledByScreen,
   )
