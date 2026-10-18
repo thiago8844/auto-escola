@@ -7,21 +7,26 @@ export function useUrlFilters<K extends string>(keys: readonly K[]) {
   const [params, setParams] = useSearchParams()
   const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? ''])) as Record<K, string>
 
-  const set = (key: K, value: string) =>
+  // Várias mudanças de uma vez (ex.: período + aba): uma única atualização da URL
+  const setMany = (patch: Record<string, string>, keepPage = false) =>
     setParams(
       (previous) => {
         const next = new URLSearchParams(previous)
-        if (value) next.set(key, value)
-        else next.delete(key)
-        next.delete('page')
+        for (const [key, value] of Object.entries(patch)) {
+          if (value) next.set(key, value)
+          else next.delete(key)
+        }
+        if (!keepPage) next.delete('page')
         return next
       },
       { replace: true },
     )
 
+  const set = (key: string, value: string) => setMany({ [key]: value })
+
   const clear = () => setParams({}, { replace: true })
 
-  return { values, set, clear, active: keys.some((key) => values[key] !== '') }
+  return { values, set, setMany, clear, active: keys.some((key) => values[key] !== '') }
 }
 
 // Campo de busca por texto: digitar atualiza `?busca=` com atraso, e o valor inicial vem da URL

@@ -16,6 +16,8 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import ReportsPage from '../pages/reports/ReportsPage'
+import StudentSummaryPage from '../pages/students/StudentSummaryPage'
 import AlertsPage from '../pages/alerts/AlertsPage'
 import AvailabilityPage from '../pages/availability/AvailabilityPage'
 import ExamDetailPage from '../pages/exams/ExamDetailPage'
@@ -123,6 +125,8 @@ export const router = createBrowserRouter([
                 children: [
                   { path: `${organizationSections.schedule}/nova`, element: <LessonFormPage /> },
                   { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
+                  { path: organizationSections.reports, element: <ReportsPage /> },
+                  { path: `${organizationSections.students}/:studentId/resumo`, element: <StudentSummaryPage /> },
                   { path: organizationSections.partners, element: <PartnersPage /> },
                   { path: `${organizationSections.partners}/novo`, element: <PartnerFormPage /> },
                   { path: `${organizationSections.partners}/:partnerId`, element: <PartnerFormPage /> },

@@ -33,6 +33,7 @@ export const queryKeys = {
     alerts: (id: number | string, params: object) => ['organizations', String(id), 'alerts', params] as const,
     alertSummary: (id: number | string) => ['organizations', String(id), 'alert-summary'] as const,
     alertSettings: (id: number | string) => ['organizations', String(id), 'alert-settings'] as const,
+    report: (id: number | string, name: string, params: object) => ['organizations', String(id), 'report', name, params] as const,
     blocks: (id: number | string, params: object) => ['organizations', String(id), 'blocks', params] as const,
     maintenances: (id: number | string, params: object) => ['organizations', String(id), 'maintenances', params] as const,
     vehicleOverview: (id: number | string, vehicleId: number | string) => ['organizations', String(id), 'vehicle-overview', String(vehicleId)] as const,

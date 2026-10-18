@@ -34,6 +34,7 @@ export const organizationSections = {
   audit: 'auditoria',
   availability: 'disponibilidade',
   alerts: 'pendencias',
+  reports: 'relatorios',
   finance: 'financeiro',
 } as const
 
@@ -68,6 +69,8 @@ export function organizationPaths(organizationId: number | string) {
     audit: `${base}/${organizationSections.audit}`,
     availability: `${base}/${organizationSections.availability}`,
     alerts: `${base}/${organizationSections.alerts}`,
+    reports: `${base}/${organizationSections.reports}`,
+    studentSummary: (studentId: number | string) => `${base}/${organizationSections.students}/${studentId}/resumo`,
     finance: `${base}/${organizationSections.finance}`,
     partners: `${base}/${organizationSections.partners}`,
     partnerNew: `${base}/${organizationSections.partners}/novo`,

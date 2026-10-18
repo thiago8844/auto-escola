@@ -269,3 +269,38 @@
 .next-step {
   border-left: 4px solid var(--bs-primary);
 }
+
+// Cartões de indicador clicáveis (painel inicial)
+.indicator-card {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    box-shadow: var(--bs-box-shadow);
+    transform: translateY(-1px);
+  }
+}
+
+// Impressão do resumo do aluno: só o conteúdo, sem menu, sino nem botões
+@media print {
+  .app-sidebar,
+  .notification-menu,
+  .bell-toggle,
+  .toast-container,
+  nav {
+    display: none !important;
+  }
+
+  .app-content {
+    padding: 0 !important;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}

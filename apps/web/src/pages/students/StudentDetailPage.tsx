@@ -70,10 +70,16 @@ function StudentDetail({ student }: { student: Student }) {
         title={student.name}
         actions={
           operate && (
-            <Link to={links.studentEdit(student.id)} className="btn btn-outline-primary">
-              <i className="bi bi-pencil me-2" aria-hidden="true" />
-              Editar
-            </Link>
+            <>
+              <Link to={links.studentSummary(student.id)} className="btn btn-outline-secondary">
+                <i className="bi bi-file-earmark-text me-2" aria-hidden="true" />
+                Resumo
+              </Link>
+              <Link to={links.studentEdit(student.id)} className="btn btn-outline-primary">
+                <i className="bi bi-pencil me-2" aria-hidden="true" />
+                Editar
+              </Link>
+            </>
           )
         }
       />
