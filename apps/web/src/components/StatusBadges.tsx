@@ -1,9 +1,10 @@
 import { Badge } from 'react-bootstrap'
-import { CHECKLIST_STATUS, DOCUMENT_STATUS, ENROLLMENT_STATUS, LESSON_STATUS, PROCESS_STATUS } from '../config/domain'
+import { CHECKLIST_STATUS, DOCUMENT_STATUS, ENROLLMENT_STATUS, LESSON_STATUS, PROCESS_STATUS, VEHICLE_STATUS } from '../config/domain'
 import type { DocumentStatus } from '../types/document'
 import type { EnrollmentStatus, PracticeRelease } from '../types/enrollment'
 import type { LessonStatus } from '../types/lesson'
 import type { ChecklistItemStatus, ProcessStatus } from '../types/process'
+import type { VehicleStatus } from '../types/vehicle'
 
 // Texto escuro sobre o amarelo, para manter o contraste
 const textFor = (bg: string) => (bg === 'warning' ? 'dark' : undefined)
@@ -59,6 +60,16 @@ export function ReleaseBadge({ release }: { release?: PracticeRelease }) {
     <Badge bg="warning" text="dark">
       <i className="bi bi-lock-fill me-1" aria-hidden="true" />
       Bloqueada
+    </Badge>
+  )
+}
+
+export function VehicleStatusBadge({ status }: { status: VehicleStatus }) {
+  const { label, bg, icon } = VEHICLE_STATUS[status]
+  return (
+    <Badge bg={bg}>
+      <i className={`bi ${icon} me-1`} aria-hidden="true" />
+      {label}
     </Badge>
   )
 }

@@ -1,6 +1,7 @@
 import type { DocumentStatus, DocumentType } from '../types/document'
 import type { ChecklistItemType, EnrollmentStatus, LicenseCategory } from '../types/enrollment'
 import type { LessonStatus } from '../types/lesson'
+import type { VehicleStatus } from '../types/vehicle'
 import type { ChecklistItemStatus, ChecklistSource, ProcessStatus, ProcessType } from '../types/process'
 
 export const LICENSE_CATEGORIES: LicenseCategory[] = ['A', 'AB', 'AC', 'AD', 'AE', 'B', 'C', 'D', 'E', 'ACC']
@@ -96,3 +97,11 @@ export const UFS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA',
   'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
 ] as const
+
+// Veículo tem categoria simples: uma matrícula AB usa um veículo A ou B
+export const VEHICLE_CATEGORIES = ['A', 'B', 'C', 'D', 'E', 'ACC'] as const
+
+export const VEHICLE_STATUS: Record<VehicleStatus, { label: string; bg: string; icon: string }> = {
+  active: { label: 'Ativo', bg: 'success', icon: 'bi-check-circle-fill' },
+  inactive: { label: 'Inativo', bg: 'secondary', icon: 'bi-pause-circle' },
+}

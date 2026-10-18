@@ -20,6 +20,8 @@ import ProcessFormPage from '../pages/processes/ProcessFormPage'
 import StudentDetailPage from '../pages/students/StudentDetailPage'
 import StudentFormPage from '../pages/students/StudentFormPage'
 import StudentsPage from '../pages/students/StudentsPage'
+import VehicleFormPage from '../pages/vehicles/VehicleFormPage'
+import VehiclesPage from '../pages/vehicles/VehiclesPage'
 import InvitationsPage from '../pages/organization/InvitationsPage'
 import MembersPage from '../pages/organization/MembersPage'
 import OrganizationHomePage from '../pages/organization/OrganizationHomePage'
@@ -76,11 +78,15 @@ export const router = createBrowserRouter([
               { path: organizationSections.settings, element: <OrganizationSettingsPage /> },
               { path: organizationSections.students, element: <StudentsPage /> },
               { path: `${organizationSections.students}/:studentId`, element: <StudentDetailPage /> },
+              // Veículos: todos os membros veem; só a equipe altera (a tela trava os campos)
+              { path: organizationSections.vehicles, element: <VehiclesPage /> },
+              { path: `${organizationSections.vehicles}/:vehicleId`, element: <VehicleFormPage /> },
               { path: organizationSections.enrollments, element: <EnrollmentsPage /> },
               { path: `${organizationSections.enrollments}/:enrollmentId`, element: <EnrollmentDetailPage /> },
               {
                 element: <RequirePermission allow={canOperate} />,
                 children: [
+                  { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
                   { path: `${organizationSections.students}/novo`, element: <StudentFormPage /> },
                   { path: `${organizationSections.students}/:studentId/editar`, element: <StudentFormPage /> },
                   { path: `${organizationSections.students}/:studentId/matriculas/nova`, element: <EnrollmentFormPage /> },
