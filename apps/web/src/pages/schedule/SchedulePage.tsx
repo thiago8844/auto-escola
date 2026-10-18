@@ -36,7 +36,6 @@ export default function SchedulePage() {
   const { searchParams, view, date, today, first, last, step, days, update } = useAgendaState(timeZone)
   const instructorId = searchParams.get('instrutor') ?? ''
   const vehicleId = searchParams.get('veiculo') ?? ''
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<number>>(new Set())
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<number>>(new Set())
   const [action, setAction] = useState<LessonAction | null>(null)
   const [bulkOpen, setBulkOpen] = useState(false)
@@ -46,8 +45,6 @@ export default function SchedulePage() {
   const instructors = useInstructors(organization.id, { page: 1, all: true }, operate)
   const vehicles = useVehicles(organization.id, { page: 1, all: true })
 
-  const toggleExpanded = (lesson: Lesson) =>
-    setExpandedIds((previous) => toggleId(previous, lesson.id))
   const toggleSelected = (lesson: Lesson) => setSelectedIds((previous) => toggleId(previous, lesson.id))
 
   const columns: Column<Lesson>[] = [
@@ -56,6 +53,8 @@ export default function SchedulePage() {
       primary: true,
       cell: (lesson) => <span className="tabular-nums">{formatTime(lesson.starts_at, timeZone)}–{formatTime(lesson.ends_at, timeZone)}</span>,
     },
+    { header: 'Cat.', cell: (lesson) => lesson.enrollment?.category ?? lesson.category ?? '—' },
+    { header: 'Dur.', cell: (lesson) => <span className="tabular-nums">{lesson.scheduled_minutes} min</span> },
     { header: 'Aluno', cell: (lesson) => lesson.enrollment?.student?.name ?? '—' },
     { header: 'Instrutor', cell: (lesson) => lesson.instructor?.full_name ?? '—' },
     { header: 'Veículo', cell: (lesson) => (lesson.vehicle ? `${lesson.vehicle.plate} · ${lesson.vehicle.model}` : 'Sem veículo') },
@@ -65,19 +64,10 @@ export default function SchedulePage() {
       actions: true,
       cell: (lesson, { mobile }) => {
         const scheduled = lesson.status === 'scheduled'
-        const expanded = expandedIds.has(lesson.id)
         return (
           <div className="d-inline-flex flex-wrap gap-1 justify-content-end">
             {scheduled && <LessonActionButton mobile={mobile} icon="bi-check2-square" label="Concluir, faltou ou cancelar" short="Concluir" onClick={() => setAction({ lesson, kind: 'status' })} />}
             {scheduled && <LessonActionButton mobile={mobile} icon="bi-calendar2-week" label="Remarcar" short="Remarcar" onClick={() => setAction({ lesson, kind: 'reschedule' })} />}
-            <LessonActionButton
-              mobile={mobile}
-              icon={expanded ? 'bi-chevron-up' : 'bi-chevron-down'}
-              label={expanded ? 'Recolher aula' : 'Expandir aula'}
-              short={expanded ? 'Recolher' : 'Detalhes'}
-              expanded={expanded}
-              onClick={() => toggleExpanded(lesson)}
-            />
           </div>
         )
       },
@@ -159,7 +149,7 @@ export default function SchedulePage() {
                 timeZone={timeZone}
                 columns={columns}
                 selection={{ selected: selectedIds, canSelect: (lesson) => lesson.status === 'scheduled', onToggle: toggleSelected }}
-                expansion={{ isOpen: (lesson) => expandedIds.has(lesson.id), onToggle: toggleExpanded, render: (lesson) => <LessonDetailsPanel lesson={lesson} href={links.lesson(lesson.id)} /> }}
+                open={{ to: (lesson) => links.lesson(lesson.id), label: (lesson) => `aula de ${lesson.enrollment?.student?.name ?? 'aluno'}` }}
               />
               {bulkOpen && (
                 <CompleteSelectedModal
@@ -197,14 +187,12 @@ function LessonActionButton({
   icon,
   label,
   short,
-  expanded,
   onClick,
 }: {
   mobile: boolean
   icon: string
   label: string
   short: string
-  expanded?: boolean
   onClick: () => void
 }) {
   return (
@@ -213,49 +201,11 @@ function LessonActionButton({
       className={mobile ? 'btn btn-outline-secondary' : 'btn btn-outline-secondary btn-sm px-2'}
       aria-label={label}
       title={label}
-      aria-expanded={expanded}
       onClick={onClick}
     >
       <i className={`bi ${icon}${mobile ? ' me-2' : ''}`} aria-hidden="true" />
       {mobile && short}
     </button>
-  )
-}
-
-// Detalhes que não cabem na linha da tabela; abre pelo botão de detalhes ou tocando no cartão
-function LessonDetailsPanel({ lesson, href }: { lesson: Lesson; href: string }) {
-  return (
-    <div>
-      <dl className="row small mb-2">
-        <dt className="col-sm-4 col-md-3 text-secondary">Matrícula</dt>
-        <dd className="col-sm-8 col-md-9">{lesson.enrollment ? `Categoria ${lesson.enrollment.category}` : '—'}</dd>
-        <dt className="col-sm-4 col-md-3 text-secondary">Duração</dt>
-        <dd className="col-sm-8 col-md-9">
-          {lesson.scheduled_minutes} min agendados{lesson.actual_minutes ? ` · ${lesson.actual_minutes} min reais` : ''}
-        </dd>
-        {lesson.status_reason && (
-          <>
-            <dt className="col-sm-4 col-md-3 text-secondary">Motivo</dt>
-            <dd className="col-sm-8 col-md-9">{lesson.status_reason}</dd>
-          </>
-        )}
-        {lesson.evolution && (
-          <>
-            <dt className="col-sm-4 col-md-3 text-secondary">Evolução</dt>
-            <dd className="col-sm-8 col-md-9">{lesson.evolution}</dd>
-          </>
-        )}
-        {lesson.notes && (
-          <>
-            <dt className="col-sm-4 col-md-3 text-secondary">Observações</dt>
-            <dd className="col-sm-8 col-md-9">{lesson.notes}</dd>
-          </>
-        )}
-      </dl>
-      <Link to={href} className="small">
-        Abrir aula completa <i className="bi bi-arrow-right" aria-hidden="true" />
-      </Link>
-    </div>
   )
 }
 

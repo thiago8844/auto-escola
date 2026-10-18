@@ -59,7 +59,7 @@ function useExamMutation<T, R>(organizationId: number, mutationFn: (input: T) =>
 export const useCreateExam = (organizationId: number) => useExamMutation(organizationId, (input: ExamInput) => createExam(organizationId, input), 'Exame agendado.')
 
 export const useUpdateExam = (organizationId: number, examId: number) =>
-  useExamMutation(organizationId, (input: { protocol: string | null; notes: string | null; location: string | null }) => updateExam(organizationId, examId, input), 'Exame atualizado.')
+  useExamMutation(organizationId, (input: Partial<ExamEditInputPayload>) => updateExam(organizationId, examId, input), 'Exame atualizado.')
 
 export const useRescheduleExam = (organizationId: number, examId: number) =>
   useExamMutation(
@@ -81,7 +81,7 @@ export const useSaveFee = (organizationId: number, feeId: number | null) =>
 export const useFeeStatus = (organizationId: number, feeId: number) =>
   useExamMutation(
     organizationId,
-    (input: { status: FeeStatus; reason: string | null; confirmation_source: string | null; paid_by: FeeParty | null }) => changeFeeStatus(organizationId, feeId, input),
+    (input: { status: FeeStatus; reason: string | null; paid_by: FeeParty | null; receipt_document_id?: number | null }) => changeFeeStatus(organizationId, feeId, input),
     'Situação da taxa atualizada.',
   )
 

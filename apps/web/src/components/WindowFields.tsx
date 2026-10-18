@@ -2,16 +2,18 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { Col, Row } from 'react-bootstrap'
 import { FormField } from './FormField'
 
-type WindowValues = { date: string; start_time: string; duration: string }
+type WindowValues = { date: string; start_time: string; duration?: string }
 
 type WindowFieldsProps<T extends WindowValues> = {
   register: UseFormRegister<T>
   errors: FieldErrors<T>
   timeZone: string
+  // Exames não têm duração: só data e horário
+  withDuration?: boolean
 }
 
 // Data, horário e duração: digitados no fuso do espaço. Campos nativos (date/time) funcionam bem no celular.
-export function WindowFields<T extends WindowValues>({ register, errors, timeZone }: WindowFieldsProps<T>) {
+export function WindowFields<T extends WindowValues>({ register, errors, timeZone, withDuration = true }: WindowFieldsProps<T>) {
   const reg = register as unknown as UseFormRegister<WindowValues>
   const err = errors as FieldErrors<WindowValues>
 
@@ -24,11 +26,13 @@ export function WindowFields<T extends WindowValues>({ register, errors, timeZon
         <Col xs={6} sm={3}>
           <FormField label="Início" type="time" error={err.start_time?.message} {...reg('start_time')} />
         </Col>
-        <Col xs={6} sm={3}>
-          <FormField label="Duração (min)" inputMode="numeric" error={err.duration?.message} {...reg('duration')} />
-        </Col>
+        {withDuration && (
+          <Col xs={6} sm={3}>
+            <FormField label="Duração (min)" inputMode="numeric" error={err.duration?.message} {...reg('duration')} />
+          </Col>
+        )}
       </Row>
-      <p className="small text-secondary mb-3">Horário de {timeZone.replace('_', ' ')} (fuso do espaço). Duração máxima: 240 minutos.</p>
+      <p className="small text-secondary mb-3">Horário de {timeZone.replace('_', ' ')} (fuso do espaço).{withDuration && ' Duração máxima: 240 minutos.'}</p>
     </>
   )
 }

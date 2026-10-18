@@ -27,13 +27,7 @@ export default function MyLessonsPage() {
       cell: (lesson) => {
         const zone = timeZoneOf(lesson)
         const time = `${formatTime(lesson.starts_at, zone)}–${formatTime(lesson.ends_at, zone)}`
-        return lesson.organization ? (
-          <Link to={organizationPaths(lesson.organization.id).lesson(lesson.id)} className="tabular-nums">
-            {time}
-          </Link>
-        ) : (
-          <span className="tabular-nums">{time}</span>
-        )
+        return <span className="tabular-nums">{time}</span>
       },
     },
     {
@@ -68,7 +62,9 @@ export default function MyLessonsPage() {
                 Mostrando {data.data.length} de {data.meta.total} aulas.
               </p>
             )}
-            <AgendaDays days={days} lessons={data.data} today={today} timeZone={deviceTimeZone} timeZoneOf={timeZoneOf} columns={columns} />
+            <AgendaDays days={days} lessons={data.data} today={today} timeZone={deviceTimeZone} timeZoneOf={timeZoneOf} columns={columns}
+              open={{ to: (lesson) => (lesson.organization ? organizationPaths(lesson.organization.id).lesson(lesson.id) : '/'), label: (lesson) => `aula de ${lesson.enrollment?.student?.name ?? 'aluno'}` }}
+            />
           </>
         )}
       </QueryState>

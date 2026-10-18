@@ -6,12 +6,17 @@ export type FeeParty = 'student' | 'partner' | 'organization' | 'other'
 
 export type ExamScheduleChange = {
   scheduled_at: string
-  duration_minutes: number
-  location: string | null
-  instructor_id: number | null
-  vehicle_id: number | null
   changed_at: string
   reason: string | null
+}
+
+export type ExamRegistration = {
+  name: string
+  cpf: string | null
+  category: string
+  birth_date: string | null
+  identity_number: string | null
+  identity_issuer: string | null
 }
 
 export type ExamPending = { code: string; message: string }
@@ -23,16 +28,18 @@ export type Exam = {
   attempt_number: number
   status: ExamStatus
   scheduled_at: string
-  ends_at: string
-  duration_minutes: number
   location: string | null
+  // Autoescola do exame: um parceiro do espaço ou o próprio espaço
+  driving_school?: { kind: 'space' | 'partner'; id: number | null; name: string | null }
   student?: { id: number; name: string }
   vehicle?: { id: number; plate: string; model: string } | null
   instructor?: { id: number; full_name: string } | null
   qualification_process_id?: number
   student_id?: number
   enrollment_id?: number | null
-  protocol?: string | null
+  partner_id?: number | null
+  // Dados da inscrição, vindos do cadastro do aluno
+  registration?: ExamRegistration
   notes?: string | null
   status_reason?: string | null
   result_at?: string | null
@@ -60,7 +67,6 @@ export type ExternalFee = {
   paid_by: FeeParty | null
   reimbursement: 'none' | 'to_settle' | 'settled'
   cash_effect: 'none'
-  confirmation_source: string | null
   confirmed_at: string | null
   confirmed_by?: { id: number; name: string } | null
   receipt_document_id: number | null

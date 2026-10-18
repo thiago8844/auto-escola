@@ -47,9 +47,18 @@ export type ExamInput = {
   enrollment_id: number | null
   category: string
   scheduled_at: string
-  duration_minutes: number
   location: string | null
-  protocol: string | null
+  // Ausente = autoescola do aluno; null = o próprio espaço
+  partner_id?: number | null
+  notes: string | null
+  instructor_id: number | null
+  vehicle_id: number | null
+}
+
+export type ExamEditInputPayload = {
+  scheduled_at: string
+  location: string | null
+  partner_id: number | null
   notes: string | null
   instructor_id: number | null
   vehicle_id: number | null
@@ -60,7 +69,7 @@ export async function createExam(organizationId: number | string, input: ExamInp
   return data.data
 }
 
-export async function updateExam(organizationId: number | string, examId: number | string, input: { protocol: string | null; notes: string | null; location: string | null }): Promise<Exam> {
+export async function updateExam(organizationId: number | string, examId: number | string, input: Partial<ExamEditInputPayload>): Promise<Exam> {
   const { data } = await http.patch<{ data: Exam }>(`${base(organizationId)}/exams/${examId}`, input, handledByScreen)
   return data.data
 }
@@ -68,7 +77,7 @@ export async function updateExam(organizationId: number | string, examId: number
 export async function rescheduleExam(
   organizationId: number | string,
   examId: number | string,
-  input: { scheduled_at: string; duration_minutes: number; location: string | null; reason: string; instructor_id: number | null; vehicle_id: number | null },
+  input: { scheduled_at: string; reason: string },
 ): Promise<Exam> {
   const { data } = await http.post<{ data: Exam }>(`${base(organizationId)}/exams/${examId}/reschedule`, input, handledByScreen)
   return data.data
@@ -114,7 +123,7 @@ export async function saveFee(organizationId: number | string, feeId: number | n
 export async function changeFeeStatus(
   organizationId: number | string,
   feeId: number,
-  input: { status: FeeStatus; reason: string | null; confirmation_source: string | null; paid_by: FeeParty | null },
+  input: { status: FeeStatus; reason: string | null; paid_by: FeeParty | null; receipt_document_id?: number | null },
 ): Promise<ExternalFee> {
   const { data } = await http.post<{ data: ExternalFee }>(`${base(organizationId)}/external-fees/${feeId}/status`, input, handledByScreen)
   return data.data

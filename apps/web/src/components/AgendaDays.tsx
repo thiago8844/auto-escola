@@ -1,4 +1,4 @@
-import { DataTable, type Column, type TableExpansion, type TableSelection } from './DataTable'
+import { DataTable, type Column, type TableOpen, type TableSelection } from './DataTable'
 import type { Lesson } from '../types/lesson'
 import { formatDayLabel, isoToZonedParts } from '../utils/timezone'
 
@@ -10,13 +10,13 @@ type AgendaDaysProps = {
   columns: Column<Lesson>[]
   // Fuso de cada aula, quando varia (agenda pessoal mistura espaços); senão vale `timeZone`
   timeZoneOf?: (lesson: Lesson) => string
-  // Repassados para cada tabela de dia (seleção e detalhes expansíveis)
+  // Repassados para cada tabela de dia (seleção e abertura da aula)
   selection?: TableSelection<Lesson>
-  expansion?: TableExpansion<Lesson>
+  open?: TableOpen<Lesson>
 }
 
 // Aulas agrupadas por dia (no fuso informado), cada dia com a sua tabela
-export function AgendaDays({ days, lessons, today, timeZone, columns, timeZoneOf, selection, expansion }: AgendaDaysProps) {
+export function AgendaDays({ days, lessons, today, timeZone, columns, timeZoneOf, selection, open }: AgendaDaysProps) {
   const byDay = new Map<string, Lesson[]>()
   for (const lesson of [...lessons].sort((a, b) => a.starts_at.localeCompare(b.starts_at))) {
     const day = isoToZonedParts(lesson.starts_at, timeZoneOf?.(lesson) ?? timeZone).date
@@ -36,7 +36,7 @@ export function AgendaDays({ days, lessons, today, timeZone, columns, timeZoneOf
             {dayLessons.length === 0 ? (
               <p className="text-secondary">Sem aulas.</p>
             ) : (
-              <DataTable rows={dayLessons} getKey={(lesson) => lesson.id} columns={columns} selection={selection} expansion={expansion} />
+              <DataTable rows={dayLessons} getKey={(lesson) => lesson.id} columns={columns} selection={selection} open={open} />
             )}
           </section>
         )
