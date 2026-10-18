@@ -25,11 +25,11 @@ export default function EntriesPage({ type }: { type: EntryType }) {
   const receivable = type === 'receivable'
   const [page, setPage] = usePageParam()
   const [text, setText, search] = useUrlSearch('q')
-  const { values, set, clear, active } = useUrlFilters(['situacao', 'de', 'ate', 'categoria', 'conta', 'forma', 'lancamento'] as const)
+  const { values, set, setMany, clear, active } = useUrlFilters(['situacao', 'de', 'ate', 'categoria', 'conta', 'forma', 'lancamento'] as const)
   const [creating, setCreating] = useState(false)
   const [paying, setPaying] = useState<Installment | null>(null)
   const openEntry = Number(values.lancamento) > 0 ? Number(values.lancamento) : null
-  const setOpenEntry = (id: number | null) => set('lancamento', id === null ? '' : String(id))
+  const setOpenEntry = (id: number | null) => setMany({ lancamento: id === null ? '' : String(id) }, true)
 
   const categories = useCategories(organization.id)
   const accounts = useAccounts(organization.id)
@@ -198,7 +198,7 @@ export default function EntriesPage({ type }: { type: EntryType }) {
       {creating && <EntryFormModal organizationId={organization.id} timezone={organization.timezone} type={type} onClose={() => setCreating(false)} />}
       {paying && <PayModal organizationId={organization.id} timezone={organization.timezone} installment={paying} onClose={() => setPaying(null)} />}
       {openEntry !== null && (
-        <EntryDetailModal organizationId={organization.id} timezone={organization.timezone} entryId={openEntry} canManage={canManageMembers(organization.role)} onClose={() => { setOpenEntry(null); set('lancamento', '') }} />
+        <EntryDetailModal organizationId={organization.id} timezone={organization.timezone} entryId={openEntry} canManage={canManageMembers(organization.role)} onClose={() => setOpenEntry(null)} />
       )}
     </>
   )

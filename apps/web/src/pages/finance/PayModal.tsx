@@ -1,3 +1,4 @@
+import { FormErrorMessage } from '../../components/FormErrorMessage'
 import { useDraftProtection } from '../../hooks/useFormProtection'
 import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
@@ -104,11 +105,7 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
           </span>
         </p>
 
-        {error && (
-          <Alert variant="danger" role="alert">
-            {error}
-          </Alert>
-        )}
+        <FormErrorMessage message={error} />
 
         {lines.map((line, index) => (
           <div key={line.key} className="border rounded p-3 mb-3">

@@ -123,7 +123,7 @@ export default function OverviewPage() {
         <QueryState query={flow} isEmpty={(d) => d.rows.length === 0} empty="Nada previsto nem realizado neste período.">
           {(data) => (
             <div className="table-responsive">
-              <Table size="sm" className="align-middle">
+              <Table size="sm" className="align-middle mobile-record-table">
                 <thead>
                   <tr>
                     <th scope="col">{data.by === 'month' ? 'Mês' : 'Dia'}</th>
@@ -136,11 +136,11 @@ export default function OverviewPage() {
                 <tbody>
                   {data.rows.map((row) => (
                     <tr key={row.bucket}>
-                      <td className="tabular-nums">{data.by === 'month' ? `${row.bucket.slice(5)}/${row.bucket.slice(0, 4)}` : formatDate(row.bucket)}</td>
-                      <td className="text-end"><Money cents={row.realized_in_cents} tone={row.realized_in_cents ? 'success' : 'secondary'} /></td>
-                      <td className="text-end"><Money cents={row.realized_out_cents} tone={row.realized_out_cents ? undefined : 'secondary'} /></td>
-                      <td className="text-end"><Money cents={row.forecast_in_cents} tone="secondary" /></td>
-                      <td className="text-end"><Money cents={row.forecast_out_cents} tone="secondary" /></td>
+                      <td data-label="Período" className="tabular-nums">{data.by === 'month' ? `${row.bucket.slice(5)}/${row.bucket.slice(0, 4)}` : formatDate(row.bucket)}</td>
+                      <td data-label="Entradas realizadas" className="text-end"><Money cents={row.realized_in_cents} tone={row.realized_in_cents ? 'success' : 'secondary'} /></td>
+                      <td data-label="Saídas realizadas" className="text-end"><Money cents={row.realized_out_cents} tone={row.realized_out_cents ? undefined : 'secondary'} /></td>
+                      <td data-label="Entradas previstas" className="text-end"><Money cents={row.forecast_in_cents} tone="secondary" /></td>
+                      <td data-label="Saídas previstas" className="text-end"><Money cents={row.forecast_out_cents} tone="secondary" /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -164,7 +164,7 @@ export default function OverviewPage() {
         <QueryState query={breakdown} isEmpty={(d) => d.rows.length === 0} empty="Nenhum recebimento ou pagamento neste período.">
           {(data) => (
             <div className="table-responsive">
-              <Table size="sm" className="align-middle">
+              <Table size="sm" className="align-middle mobile-record-table">
                 <thead>
                   <tr>
                     <th scope="col">{{ category: 'Categoria', student: 'Aluno', partner: 'Parceiro', method: 'Forma de pagamento', account: 'Conta' }[group]}</th>
@@ -175,9 +175,9 @@ export default function OverviewPage() {
                 <tbody>
                   {data.rows.map((row) => (
                     <tr key={row.label}>
-                      <td>{row.label}</td>
-                      <td className="text-end"><Money cents={row.received_cents} /></td>
-                      <td className="text-end"><Money cents={row.paid_cents} /></td>
+                      <td data-label="Grupo">{row.label}</td>
+                      <td data-label="Recebido" className="text-end"><Money cents={row.received_cents} /></td>
+                      <td data-label="Pago" className="text-end"><Money cents={row.paid_cents} /></td>
                     </tr>
                   ))}
                 </tbody>

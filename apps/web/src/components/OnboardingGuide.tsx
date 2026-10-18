@@ -15,6 +15,7 @@ const TARGETS = (organizationId: number): Record<string, { to: string; label: st
     student: { to: links.studentNew, label: 'Cadastrar aluno' },
     enrollment: { to: links.students, label: 'Escolher o aluno' },
     package: { to: links.enrollments, label: 'Abrir matrículas' },
+    finance_account: { to: links.financeAccounts, label: 'Abrir contas e caixa' },
     lesson: { to: links.scheduleNew(), label: 'Agendar aula' },
   }
 }

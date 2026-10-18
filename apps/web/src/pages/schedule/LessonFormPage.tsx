@@ -1,3 +1,5 @@
+import { useSessionFormRecovery } from '../../hooks/useSessionFormRecovery'
+import { SlotSuggestions } from '../../components/SlotSuggestions'
 import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert } from 'react-bootstrap'
@@ -22,7 +24,7 @@ import { scheduleSchema, type ScheduleInput } from '../../schemas/lesson'
 import type { Enrollment } from '../../types/enrollment'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
 import { notify } from '../../stores/toastStore'
-import { todayInTimeZone } from '../../utils/timezone'
+import { isoToZonedParts, todayInTimeZone } from '../../utils/timezone'
 
 // /agenda/nova, opcionalmente com ?matricula=ID (vem do detalhe da matrícula) e ?data=YYYY-MM-DD
 export default function LessonFormPage() {
@@ -53,6 +55,8 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
   const dateParam = searchParams.get('data') ?? ''
   const {
     register,
+    getValues,
+    reset,
     control,
     handleSubmit,
     setError,
@@ -74,9 +78,9 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
     },
   })
 
-  const [enrollmentId, vehicleId, duration, overrideReason, chosenCategory] = useWatch({
+  const [enrollmentId, vehicleId, duration, overrideReason, chosenCategory, instructorId, selectedDate, startTime] = useWatch({
     control,
-    name: ['enrollment_id', 'vehicle_id', 'duration', 'override_reason', 'category'],
+    name: ['enrollment_id', 'vehicle_id', 'duration', 'override_reason', 'category', 'instructor_id', 'date', 'start_time'],
   })
   const selected = useEnrollment(organization.id, enrollmentId, enrollmentId !== '')
   const enrollment = selected.data ?? (presetEnrollment && String(presetEnrollment.id) === enrollmentId ? presetEnrollment : undefined)
@@ -86,6 +90,7 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
   const lessonCategory = !enrollment ? null : composite ? (vehicle?.category ?? (chosenCategory || null)) : enrollment.category
   const needed = /^\d+$/.test(duration) ? Number(duration) : 0
 
+  useSessionFormRecovery(`lesson:${organization.id}:${presetEnrollment?.id ?? 'new'}`, getValues, reset)
   const protection = useFormProtection(isDirty)
 
   const onSubmit = handleSubmit((values) =>
@@ -181,6 +186,11 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
             />
           )}
           <TextAreaField label="Observações (opcional)" error={errors.notes?.message} {...register('notes')} />
+          <SlotSuggestions organizationId={organization.id} timezone={organization.timezone} enrollmentId={enrollmentId} instructorId={instructorId} vehicleId={vehicleId} date={selectedDate} duration={duration} category={chosenCategory} fromTime={startTime} onChoose={(slot) => {
+            const parts = isoToZonedParts(slot.starts_at, organization.timezone)
+            setValue('date', parts.date, { shouldDirty: true })
+            setValue('start_time', parts.time, { shouldDirty: true, shouldValidate: true })
+          }} />
           <SubmitButton loading={create.isPending}>Agendar aula</SubmitButton>
         </form>
       </div>

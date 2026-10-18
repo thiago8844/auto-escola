@@ -1,7 +1,8 @@
+import { FormErrorMessage } from '../../components/FormErrorMessage'
 import { useDraftProtection } from '../../hooks/useFormProtection'
 import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
+import { Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
 import { NumericFormat } from 'react-number-format'
 import { BootstrapInput } from '../../components/BootstrapInput'
 import { PERIODICITY_LABELS } from '../../config/finance'
@@ -119,11 +120,7 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && (
-          <Alert variant="danger" role="alert">
-            {error}
-          </Alert>
-        )}
+        <FormErrorMessage message={error} />
 
         <Form.Group className="mb-3" controlId="entry-description">
           <Form.Label>Descrição</Form.Label>

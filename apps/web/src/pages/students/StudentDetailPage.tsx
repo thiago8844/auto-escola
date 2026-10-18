@@ -1,3 +1,4 @@
+import { RecordLink } from '../../components/RecordLink'
 import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap'
@@ -186,7 +187,7 @@ function StudentDetail({ student }: { student: Student }) {
               rows={lessons.slice(0, lessonsShown)}
               getKey={(lesson) => lesson.id}
               columns={[
-                { header: 'Data e hora', primary: true, cell: (lesson) => <Link className="tabular-nums" to={links.lesson(lesson.id)}>{formatDateTime(lesson.starts_at, organization.timezone)}</Link> },
+                { header: 'Data e hora', primary: true, cell: (lesson) => <RecordLink className="tabular-nums" to={links.lesson(lesson.id)} returnLabel="Voltar ao aluno">{formatDateTime(lesson.starts_at, organization.timezone)}</RecordLink> },
                 { header: 'Instrutor', cell: (lesson) => lesson.instructor?.full_name ?? '—' },
                 { header: 'Situação', cell: (lesson) => <LessonStatusBadge status={lesson.status} /> },
               ]}

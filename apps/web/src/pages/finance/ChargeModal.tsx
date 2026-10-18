@@ -1,3 +1,4 @@
+import { RecordLink } from '../../components/RecordLink'
 import { useDraftProtection } from '../../hooks/useFormProtection'
 import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
@@ -94,7 +95,7 @@ export function ChargeModal(props: ChargeModalProps) {
         <Modal.Body>
           <Alert variant="success" className="mb-0">
             {type === 'receivable' ? 'Cobrança gerada.' : 'Despesa lançada.'} Acompanhe e dê baixa em{' '}
-            <Link to={`${type === 'receivable' ? links.financeReceivables : links.financePayables}?lancamento=${createdEntryId}`}>{type === 'receivable' ? 'Financeiro > Receitas' : 'Financeiro > Despesas'}</Link>.
+            <RecordLink returnLabel="Voltar à origem da cobrança" to={`${type === 'receivable' ? links.financeReceivables : links.financePayables}?lancamento=${createdEntryId}`}>{type === 'receivable' ? 'Financeiro > Receitas' : 'Financeiro > Despesas'}</RecordLink>.
           </Alert>
         </Modal.Body>
         <Modal.Footer>

@@ -1,3 +1,4 @@
+import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
 import { Badge, Button, Card, Form } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
@@ -175,12 +176,9 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
         {!closed && <AddChecklistItem organizationId={organization.id} processId={String(process.id)} existing={process.checklist ?? []} />}
       </section>
 
-      <section aria-labelledby="timeline-title">
-        <h2 id="timeline-title" className="h4 mb-3">
-          Linha do tempo do processo
-        </h2>
+      <RecordSection title="Linha do tempo do processo">
         <Timeline organizationId={organization.id} timezone={organization.timezone} scope={{ kind: 'process', id: process.id }} emptyMessage="Nenhum evento registrado neste processo." />
-      </section>
+      </RecordSection>
 
       {schedulingExam && <ExamFormModal organizationId={organization.id} timezone={organization.timezone} presetProcess={process} onClose={() => setSchedulingExam(false)} />}
       {editing && <ChecklistItemModal organizationId={organization.id} processId={String(process.id)} studentId={process.student?.id} item={editing} onClose={() => setEditing(null)} />}

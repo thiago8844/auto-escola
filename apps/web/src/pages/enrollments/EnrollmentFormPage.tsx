@@ -1,3 +1,4 @@
+import { useSessionFormRecovery } from '../../hooks/useSessionFormRecovery'
 import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button } from 'react-bootstrap'
@@ -45,6 +46,8 @@ function EnrollmentForm({ student }: { student: Student }) {
 
   const {
     register,
+    getValues,
+    reset,
     control,
     handleSubmit,
     setError,
@@ -54,6 +57,7 @@ function EnrollmentForm({ student }: { student: Student }) {
     defaultValues: { category: 'B', status: 'contracted', contracted_minutes: '', price: '', qualification_process_id: '', partner_id: '', notes: '' },
   })
 
+  useSessionFormRecovery(`enrollment:${organization.id}:${student.id}`, getValues, reset)
   const protection = useFormProtection(isDirty)
 
   const onSubmit = handleSubmit((values) =>

@@ -1,3 +1,4 @@
+import { useSessionFormRecovery } from '../../hooks/useSessionFormRecovery'
 import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -50,6 +51,8 @@ function StudentForm({ student }: { student?: Student }) {
 
   const {
     register,
+    getValues,
+    reset,
     control,
     handleSubmit,
     setError,
@@ -59,6 +62,7 @@ function StudentForm({ student }: { student?: Student }) {
     defaultValues: student ? toFormValues(student) : emptyValues,
   })
 
+  useSessionFormRecovery(`student:${organization.id}:${student?.id ?? 'new'}`, getValues, reset)
   const protection = useFormProtection(isDirty)
 
   const onSubmit = handleSubmit((values) =>

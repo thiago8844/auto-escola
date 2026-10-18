@@ -152,7 +152,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
 
                       {(installment.payments ?? []).length > 0 && (
                         <div className="table-responsive mt-3">
-                          <Table size="sm" className="align-middle mb-0">
+                          <Table size="sm" className="align-middle mb-0 mobile-record-table">
                             <thead>
                               <tr>
                                 <th scope="col">Data</th>
@@ -165,12 +165,12 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
                             <tbody>
                               {(installment.payments ?? []).map((payment) => (
                                 <tr key={payment.id} className={payment.status === 'reversed' ? 'text-secondary' : undefined}>
-                                  <td className="tabular-nums">{formatDate(payment.paid_on)}</td>
-                                  <td>
+                                  <td data-label="Data" className="tabular-nums">{formatDate(payment.paid_on)}</td>
+                                  <td data-label="Forma e conta">
                                     {payment.method.name} · {payment.account.name}
                                     {payment.reference && <span className="d-block small text-secondary text-break">{payment.reference}</span>}
                                   </td>
-                                  <td>
+                                  <td data-label="Valor">
                                     <Money cents={payment.applied_cents} />
                                     {(payment.discount_cents > 0 || payment.interest_cents > 0 || payment.fine_cents > 0 || payment.fee_cents > 0) && (
                                       <span className="d-block small text-secondary">
@@ -182,7 +182,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
                                       </span>
                                     )}
                                   </td>
-                                  <td>
+                                  <td data-label="Situação">
                                     {payment.status === 'confirmed' && <Badge bg="success">Confirmado</Badge>}
                                     {payment.status === 'pending' && (
                                       <Badge bg="warning" text="dark">
@@ -195,7 +195,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
                                       </Badge>
                                     )}
                                   </td>
-                                  <td className="text-end">
+                                  <td data-label="Ações" className="text-end">
                                     <div className="d-inline-flex flex-wrap gap-1 justify-content-end">
                                       {payment.status === 'pending' && (
                                         <Button size="sm" variant="success" disabled={confirmPayment.isPending} onClick={() => confirmPayment.mutate({ paymentId: payment.id, settledOn: today }, { onError: (e) => setError(e.message) })}>

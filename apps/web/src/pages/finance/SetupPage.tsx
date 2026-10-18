@@ -1,3 +1,4 @@
+import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
 import { Alert, Badge, Button, Card, Col, Form, Row } from 'react-bootstrap'
 import { PageHeader } from '../../components/PageHeader'
@@ -29,12 +30,17 @@ export default function SetupPage() {
     <>
       <PageHeader title="Cadastros do financeiro" subtitle="Categorias, formas de pagamento, favorecidos e lançamentos que se repetem todo mês." />
       {!manage && <Alert variant="info">Categorias, formas de pagamento e recorrências são alteradas por proprietários e gestores. Você pode cadastrar favorecidos.</Alert>}
-      <Row className="g-4">
-        <Col lg={6}><Categories organizationId={organization.id} manage={manage} /></Col>
-        <Col lg={6}><Methods organizationId={organization.id} manage={manage} /></Col>
+      {manage ? <Row className="g-4">
+        <Col lg={6}><Categories organizationId={organization.id} manage /></Col>
+        <Col lg={6}><Methods organizationId={organization.id} manage /></Col>
         <Col lg={6}><Parties organizationId={organization.id} /></Col>
-        <Col lg={6}><Recurrences organizationId={organization.id} timezone={organization.timezone} manage={manage} /></Col>
-      </Row>
+        <Col lg={6}><Recurrences organizationId={organization.id} timezone={organization.timezone} manage /></Col>
+      </Row> : <>
+        <div className="mb-4"><Parties organizationId={organization.id} /></div>
+        <RecordSection title="Consultar categorias e formas de pagamento"><Row className="g-4"><Col lg={6}><Categories organizationId={organization.id} manage={false} /></Col><Col lg={6}><Methods organizationId={organization.id} manage={false} /></Col></Row></RecordSection>
+        <RecordSection title="Consultar recorrências"><Recurrences organizationId={organization.id} timezone={organization.timezone} manage={false} /></RecordSection>
+      </>}
+
     </>
   )
 }

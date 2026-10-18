@@ -1,3 +1,4 @@
+import { RecordReturn } from '../components/RecordLink'
 import { Link, Outlet, useParams } from 'react-router-dom'
 import { Alert, Spinner } from 'react-bootstrap'
 import { AlertWatcher } from '../components/AlertWatcher'
@@ -41,6 +42,7 @@ export function OrganizationLayout() {
     content = (
       <>
         <AlertWatcher organizationId={organization.id} />
+        <RecordReturn organizationId={organization.id} />
         <Outlet context={organization} />
       </>
     )

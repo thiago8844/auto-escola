@@ -1,8 +1,9 @@
+import { RecordLink } from '../../components/RecordLink'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Alert, Badge, Button, Card } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ReassignControls } from '../../components/CommitmentList'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
@@ -104,12 +105,12 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
         <Card.Body>
           <dl className="row mb-0">
             <dt className="col-sm-4 col-md-3">Instrutor</dt>
-            <dd className="col-sm-8 col-md-9">{lesson.instructor?.full_name ?? '—'}</dd>
+            <dd className="col-sm-8 col-md-9">{lesson.instructor ? operate ? <RecordLink to={links.instructor(lesson.instructor.id)} returnLabel="Voltar à aula">{lesson.instructor.full_name}</RecordLink> : lesson.instructor.full_name : '—'}</dd>
             <dt className="col-sm-4 col-md-3">Veículo</dt>
-            <dd className="col-sm-8 col-md-9">{lesson.vehicle ? `${lesson.vehicle.plate} · ${lesson.vehicle.model} (${lesson.vehicle.category})` : 'Sem veículo'}</dd>
+            <dd className="col-sm-8 col-md-9">{lesson.vehicle ? <RecordLink to={links.vehicle(lesson.vehicle.id)} returnLabel="Voltar à aula">{lesson.vehicle.plate} · {lesson.vehicle.model} ({lesson.vehicle.category})</RecordLink> : 'Sem veículo'}</dd>
             <dt className="col-sm-4 col-md-3">Matrícula</dt>
             <dd className="col-sm-8 col-md-9">
-              {lesson.enrollment ? <Link to={links.enrollment(lesson.enrollment.id)}>Categoria {lesson.enrollment.category}</Link> : '—'}
+              {lesson.enrollment ? <RecordLink to={links.enrollment(lesson.enrollment.id)} returnLabel="Voltar à aula">Categoria {lesson.enrollment.category}</RecordLink> : '—'}
             </dd>
             <dt className="col-sm-4 col-md-3">Duração agendada</dt>
             <dd className="col-sm-8 col-md-9">{lesson.scheduled_minutes} min</dd>
