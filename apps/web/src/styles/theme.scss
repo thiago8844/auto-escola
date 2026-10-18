@@ -98,6 +98,13 @@
   --bs-primary: #{b.$dark-primary};
   --bs-primary-rgb: #{color.channel(b.$dark-primary, 'red', $space: rgb)}, #{color.channel(b.$dark-primary, 'green', $space: rgb)}, #{color.channel(b.$dark-primary, 'blue', $space: rgb)};
 
+  // Variante "light" (bg-light, badge bg="light", alert variant="light") vira superfície escura
+  --bs-light: #{b.$dark-surface};
+  --bs-light-rgb: #{color.channel(b.$dark-surface, 'red', $space: rgb)}, #{color.channel(b.$dark-surface, 'green', $space: rgb)}, #{color.channel(b.$dark-surface, 'blue', $space: rgb)};
+  --bs-light-bg-subtle: #1c2e39;
+  --bs-light-border-subtle: #{b.$dark-border};
+  --bs-light-text-emphasis: #{b.$dark-text};
+
   .btn-primary {
     --bs-btn-color: #{b.$dark-primary-contrast};
     --bs-btn-bg: #{b.$dark-primary};
