@@ -2,7 +2,7 @@
 
 Lista das telas do `apps/web`, divididas por módulo e ordenadas por importância. A ordem segue a dependência: sem autenticação e sem espaço não há o que testar nos módulos seguintes.
 
-> Status: 📋 planejado. Marque `[x]` quando a tela estiver pronta e verificada no navegador.
+> Status: ✅ V1 implementada (módulos 1 a 11) em `apps/web`. Falta a verificação manual no navegador, por papel de usuário: marque `[x]` item a item conforme for conferindo.
 > Cada módulo termina com uma verificação de regra de acesso, porque o papel do usuário muda o que a tela pode fazer (ver [permissoes.md](permissoes.md)).
 
 ## Ordem de importância
