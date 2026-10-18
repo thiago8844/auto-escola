@@ -81,8 +81,8 @@ class ExternalFeeController extends Controller
             $externalFee,
             FeeStatus::from($request->validated('status')),
             $request->validated('reason'),
-            $request->validated('confirmation_source'),
             $paidBy ? FeeParty::from($paidBy) : null,
+            $request->validated('receipt_document_id'),
         ));
     }
 

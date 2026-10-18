@@ -22,7 +22,8 @@ class FeeStatusRequest extends FormRequest
         return [
             'status' => ['required', Rule::enum(FeeStatus::class)],
             'reason' => ['nullable', 'string', 'max:255'],
-            'confirmation_source' => ['nullable', 'string', 'max:150'],
+            // Comprovante opcional ao confirmar o pagamento (documento já enviado ao espaço).
+            'receipt_document_id' => ['nullable', 'integer', Rule::exists('documents', 'id')->where('organization_id', $this->route('organization')->getKey())],
             'paid_by' => ['nullable', Rule::enum(FeeParty::class)],
         ];
     }

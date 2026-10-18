@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Taxa cobrada por órgão externo. Nunca é receita nem entra no caixa do espaço; o comprovante
- * anexado não confirma o pagamento por si: a confirmação é ato registrado da equipe.
+ * anexado (opcional) não confirma o pagamento por si: o pagamento confirmado é ato registrado da equipe.
  */
 #[Fillable([
     'organization_id', 'qualification_process_id', 'student_id', 'kind', 'voucher_number', 'amount_cents',
     'issued_at', 'due_date', 'reference', 'status', 'obligor', 'paid_by', 'reimbursement', 'status_reason',
-    'confirmation_source', 'confirmed_by', 'confirmed_at', 'receipt_document_id', 'notes', 'created_by',
+    'confirmed_by', 'confirmed_at', 'receipt_document_id', 'notes', 'created_by',
 ])]
 class ExternalFee extends Model
 {

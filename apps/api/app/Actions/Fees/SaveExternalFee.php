@@ -95,11 +95,11 @@ class SaveExternalFee
 
     /**
      * Muda a situação com as evidências exigidas. Anexar comprovante nunca confirma sozinho:
-     * a confirmação registra quem conferiu, quando e a fonte.
+     * o pagamento confirmado registra quem conferiu e quando; o comprovante é opcional e reforça a conferência.
      */
-    public function changeStatus(ExternalFee $fee, FeeStatus $next, ?string $reason, ?string $source, ?FeeParty $paidBy): ExternalFee
+    public function changeStatus(ExternalFee $fee, FeeStatus $next, ?string $reason, ?FeeParty $paidBy, ?int $receiptDocumentId = null): ExternalFee
     {
-        return DB::transaction(function () use ($fee, $next, $reason, $source, $paidBy) {
+        return DB::transaction(function () use ($fee, $next, $reason, $paidBy, $receiptDocumentId) {
             $current = ExternalFee::query()->whereKey($fee->getKey())->lockForUpdate()->firstOrFail();
             $previous = $current->status;
 
@@ -111,13 +111,13 @@ class SaveExternalFee
 
             switch ($next) {
                 case FeeStatus::Confirmed:
-                    if ($source === null || trim($source) === '') {
-                        throw new BusinessRuleException('Informe a fonte da confirmação (ex.: consulta ao órgão, extrato).', 'confirmation_source_required', 422);
-                    }
                     if ($paidBy === null && $current->paid_by === null) {
                         throw new BusinessRuleException('Informe quem efetivamente pagou.', 'paid_by_required', 422);
                     }
-                    $changes += ['confirmation_source' => $source, 'confirmed_by' => auth()->id(), 'confirmed_at' => now()];
+                    $changes += ['confirmed_by' => auth()->id(), 'confirmed_at' => now()];
+                    if ($receiptDocumentId !== null) {
+                        $changes['receipt_document_id'] = $receiptDocumentId;
+                    }
                     break;
                 case FeeStatus::Waived:
                 case FeeStatus::Cancelled:
@@ -130,7 +130,7 @@ class SaveExternalFee
             }
 
             if ($next !== FeeStatus::Confirmed && $previous === FeeStatus::Confirmed) {
-                $changes += ['confirmation_source' => null, 'confirmed_by' => null, 'confirmed_at' => null];
+                $changes += ['confirmed_by' => null, 'confirmed_at' => null];
             }
 
             if ($paidBy !== null) {
@@ -154,7 +154,7 @@ class SaveExternalFee
                 'process_id' => $current->qualification_process_id,
                 'subject' => $current,
                 'reason' => $reason,
-                'changes' => ['status' => ['from' => $previous->value, 'to' => $next->value], 'source' => $source],
+                'changes' => ['status' => ['from' => $previous->value, 'to' => $next->value], 'receipt_document_id' => $current->receipt_document_id],
             ]);
 
             return $current;

@@ -36,7 +36,6 @@ class ExternalFeeResource extends JsonResource
             'paid_by' => $this->paid_by?->value,
             'reimbursement' => $this->reimbursement,
             'cash_effect' => 'none',
-            'confirmation_source' => $this->confirmation_source,
             'confirmed_at' => $this->confirmed_at?->toIso8601String(),
             'confirmed_by' => $this->whenLoaded('confirmer', fn () => $this->confirmer ? ['id' => $this->confirmer->id, 'name' => $this->confirmer->name] : null),
             'receipt_document_id' => $this->receipt_document_id,
