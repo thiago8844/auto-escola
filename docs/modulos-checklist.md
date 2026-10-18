@@ -2,7 +2,7 @@
 
 Análise da base em **17/10/2026**. Este é o checklist principal do produto até o lançamento do MVP **web**, atendendo CFCs e instrutores autônomos. Cada entrega inclui a API necessária e a experiência completa em `apps/web`.
 
-**Próximo módulo recomendado: Disponibilidade e frota (módulo 4).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
+**Próximo módulo recomendado: Pendências e alertas reais (módulo 5).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; o módulo 4 (disponibilidade e frota) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
 
 **Ordem definida:** saldo → exames e taxas → desfecho e histórico → disponibilidade e frota → alertas → acesso e acabamento → relatórios → financeiro básico. **O financeiro é o último módulo do MVP.** Depois do MVP entram **Vendas e atendimento** e, em uma etapa própria posterior, o aplicativo mobile.
 
@@ -78,7 +78,7 @@ Esses resultados verificam a base atual. Não significam que os módulos planeja
 | 1               | **Pacotes e saldo de aulas**                 | Falta                                             | Contratação, reserva, consumo e extrato confiáveis por matrícula/percurso.                                         |
 | 2               | **Exames práticos e taxas externas**         | Falta                                             | Agendamento, tentativas, resultado e evidências de taxas.                                                          |
 | 3               | **Desfecho do processo e histórico**         | Parcial: situação editável e marca de conferência | Acompanhar aprovação, emissão e encerramento com rastreabilidade.                                                  |
-| 4               | **Disponibilidade e frota**                  | Parcial: conflitos, CRLV e ativo/inativo          | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
+| 4               | **Disponibilidade e frota**                  | Implementado em 18/10/2026                         | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
 | 5               | **Pendências e alertas reais**               | Parcial: componentes visuais                      | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
 | 6               | **Acesso, correções e acabamento web**       | Parcial                                           | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
 | 7               | **Relatórios e painel de gestão**            | Falta; início ainda é protótipo                   | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
@@ -152,17 +152,19 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 **Objetivo:** a agenda respeitar indisponibilidades reais de instrutor e veículo, além dos conflitos entre aulas já existentes.
 
-- [ ] Cadastrar bloqueios por período para veículo e instrutor, com início/fim, motivo e responsável: manutenção, ausência, férias ou indisponibilidade pontual.
-- [ ] Distinguir bloqueio local do espaço e indisponibilidade pessoal do instrutor entre espaços; preservar acesso e privacidade ao consultar conflitos.
-- [ ] Definir horário de atendimento e disponibilidade recorrente básica, ou uma regra explícita de agenda livre com bloqueios; mostrar essa regra no web.
-- [ ] Aplicar bloqueios no agendamento e remarcação de aulas e exames, com proteção contra concorrência e mensagens que indiquem como resolver o problema.
-- [ ] Ao bloquear recurso, desativar vínculo ou alterar validade documental, listar compromissos futuros afetados e permitir providências explícitas. Não cancelar silenciosamente.
-- [ ] Revalidar impedimentos operacionais relevantes na execução, incluindo documento de liberação vencido e veículo impedido; distinguir pré-reserva de prática liberada.
-- [ ] Registrar manutenção: tipo, data, oficina/fornecedor, quilometragem quando informada, custo estimado/real, documento e próxima revisão por data ou km.
-- [ ] Associar manutenção a bloqueio de agenda quando necessário; registrar liberação após o serviço e alertar para próxima revisão sem exigir telemetria.
-- [ ] Entregar detalhe do veículo com documentos/versões, bloqueios, manutenções e aulas/exames afetados, além de visão de disponibilidade do instrutor.
-- [ ] Preparar referência única da manutenção para futura conta a pagar; somente no módulo 8 integrar despesas, impedindo lançamento duplicado.
-- [ ] Verificar bloqueio sobre aula existente, documento vencendo após agendamento, manutenção encerrada, instrutor em dois CFCs e conflito de aula com exame.
+- [x] Cadastrar bloqueios por período para veículo e instrutor, com início/fim, motivo e responsável: manutenção, ausência, férias ou indisponibilidade pontual.
+- [x] Distinguir bloqueio local do espaço e indisponibilidade pessoal do instrutor entre espaços; preservar acesso e privacidade ao consultar conflitos.
+- [x] Definir horário de atendimento e disponibilidade recorrente básica, ou uma regra explícita de agenda livre com bloqueios; mostrar essa regra no web.
+- [x] Aplicar bloqueios no agendamento e remarcação de aulas e exames, com proteção contra concorrência e mensagens que indiquem como resolver o problema.
+- [x] Ao bloquear recurso, desativar vínculo ou alterar validade documental, listar compromissos futuros afetados e permitir providências explícitas. Não cancelar silenciosamente.
+- [x] Revalidar impedimentos operacionais relevantes na execução, incluindo documento de liberação vencido e veículo impedido; distinguir pré-reserva de prática liberada.
+- [x] Registrar manutenção: tipo, data, oficina/fornecedor, quilometragem quando informada, custo estimado/real, documento e próxima revisão por data ou km. *(O vínculo de `document_id` existe na API; o anexo pela tela chega com os documentos do veículo no módulo 6.)*
+- [x] Associar manutenção a bloqueio de agenda quando necessário; registrar liberação após o serviço e alertar para próxima revisão sem exigir telemetria.
+- [x] Entregar detalhe do veículo com documentos/versões, bloqueios, manutenções e aulas/exames afetados, além de visão de disponibilidade do instrutor.
+- [x] Preparar referência única da manutenção para futura conta a pagar; somente no módulo 8 integrar despesas, impedindo lançamento duplicado.
+- [x] Verificar bloqueio sobre aula existente, documento vencendo após agendamento, manutenção encerrada, instrutor em dois CFCs e conflito de aula com exame.
+
+**Implementação:** `availability_blocks` (alcance `organization`/`personal`), `vehicle_maintenances` com `finance_ref`, `business_hours` do espaço e `weekly_hours` por instrutor, `AvailabilityGuard` aplicado em aulas e exames sob os mesmos locks de instrutor/veículo, `ExecutionChecks` na conclusão e `CommitmentFinder` para listar compromissos afetados. Web: bloqueios e manutenção no detalhe do veículo e do instrutor, página *Bloqueios*, horário de atendimento nas configurações e troca de veículo/instrutor como providência. Testes: `AvailabilityTest`.
 
 **Aceite:** colocar um veículo em manutenção expor as aulas afetadas e impedir novas reservas conflitantes até sua liberação, mantendo o histórico.
 
