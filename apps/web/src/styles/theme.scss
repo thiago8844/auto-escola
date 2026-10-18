@@ -120,6 +120,35 @@
     --bs-btn-disabled-border-color: #{b.$dark-primary};
   }
 
+  // Botões secundários: o cinza da marca some sobre o fundo escuro, então usam o texto claro do tema
+  .btn-outline-secondary {
+    --bs-btn-color: #{b.$dark-text};
+    --bs-btn-border-color: #{b.$dark-control-border};
+    --bs-btn-hover-color: #{b.$dark-primary-contrast};
+    --bs-btn-hover-bg: #{b.$dark-text};
+    --bs-btn-hover-border-color: #{b.$dark-text};
+    --bs-btn-active-color: #{b.$dark-primary-contrast};
+    --bs-btn-active-bg: #{b.$dark-text};
+    --bs-btn-active-border-color: #{b.$dark-text};
+    --bs-btn-disabled-color: #{b.$dark-text-muted};
+    --bs-btn-disabled-border-color: #{b.$dark-control-border};
+  }
+
+  .btn-secondary {
+    --bs-btn-color: #{b.$dark-primary-contrast};
+    --bs-btn-bg: #{b.$dark-text-muted};
+    --bs-btn-border-color: #{b.$dark-text-muted};
+    --bs-btn-hover-color: #{b.$dark-primary-contrast};
+    --bs-btn-hover-bg: #{b.$dark-text};
+    --bs-btn-hover-border-color: #{b.$dark-text};
+    --bs-btn-active-color: #{b.$dark-primary-contrast};
+    --bs-btn-active-bg: #{b.$dark-text};
+    --bs-btn-active-border-color: #{b.$dark-text};
+    --bs-btn-disabled-color: #{b.$dark-primary-contrast};
+    --bs-btn-disabled-bg: #{b.$dark-text-muted};
+    --bs-btn-disabled-border-color: #{b.$dark-text-muted};
+  }
+
   .btn-outline-primary {
     --bs-btn-color: #{b.$dark-primary};
     --bs-btn-border-color: #{b.$dark-primary};
