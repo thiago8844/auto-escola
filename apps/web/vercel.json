@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://auto-escola-production-5fdf.up.railway.app/api/:path*" },
+    { "source": "/sanctum/:path*", "destination": "https://auto-escola-production-5fdf.up.railway.app/sanctum/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
