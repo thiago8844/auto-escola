@@ -33,20 +33,25 @@ class Dashboard
         $open = Alert::query()->visibleTo($org, $user)->where('status', 'open')
             ->whereDoesntHave('states', fn ($s) => $s->where('user_id', $user->getKey())->whereNotNull('archived_at'));
         $balanceAlerts = (clone $open)->where('category', 'balance');
+        $examsUntil = $now->addDays(13)->endOfDay();
+        $upcomingExams = PracticalExam::query()->where('organization_id', $org->getKey())->where('status', 'scheduled')
+            ->whereBetween('scheduled_at', [$dayStart, $examsUntil->utc()]);
 
         return [
             'scope' => 'staff',
             'today' => $shape($count($lessons($dayStart, $dayEnd)->toBase())) + ['date' => $now->toDateString()],
             'week' => $shape($count($lessons($weekStart, $weekEnd)->toBase())) + ['from' => $now->startOfWeek()->toDateString(), 'to' => $now->endOfWeek()->toDateString()],
             'students_in_service' => Enrollment::query()->where('organization_id', $org->getKey())->where('status', 'in_service')->distinct('student_id')->count('student_id'),
+            'enrollments_in_service' => Enrollment::query()->where('organization_id', $org->getKey())->where('status', 'in_service')->count(),
             'pending' => [
                 'open' => (clone $open)->count(),
                 'critical' => (clone $open)->where('priority', 'critical')->count(),
                 'high' => (clone $open)->where('priority', 'high')->count(),
             ],
             'low_balance' => ['count' => (clone $balanceAlerts)->count(), 'exhausted' => (clone $balanceAlerts)->where('kind', 'balance.exhausted')->count()],
-            'upcoming_exams' => PracticalExam::query()->where('organization_id', $org->getKey())->where('status', 'scheduled')
-                ->where('scheduled_at', '>=', $now->utc())->where('scheduled_at', '<=', $now->addDays(14)->utc())
+            'upcoming_exams_total' => (clone $upcomingExams)->count(),
+            'upcoming_exams_period' => ['from' => $now->toDateString(), 'to' => $examsUntil->toDateString()],
+            'upcoming_exams' => (clone $upcomingExams)
                 ->with('student:id,name')->orderBy('scheduled_at')->limit(5)->get()
                 ->map(fn ($e) => ['id' => $e->getKey(), 'student' => $e->student?->name, 'category' => $e->category, 'scheduled_at' => $e->scheduled_at->toIso8601String(), 'location' => $e->location])->all(),
             'next_lessons' => Lesson::query()->where('organization_id', $org->getKey())->where('status', 'scheduled')->where('ends_at', '>=', $now->utc())

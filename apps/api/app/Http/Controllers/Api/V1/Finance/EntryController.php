@@ -40,7 +40,7 @@ class EntryController extends FinanceController
         $filters = $request->validate(self::filterRules());
         $today = $service->today($organization)->toDateString();
 
-        $page = $query->installments($organization, $filters)->with(self::RELATIONS)
+        $page = $query->installments($organization, $filters)->with([...self::RELATIONS, 'payments'])
             ->orderBy('finance_installments.due_date')->orderBy('finance_installments.id')->paginate($this->perPage($request));
 
         return response()->json([
@@ -210,6 +210,8 @@ class EntryController extends FinanceController
         return response()->json(['data' => [
             'number' => FinancePresenter::receiptNumber($payment),
             'kind' => $entry->isReceivable() ? 'Recibo de recebimento' : 'Comprovante de pagamento',
+            'entry_type' => $entry->type,
+            'entry_id' => $entry->getKey(),
             'status' => $payment->status,
             'organization' => ['name' => $organization->name, 'document' => $organization->document, 'address' => $organization->address, 'city' => $organization->city, 'state' => $organization->state, 'phone' => $organization->phone],
             'counterparty' => ($entry->partner ?? $entry->student ?? $entry->party)?->name,

@@ -96,6 +96,9 @@ class FinancePresenter
         return [
             'id' => $i->getKey(), 'entry_id' => $i->entry_id, 'number' => $i->number, 'due_date' => $i->due_date->toDateString(),
             'amount_cents' => $i->amount_cents, 'paid_cents' => $i->paid_cents, 'outstanding_cents' => $i->outstandingCents(),
+            'awaiting_settlement_cents' => $i->relationLoaded('payments')
+                ? (int) $i->payments->where('status', 'pending')->sum('applied_cents')
+                : (int) $i->payments()->where('status', 'pending')->sum('applied_cents'),
             'status' => $i->status, 'paid_on' => $i->paid_on?->toDateString(),
             'situation' => $entry ? self::situation($i, $entry->status, $today) : ($i->status === 'cancelled' ? 'cancelled' : null),
             'entry' => $entry ? self::entrySummary($entry) : null,
