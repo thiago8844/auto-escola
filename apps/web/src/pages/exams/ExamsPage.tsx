@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Alert, Button, Col, Form, Row } from 'react-bootstrap'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -158,23 +157,7 @@ export default function ExamsPage() {
                       ]
                     : [{ header: 'Veículo', cell: (exam: (typeof data.data)[number]) => exam.vehicle?.plate ?? '—' }]),
                 ]}
-                preview={{
-                  label: (exam) => `exame de ${exam.student?.name ?? formatDateTime(exam.scheduled_at, organization.timezone)}`,
-                  render: (exam) => (
-                    <RecordPreview
-                      to={links.exam(exam.id)}
-                      action="Abrir exame"
-                      fields={[
-                        { label: 'Instrutor', value: exam.instructor?.full_name },
-                        { label: 'Veículo', value: exam.vehicle ? `${exam.vehicle.plate} · ${exam.vehicle.model}` : null },
-                        { label: 'Duração', value: `${exam.duration_minutes} min` },
-                        { label: 'Protocolo', value: exam.protocol },
-                        { label: 'Pendências', value: exam.pending?.map((p) => p.message).join(' · ') },
-                        { label: 'Observações', value: exam.notes },
-                      ]}
-                    />
-                  ),
-                }}
+                open={{ to: (exam) => links.exam(exam.id), label: (exam) => `exame de ${exam.student?.name ?? formatDateTime(exam.scheduled_at, organization.timezone)}` }}
               />
               <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
             </>

@@ -1,6 +1,5 @@
 import { Button, Col, Form, Row } from 'react-bootstrap'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -86,22 +85,7 @@ export default function ProcessesPage() {
                 { header: 'Situação', cell: (process) => <ProcessStatusBadge status={process.status} /> },
                 { header: 'Prática', cell: (process) => <ReleaseBadge release={process.practice_release} /> },
               ]}
-              preview={{
-                label: (process) => process.student?.name ?? `processo ${process.id}`,
-                render: (process) => (
-                  <RecordPreview
-                    to={links.process(process.id)}
-                    action="Abrir processo"
-                    fields={[
-                      { label: 'UF / município', value: [process.uf, process.municipality].filter(Boolean).join(' · ') },
-                      { label: 'RENACH', value: process.renach },
-                      { label: 'Protocolo', value: process.protocol },
-                      { label: 'Categorias atuais', value: process.current_categories.join(', ') },
-                      { label: 'Observações', value: process.notes },
-                    ]}
-                  />
-                ),
-              }}
+              open={{ to: (process) => links.process(process.id), label: (process) => process.student?.name ?? `processo ${process.id}` }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

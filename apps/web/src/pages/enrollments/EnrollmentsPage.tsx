@@ -1,7 +1,6 @@
 import { Button, Col, Form, Row } from 'react-bootstrap'
 import { BalanceBadge } from '../../components/BalanceBar'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -14,7 +13,6 @@ import { useEnrollments } from '../../hooks/useEnrollments'
 import { usePartners } from '../../hooks/usePartners'
 import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { useUrlFilters, useUrlSearch } from '../../hooks/useUrlFilters'
-import { formatCurrency } from '../../utils/formatCurrency'
 import { formatMinutes } from '../../utils/formatMinutes'
 import { canOperate } from '../../utils/permissions'
 
@@ -104,21 +102,7 @@ export default function EnrollmentsPage() {
                 }] : []),
                 { header: 'Prática', cell: (enrollment) => <ReleaseBadge release={enrollment.practice_release} /> },
               ]}
-              preview={{
-                label: (enrollment) => enrollment.student?.name ?? `matrícula ${enrollment.id}`,
-                render: (enrollment) => (
-                  <RecordPreview
-                    to={links.enrollment(enrollment.id)}
-                    action="Abrir matrícula"
-                    fields={[
-                      { label: 'Telefone do aluno', value: enrollment.student?.phone },
-                      { label: 'Auto escola parceira', value: enrollment.partner?.name },
-                      { label: 'Preço', value: enrollment.price_cents ? formatCurrency(enrollment.price_cents / 100) : null },
-                      { label: 'Observações', value: enrollment.notes },
-                    ]}
-                  />
-                ),
-              }}
+              open={{ to: (enrollment) => links.enrollment(enrollment.id), label: (enrollment) => enrollment.student?.name ?? `matrícula ${enrollment.id}` }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

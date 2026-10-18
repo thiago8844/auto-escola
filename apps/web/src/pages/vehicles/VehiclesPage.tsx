@@ -2,7 +2,6 @@ import { Badge, Button, Col, Form, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -127,19 +126,7 @@ export default function VehiclesPage() {
                     ]
                   : []),
               ]}
-              preview={{
-                label: (vehicle) => vehicle.plate,
-                render: (vehicle) => (
-                  <RecordPreview
-                    to={links.vehicle(vehicle.id)}
-                    action="Abrir veículo"
-                    fields={[
-                      { label: 'Adaptações', value: vehicle.adapted ? vehicle.adaptations || 'Veículo adaptado' : null },
-                      { label: 'Observações', value: vehicle.notes },
-                    ]}
-                  />
-                ),
-              }}
+              open={{ to: (vehicle) => links.vehicle(vehicle.id), label: (vehicle) => vehicle.plate }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

@@ -2,7 +2,6 @@ import { Button, Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -82,20 +81,7 @@ export default function StudentsPage() {
                     ]
                   : []),
               ]}
-              preview={{
-                label: (student) => student.name,
-                render: (student) => (
-                  <RecordPreview
-                    to={links.student(student.id)}
-                    action="Abrir cadastro do aluno"
-                    fields={[
-                      { label: 'E-mail', value: student.email },
-                      { label: 'Nascimento', value: student.birth_date ? formatDate(student.birth_date) : null },
-                      { label: 'Telefone', value: student.phone },
-                    ]}
-                  />
-                ),
-              }}
+              open={{ to: (student) => links.student(student.id), label: (student) => student.name }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

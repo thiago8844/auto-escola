@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
-import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -64,19 +63,7 @@ export default function InstructorsPage() {
                 { header: 'Conta', cell: (instructor) => (instructor.has_account ? 'Com conta própria' : 'Sem conta') },
                 { header: 'Vínculo', cell: (instructor) => <LinkStatusBadge active={instructor.active !== false} /> },
               ]}
-              preview={{
-                label: (instructor) => instructor.full_name,
-                render: (instructor) => (
-                  <RecordPreview
-                    to={links.instructor(instructor.id)}
-                    action="Abrir instrutor"
-                    fields={[
-                      { label: 'Credencial', value: instructor.credential_number },
-                      { label: 'Categorias', value: instructor.categories.join(', ') },
-                    ]}
-                  />
-                ),
-              }}
+              open={{ to: (instructor) => links.instructor(instructor.id), label: (instructor) => instructor.full_name }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>
