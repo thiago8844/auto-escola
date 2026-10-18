@@ -1,3 +1,5 @@
+import { Suspense } from 'react'
+import { FullPageSpinner } from './FullPageSpinner'
 import { FormNavigationGuard } from './FormNavigationGuard'
 import { AuthGate } from './AuthGate'
 import { CriticalAlertHost } from './CriticalAlertHost'
@@ -7,7 +9,7 @@ import { ToastHost } from './ToastHost'
 export function RootLayout() {
   return (
     <>
-      <AuthGate />
+      <Suspense fallback={<FullPageSpinner />}><AuthGate /></Suspense>
       <FormNavigationGuard />
       <ToastHost />
       <CriticalAlertHost />
