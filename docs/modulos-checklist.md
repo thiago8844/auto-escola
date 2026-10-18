@@ -2,7 +2,7 @@
 
 Análise da base em **17/10/2026**. Este é o checklist principal do produto até o lançamento do MVP **web**, atendendo CFCs e instrutores autônomos. Cada entrega inclui a API necessária e a experiência completa em `apps/web`.
 
-**Próximo módulo recomendado: Acesso, correções e acabamento web (módulo 6).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; os módulos 4 (disponibilidade e frota) e 5 (pendências e alertas) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
+**Próximo módulo recomendado: Relatórios e painel de gestão (módulo 7).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026; os módulos 4 (disponibilidade e frota), 5 (pendências e alertas) e 6 (acesso e acabamento, exceto a homologação manual de teclado e dispositivos) em 18/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
 
 **Ordem definida:** saldo → exames e taxas → desfecho e histórico → disponibilidade e frota → alertas → acesso e acabamento → relatórios → financeiro básico. **O financeiro é o último módulo do MVP.** Depois do MVP entram **Vendas e atendimento** e, em uma etapa própria posterior, o aplicativo mobile.
 
@@ -80,7 +80,7 @@ Esses resultados verificam a base atual. Não significam que os módulos planeja
 | 3               | **Desfecho do processo e histórico**         | Parcial: situação editável e marca de conferência | Acompanhar aprovação, emissão e encerramento com rastreabilidade.                                                  |
 | 4               | **Disponibilidade e frota**                  | Implementado em 18/10/2026                         | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
 | 5               | **Pendências e alertas reais**               | Implementado em 18/10/2026 (contas no módulo 8)   | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
-| 6               | **Acesso, correções e acabamento web**       | Parcial                                           | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
+| 6               | **Acesso, correções e acabamento web**       | Implementado em 18/10/2026 (homologação manual pendente) | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
 | 7               | **Relatórios e painel de gestão**            | Falta; início ainda é protótipo                   | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
 | 8               | **Financeiro básico — último módulo do MVP** | Falta                                             | Receitas/despesas, parcelas, formas de pagamento, contas bancárias/caixa, transferências e relatórios financeiros. |
 | Após o MVP      | **Vendas e atendimento**                     | Futuro                                            | Organizar interessados, próximos contatos, propostas e conversão em matrícula.                                     |
@@ -194,20 +194,24 @@ Lembretes externos para alunos por WhatsApp, SMS, push e automações de e-mail 
 
 **Objetivo:** fechar as lacunas dos fluxos existentes para que a equipe consiga operar sem intervenção no banco de dados.
 
-- [ ] Entregar esqueci minha senha/redefinição: link temporário de uso único, formulário web, respostas que não revelem existência de conta, limitação de tentativas e verificação de expiração/reuso.
-- [ ] Oferecer alteração da própria senha com confirmação da atual e definir invalidação de outras sessões. Revisar para produção a política de senha hoje configurada com mínimo de 3 caracteres, registrando a decisão de produto.
-- [ ] Completar edição dos dados permitidos de matrícula e processo, com proteção do histórico prevista nos módulos 1 e 3 e mensagens claras para dados imutáveis.
-- [ ] Permitir adicionar exigência de checklist e selecionar/anexar evidência privada no próprio fluxo. Conferência deve continuar sendo uma ação separada do upload.
-- [ ] Oferecer substituição de documento e consulta de versões na interface; concluir vínculo a processo/veículo, validade e tratamento amigável de arquivo indisponível.
-- [ ] Resolver paginação de agendas, histórico do aluno/matrícula, documentos e seletores auxiliares. Uma lista acima de 100 itens deve continuar acessível e o resumo deve considerar o conjunto completo.
-- [ ] Completar filtros de situação, período, categoria e parceiro onde fizerem parte do trabalho diário; manter busca e página ao voltar do detalhe.
-- [ ] Oferecer arquivamento e recuperação dos cadastros que precisam sair da operação sem perder histórico; explicitar o que acontece com CPF/placa já usados e compromissos existentes.
-- [ ] Traduzir validações do backend para português e padronizar mensagens, máscaras, datas, valores, confirmações e retorno de ações.
-- [ ] Conferir navegação por teclado, foco em modais/erros, rótulos, contraste, temas e estados de carregamento/vazio/erro nas telas novas e existentes.
-- [ ] Validar uso do site em desktop, tablet e navegador de celular, incluindo tabelas e formulários longos. Isso é responsividade web, sem antecipar desenvolvimento do aplicativo mobile.
-- [ ] Definir comportamento de alteração simultânea e falha de rede nas operações críticas, evitando sobrescrita silenciosa, duplo envio e perda de dados preenchidos.
-- [ ] Guiar primeiro acesso: criar espaço, completar dados, cadastrar/vincular instrutor, veículo, aluno e contratação; oferecer instruções curtas nos estados vazios e um canal de suporte.
-- [ ] Conferir matrizes de permissão no web e na API; preço, documentos e dados de saúde não podem aparecer por atalhos, erros ou mudança de espaço.
+- [x] Entregar esqueci minha senha/redefinição: link temporário de uso único, formulário web, respostas que não revelem existência de conta, limitação de tentativas e verificação de expiração/reuso.
+- [x] Oferecer alteração da própria senha com confirmação da atual e definir invalidação de outras sessões. Revisar para produção a política de senha hoje configurada com mínimo de 3 caracteres, registrando a decisão de produto.
+- [x] Completar edição dos dados permitidos de matrícula e processo, com proteção do histórico prevista nos módulos 1 e 3 e mensagens claras para dados imutáveis.
+- [x] Permitir adicionar exigência de checklist e selecionar/anexar evidência privada no próprio fluxo. Conferência deve continuar sendo uma ação separada do upload.
+- [x] Oferecer substituição de documento e consulta de versões na interface; concluir vínculo a processo/veículo, validade e tratamento amigável de arquivo indisponível.
+- [x] Resolver paginação de agendas, histórico do aluno/matrícula, documentos e seletores auxiliares. Uma lista acima de 100 itens deve continuar acessível e o resumo deve considerar o conjunto completo.
+- [x] Completar filtros de situação, período, categoria e parceiro onde fizerem parte do trabalho diário; manter busca e página ao voltar do detalhe.
+- [x] Oferecer arquivamento e recuperação dos cadastros que precisam sair da operação sem perder histórico; explicitar o que acontece com CPF/placa já usados e compromissos existentes.
+- [x] Traduzir validações do backend para português e padronizar mensagens, máscaras, datas, valores, confirmações e retorno de ações.
+- [ ] Conferir navegação por teclado, foco em modais/erros, rótulos, contraste, temas e estados de carregamento/vazio/erro nas telas novas e existentes. *(Feito: atalho “Pular para o conteúdo”, rótulos e `role="alert"` nas telas novas, estados de carregamento/vazio/erro em todas as listas. Pendente: passada manual de teclado, leitor de tela e contraste no navegador.)*
+- [ ] Validar uso do site em desktop, tablet e navegador de celular, incluindo tabelas e formulários longos. Isso é responsividade web, sem antecipar desenvolvimento do aplicativo mobile. *(Tabelas viram cartões abaixo de 768 px e modais ocupam a tela no celular; falta homologar em aparelhos reais.)*
+- [x] Definir comportamento de alteração simultânea e falha de rede nas operações críticas, evitando sobrescrita silenciosa, duplo envio e perda de dados preenchidos.
+- [x] Guiar primeiro acesso: criar espaço, completar dados, cadastrar/vincular instrutor, veículo, aluno e contratação; oferecer instruções curtas nos estados vazios e um canal de suporte.
+- [x] Conferir matrizes de permissão no web e na API; preço, documentos e dados de saúde não podem aparecer por atalhos, erros ou mudança de espaço.
+
+**Implementação:** `PasswordController` (recuperação de uso único com expiração, troca de senha e encerramento de outras sessões), política `autoescola.password_min` (8 em produção, 3 em desenvolvimento) espelhada no web, `lang/pt_BR`, `IdempotentRequests` (`Idempotency-Key` automática no web: duplo clique vira uma requisição e o reenvio após falha de rede não duplica), `StaleGuard` (`expected_updated_at` → `409 stale_record`), arquivar/restaurar aluno, parceiro e veículo com explicação de CPF/placa, `fetchAllPages` no web (agenda, histórico, seletores e documentos sem truncar em 100), filtros na URL, edição de matrícula e processo, exigência e evidência no checklist, substituição e versões de documentos (aluno e veículo), `OnboardingController` e guia de primeiros passos, `SUPPORT_EMAIL`. Testes: `AccessPolishTest`, `PermissionMatrixTest`.
+
+**Decisão de produto (senha):** mínimo de 8 caracteres em produção, sem exigência de símbolos para não dificultar o uso por equipes pequenas; reavaliar com o piloto. Alterar a senha ou redefini-la desconecta os outros dispositivos.
 
 **Aceite:** uma equipe nova consegue começar, corrigir seus cadastros, recuperar acesso e encontrar todo o histórico pelo web, sem intervenção técnica.
 
