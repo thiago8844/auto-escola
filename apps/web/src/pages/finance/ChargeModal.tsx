@@ -17,6 +17,7 @@ type ChargeModalProps = {
   title: string
   // Rota da integração, sob o espaço (ex.: /enrollments/3/finance/charge)
   path: string
+  packageId?: number
   type: EntryType
   description: string
   defaultTotalCents: number | null
@@ -45,7 +46,7 @@ export function ChargeModal(props: ChargeModalProps) {
   const [edited, setEdited] = useState<Array<{ due_date: string; amount: string }> | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [existing, setExisting] = useState<number | null>(null)
-  const [done, setDone] = useState(false)
+  const [createdEntryId, setCreatedEntryId] = useState<number | null>(null)
 
   const totalCents = toCents(total)
   const planned = useMemo(
@@ -63,6 +64,7 @@ export function ChargeModal(props: ChargeModalProps) {
       {
         path,
         body: {
+          package_id: props.packageId,
           total_cents: totalCents,
           installments: rows.map((row) => ({ due_date: row.due_date, amount_cents: toCents(row.amount) })),
           ...(partnerName ? { payer } : {}),
@@ -70,7 +72,7 @@ export function ChargeModal(props: ChargeModalProps) {
         },
       },
       {
-        onSuccess: () => setDone(true),
+        onSuccess: (entry) => setCreatedEntryId(entry.id),
         onError: (e) => {
           if (e.code === 'entry_already_exists') setExisting((e.body?.existing_entry_id as number | undefined) ?? 0)
           setError(e.message)
@@ -79,7 +81,7 @@ export function ChargeModal(props: ChargeModalProps) {
     )
   }
 
-  if (done) {
+  if (createdEntryId !== null) {
     return (
       <Modal show onHide={onClose} centered>
         <Modal.Header closeButton>
@@ -88,7 +90,7 @@ export function ChargeModal(props: ChargeModalProps) {
         <Modal.Body>
           <Alert variant="success" className="mb-0">
             {type === 'receivable' ? 'Cobrança gerada.' : 'Despesa lançada.'} Acompanhe e dê baixa em{' '}
-            <Link to={type === 'receivable' ? links.financeReceivables : links.financePayables}>{type === 'receivable' ? 'Financeiro > Receitas' : 'Financeiro > Despesas'}</Link>.
+            <Link to={`${type === 'receivable' ? links.financeReceivables : links.financePayables}?lancamento=${createdEntryId}`}>{type === 'receivable' ? 'Financeiro > Receitas' : 'Financeiro > Despesas'}</Link>.
           </Alert>
         </Modal.Body>
         <Modal.Footer>

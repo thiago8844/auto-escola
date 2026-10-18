@@ -164,7 +164,7 @@ export default function EntriesPage({ type }: { type: EntryType }) {
                   { header: 'Parcela', cell: (row) => <span className="tabular-nums">{row.number}/{row.entry?.installments_count}</span> },
                   { header: 'Valor', cell: (row) => <Money cents={row.amount_cents} /> },
                   { header: 'Em aberto', cell: (row) => <Money cents={row.outstanding_cents} strong /> },
-                  { header: 'Situação', cell: (row) => <SituationBadge situation={row.situation} /> },
+                  { header: 'Situação', cell: (row) => <SituationBadge situation={row.situation} pendingCents={row.awaiting_settlement_cents} /> },
                   {
                     header: 'Ações',
                     actions: true,

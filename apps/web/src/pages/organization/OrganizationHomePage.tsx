@@ -10,7 +10,7 @@ import { useAuthStore } from '../../stores/authStore'
 import type { DashboardStaff } from '../../types/reports'
 import { formatDateTime } from '../../utils/formatDateTime'
 import { canOperate } from '../../utils/permissions'
-import { addDays, todayInTimeZone } from '../../utils/timezone'
+import { todayInTimeZone } from '../../utils/timezone'
 
 type CardProps = { icon: string; label: string; value: number | string; hint?: string; to: string; tone?: 'danger' | 'warning' }
 
@@ -62,8 +62,8 @@ export default function OrganizationHomePage() {
             <StaffDashboard data={data} timezone={organization.timezone} organizationId={organization.id} today={today} />
           ) : (
             <Row xs={1} md={3} className="g-4">
-              <IndicatorCard icon="bi-calendar-check" label="Minhas aulas hoje" value={data.today.total} to={links.schedule} />
-              <IndicatorCard icon="bi-calendar-week" label="Minhas aulas na semana" value={data.week.total} to={links.schedule} />
+              <IndicatorCard icon="bi-calendar-check" label="Minhas aulas hoje" value={data.today.total} to={`${links.schedule}?data=${today}`} />
+              <IndicatorCard icon="bi-calendar-week" label="Minhas aulas na semana" value={data.week.total} to={`${links.schedule}?visao=semana&data=${data.today.date}`} />
               <IndicatorCard icon="bi-bell" label="Pendências para mim" value={data.pending.open} to={links.alerts} tone={data.pending.open > 0 ? 'warning' : undefined} />
             </Row>
           )
@@ -82,9 +82,9 @@ function StaffDashboard({ data, timezone, organizationId, today }: { data: Dashb
   return (
     <>
       <Row xs={1} md={2} xl={3} className="g-4 mb-4">
-        <IndicatorCard icon="bi-calendar-check" label="Aulas hoje" value={data.today.total} hint={`${data.today.scheduled} a realizar · ${data.today.completed} realizadas`} to={links.schedule} />
-        <IndicatorCard icon="bi-calendar-week" label="Aulas na semana" value={data.week.total} hint={`${data.week.completed} realizadas · ${data.week.missed} faltas`} to={reports(`de=${weekFrom}&ate=${weekTo}`)} />
-        <IndicatorCard icon="bi-mortarboard" label="Alunos em atendimento" value={data.students_in_service} to={`${links.enrollments}?situacao=in_service`} />
+        <IndicatorCard icon="bi-calendar-check" label="Aulas hoje" value={data.today.total} hint={`${data.today.scheduled} a realizar · ${data.today.completed} realizadas`} to={`${links.schedule}?data=${today}`} />
+        <IndicatorCard icon="bi-calendar-week" label="Aulas na semana" value={data.week.total} hint={`${data.week.completed} realizadas · ${data.week.missed} faltas`} to={reports(`de=${weekFrom}&ate=${weekTo}&cancelamentos=1`)} />
+        <IndicatorCard icon="bi-mortarboard" label="Matrículas em atendimento" value={data.enrollments_in_service} to={`${links.enrollments}?situacao=in_service`} />
         <IndicatorCard
           icon="bi-bell"
           label="Pendências abertas"
@@ -98,10 +98,10 @@ function StaffDashboard({ data, timezone, organizationId, today }: { data: Dashb
           label="Saldo de aulas baixo"
           value={data.low_balance.count}
           hint={data.low_balance.exhausted > 0 ? `${data.low_balance.exhausted} esgotados` : undefined}
-          to={`${links.alerts}`}
+          to={`${links.alerts}?assunto=balance`}
           tone={data.low_balance.exhausted > 0 ? 'warning' : undefined}
         />
-        <IndicatorCard icon="bi-clipboard-check" label="Exames nos próximos 14 dias" value={data.upcoming_exams.length} to={`${links.exams}?de=${today}&ate=${addDays(today, 14)}&situacao=scheduled`} />
+        <IndicatorCard icon="bi-clipboard-check" label="Exames nos próximos 14 dias" value={data.upcoming_exams_total} to={`${links.exams}?de=${data.upcoming_exams_period.from}&ate=${data.upcoming_exams_period.to}&situacao=scheduled`} />
       </Row>
 
       <Row className="g-4">

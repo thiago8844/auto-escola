@@ -82,7 +82,7 @@ export default function AvailabilityPage() {
                           {b.vehicle.plate} · {b.vehicle.model}
                         </Link>
                       ) : b.instructor ? (
-                        <Link to={links.instructor(b.instructor.id)}>{b.instructor.full_name}</Link>
+                        staff ? <Link to={links.instructor(b.instructor.id)}>{b.instructor.full_name}</Link> : <span>{b.instructor.full_name}</span>
                       ) : (
                         'Instrutor'
                       ),

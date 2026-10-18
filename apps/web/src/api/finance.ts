@@ -115,7 +115,7 @@ export const createRecurrence = (id: number | string, body: Record<string, unkno
 export const stopRecurrence = (id: number | string, recurrenceId: number) => send<FinanceRecurrence>('delete', id, `/recurrences/${recurrenceId}`)
 
 // ---- integrações (ação explícita; repetir devolve 409 com o lançamento existente)
-type ChargeBody = { total_cents?: number; plan?: PlanInput; installments?: Array<{ due_date: string; amount_cents: number }>; payer?: 'student' | 'partner'; party_id?: number | null; due_date?: string }
+type ChargeBody = { package_id?: number; total_cents?: number; plan?: PlanInput; installments?: Array<{ due_date: string; amount_cents: number }>; payer?: 'student' | 'partner'; party_id?: number | null; due_date?: string }
 
 export async function chargeFrom(organizationId: number | string, path: string, body: ChargeBody): Promise<Entry> {
   const { data } = await http.post<{ data: Entry }>(`/organizations/${organizationId}${path}`, body, handledByScreen)

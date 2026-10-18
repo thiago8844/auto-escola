@@ -81,6 +81,9 @@ export type DashboardStaff = {
   today: { total: number; scheduled: number; completed: number; missed: number; cancelled: number; date: string }
   week: { total: number; scheduled: number; completed: number; missed: number; cancelled: number; from: string; to: string }
   students_in_service: number
+  enrollments_in_service: number
+  upcoming_exams_total: number
+  upcoming_exams_period: { from: string; to: string }
   pending: { open: number; critical: number; high: number }
   low_balance: { count: number; exhausted: number }
   upcoming_exams: Array<{ id: number; student: string | null; category: string; scheduled_at: string; location: string | null }>

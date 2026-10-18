@@ -91,6 +91,7 @@ export type Installment = {
   outstanding_cents: number
   status: 'open' | 'paid' | 'cancelled'
   paid_on: string | null
+  awaiting_settlement_cents: number
   situation: Situation | null
   entry: EntrySummary | null
   payments: Payment[] | null
@@ -208,6 +209,8 @@ export type FeeAdvance = {
 }
 
 export type Receipt = {
+  entry_type: EntryType
+  entry_id: number
   number: string
   kind: string
   status: string

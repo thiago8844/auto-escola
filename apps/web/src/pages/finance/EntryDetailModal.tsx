@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Alert, Badge, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { QueryState } from '../../components/QueryState'
 import { ReasonModal } from '../../components/ReasonModal'
 import { DOCUMENT_TYPE_LABELS } from '../../config/domain'
@@ -21,6 +21,7 @@ type Props = { organizationId: number; timezone: string; entryId: number; canMan
 
 // Lançamento completo: parcelas, pagamentos, anexos e as providências de cada um (receber, estornar, corrigir, cancelar)
 export function EntryDetailModal({ organizationId, timezone, entryId, canManage, onClose }: Props) {
+  const location = useLocation()
   const links = organizationPaths(organizationId)
   const query = useEntry(organizationId, entryId)
   const documents = useEntryDocuments(organizationId, entryId)
@@ -92,7 +93,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
                     <div key={installment.id} className="border rounded p-3 mb-3">
                       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                         <div>
-                          <strong>Parcela {installment.number}/{entry.installments_count}</strong> · vence em {formatDate(installment.due_date)} <SituationBadge situation={installment.situation} />
+                          <strong>Parcela {installment.number}/{entry.installments_count}</strong> · vence em {formatDate(installment.due_date)} <SituationBadge situation={installment.situation} pendingCents={installment.awaiting_settlement_cents} />
                           <div className="small text-secondary">
                             Valor <Money cents={installment.amount_cents} /> · pago <Money cents={installment.paid_cents} /> · falta <Money cents={installment.outstanding_cents} strong />
                           </div>
@@ -202,7 +203,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
                                         </Button>
                                       )}
                                       {payment.status !== 'reversed' && (
-                                        <Link to={links.financeReceipt(payment.id)} className="btn btn-sm btn-outline-secondary">
+                                        <Link to={links.financeReceipt(payment.id)} state={{ from: location.pathname + location.search }} className="btn btn-sm btn-outline-secondary">
                                           Recibo
                                         </Link>
                                       )}
@@ -291,7 +292,7 @@ export function EntryDetailModal({ organizationId, timezone, entryId, canManage,
       {reversing && (
         <ReasonModal
           title="Estornar pagamento"
-          description="O valor sai da conta e a parcela volta a ficar em aberto. O lançamento original continua no extrato, com o estorno ao lado."
+          description={reversing.status === 'pending' ? 'O pagamento pendente será desfeito e a parcela voltará a ficar em aberto. Nenhum dinheiro já liquidado será movimentado.' : query.data?.type === 'payable' ? 'O valor retorna à conta e a despesa volta a ficar em aberto. O histórico do pagamento e do estorno é preservado.' : 'O valor sai da conta e a parcela volta a ficar em aberto. O histórico do recebimento e do estorno é preservado.'}
           label="Motivo do estorno"
           submitLabel="Estornar"
           singleLine

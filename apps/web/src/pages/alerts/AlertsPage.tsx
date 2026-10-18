@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Badge, Button, Card, Col, Form, Nav, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '../../components/PageHeader'
@@ -7,6 +6,7 @@ import { QueryState } from '../../components/QueryState'
 import { ALERT_CATEGORIES, PRIORITY_LABEL, PRIORITY_NOTICE } from '../../config/alerts'
 import { NOTICE_TYPES } from '../../config/notices'
 import { PAGE_SIZE } from '../../config/organization'
+import { useUrlFilters } from '../../hooks/useUrlFilters'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useAlerts, useArchiveAlert, useMarkAlertRead, useMarkAllAlertsRead, useRefreshAlerts, useUnarchiveAlert } from '../../hooks/useAlerts'
 import { useClampPage, usePageParam } from '../../hooks/usePageParam'
@@ -20,9 +20,13 @@ type Tab = 'open' | 'resolved' | 'archived'
 export default function AlertsPage() {
   const organization = useActiveOrganization()
   const [page, setPage] = usePageParam()
-  const [tab, setTab] = useState<Tab>('open')
-  const [category, setCategory] = useState('')
-  const [priority, setPriority] = useState('')
+  const { values, set } = useUrlFilters(['aba', 'assunto', 'prioridade'] as const)
+  const tab: Tab = values.aba === 'resolved' || values.aba === 'archived' ? values.aba : 'open'
+  const category = values.assunto
+  const priority = values.prioridade
+  const setTab = (value: Tab) => set('aba', value === 'open' ? '' : value)
+  const setCategory = (value: string) => set('assunto', value)
+  const setPriority = (value: string) => set('prioridade', value)
 
   const query = useAlerts(organization.id, {
     page,
@@ -43,7 +47,7 @@ export default function AlertsPage() {
     <>
       <PageHeader
         title="Pendências"
-        subtitle="O que precisa de ação no seu espaço. A lista se atualiza sozinha e some quando a pendência é resolvida."
+        subtitle="O que precisa de ação no seu espaço. Resolver o registro de origem encerra a pendência. Ler ou arquivar só organiza a sua lista."
         actions={
           <>
             <Button variant="outline-secondary" onClick={() => refresh.mutate(undefined)} disabled={refresh.isPending}>

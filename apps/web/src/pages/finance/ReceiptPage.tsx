@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Card, Table } from 'react-bootstrap'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { QueryState } from '../../components/QueryState'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
@@ -10,6 +10,7 @@ import { formatCents } from '../../utils/money'
 // Comprovante interno de recebimento ou pagamento, pronto para imprimir (não é documento fiscal)
 export default function ReceiptPage() {
   const { paymentId = '' } = useParams()
+  const location = useLocation()
   const organization = useActiveOrganization()
   const links = organizationPaths(organization.id)
   const query = useReceipt(organization.id, paymentId)
@@ -19,7 +20,7 @@ export default function ReceiptPage() {
       {(receipt) => (
         <div className="print-area" style={{ maxWidth: 720 }}>
           <div className="d-flex justify-content-between align-items-center mb-3 d-print-none">
-            <Link to={links.financeReceivables}>← Voltar ao financeiro</Link>
+            <Link to={typeof location.state?.from === 'string' && location.state.from.startsWith(`${links.home}/`) ? location.state.from : `${receipt.entry_type === 'payable' ? links.financePayables : links.financeReceivables}?lancamento=${receipt.entry_id}`}>← Voltar ao lançamento</Link>
             <Button onClick={() => window.print()}>
               <i className="bi bi-printer me-2" aria-hidden="true" />
               Imprimir
@@ -40,9 +41,9 @@ export default function ReceiptPage() {
                 </div>
               </div>
               {receipt.status === 'reversed' && <Alert variant="danger">Este pagamento foi estornado em {receipt.payment.reversed_at ? formatDate(receipt.payment.reversed_at) : ''}. O recibo não vale mais.</Alert>}
-              {receipt.status === 'pending' && <Alert variant="warning">Pagamento aguardando liquidação: o valor ainda não está disponível na conta.</Alert>}
+              {receipt.status === 'pending' && <Alert variant="warning">Pagamento aguardando liquidação: o valor ainda não foi confirmado no caixa.</Alert>}
               <p>
-                Recebemos de <strong>{receipt.counterparty ?? 'pagador não identificado'}</strong> a quantia de <strong>{formatCents(receipt.payment.gross_cents)}</strong> referente a{' '}
+                {receipt.entry_type === 'payable' ? 'Pagamos a' : 'Recebemos de'} <strong>{receipt.counterparty ?? 'pessoa não identificada'}</strong> a quantia de <strong>{formatCents(receipt.payment.gross_cents)}</strong> referente a{' '}
                 <strong>{receipt.description}</strong> (parcela {receipt.installment}).
               </p>
               <Table size="sm" className="mb-3">
@@ -51,7 +52,7 @@ export default function ReceiptPage() {
                   {receipt.payment.discount_cents > 0 && <tr><th scope="row" className="fw-normal">Desconto</th><td className="text-end tabular-nums">{formatCents(receipt.payment.discount_cents)}</td></tr>}
                   {receipt.payment.interest_cents > 0 && <tr><th scope="row" className="fw-normal">Juros</th><td className="text-end tabular-nums">{formatCents(receipt.payment.interest_cents)}</td></tr>}
                   {receipt.payment.fine_cents > 0 && <tr><th scope="row" className="fw-normal">Multa</th><td className="text-end tabular-nums">{formatCents(receipt.payment.fine_cents)}</td></tr>}
-                  <tr><th scope="row">Total recebido</th><td className="text-end tabular-nums fw-semibold">{formatCents(receipt.payment.gross_cents)}</td></tr>
+                  <tr><th scope="row">{receipt.entry_type === 'payable' ? 'Total pago' : 'Total recebido'}</th><td className="text-end tabular-nums fw-semibold">{formatCents(receipt.payment.gross_cents)}</td></tr>
                 </tbody>
               </Table>
               <dl className="row small mb-3">

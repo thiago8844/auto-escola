@@ -57,7 +57,7 @@ export function EnrollmentFinancePanel({ organization, enrollment, canManage }: 
                       {entry.installments.map((installment) => (
                         <li key={installment.id} className="d-flex flex-wrap align-items-center justify-content-between gap-2 small">
                           <span>
-                            {installment.number}/{entry.installments_count} · {formatDate(installment.due_date)} · <Money cents={installment.amount_cents} /> <SituationBadge situation={installment.situation} />
+                            {installment.number}/{entry.installments_count} · {formatDate(installment.due_date)} · <Money cents={installment.amount_cents} /> <SituationBadge situation={installment.situation} pendingCents={installment.awaiting_settlement_cents} />
                           </span>
                           {installment.outstanding_cents > 0 && installment.status !== 'cancelled' && (
                             <Button size="sm" variant="outline-primary" onClick={() => setPaying({ ...installment, entry })}>Receber</Button>
@@ -78,6 +78,7 @@ export function EnrollmentFinancePanel({ organization, enrollment, canManage }: 
           organizationId={organization.id}
           timezone={organization.timezone}
           title="Cobrar a contratação"
+          packageId={charging}
           path={`/enrollments/${enrollment.id}/finance/charge`}
           type="receivable"
           description={`Gera a conta a receber de ${enrollment.student?.name ?? 'o aluno'} a partir do pacote. Aulas consumidas, edições da matrícula e novos envios não geram outra cobrança.`}
