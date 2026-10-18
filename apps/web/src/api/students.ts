@@ -29,6 +29,9 @@ function toPayload(input: StudentInput) {
     email: orNull(input.email),
     phone: orNull(input.phone),
     birth_date: orNull(input.birth_date),
+    identity_number: orNull(input.identity_number),
+    identity_issuer: orNull(input.identity_issuer),
+    partner_id: input.partner_id === 'space' ? null : Number(input.partner_id),
   }
 }
 

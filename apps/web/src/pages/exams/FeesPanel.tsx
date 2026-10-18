@@ -68,8 +68,8 @@ export function FeesPanel({ organizationId, timezone, processId, exams, examId }
                       <FeeStatusBadge status={fee.status} />
                       {fee.confirmed_at && (
                         <span className="d-block small text-secondary mt-1">
-                          Conferida por {fee.confirmed_by?.name ?? '—'} em {formatDate(fee.confirmed_at, timezone)}
-                          {fee.confirmation_source ? ` · ${fee.confirmation_source}` : ''}
+                          Conferido por {fee.confirmed_by?.name ?? '—'} em {formatDate(fee.confirmed_at, timezone)}
+                          {fee.receipt_document_id ? ' · com comprovante' : ''}
                         </span>
                       )}
                       {fee.status_reason && <span className="d-block small text-secondary mt-1">{fee.status_reason}</span>}

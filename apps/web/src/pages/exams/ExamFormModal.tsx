@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { useForm, useWatch } from 'react-hook-form'
 import { FormField } from '../../components/FormField'
@@ -7,6 +7,9 @@ import { SelectField } from '../../components/SelectField'
 import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
 import { WindowFields } from '../../components/WindowFields'
+import { DrivingSchoolField } from './DrivingSchoolField'
+import { SPACE_VALUE, toPartnerId } from '../../utils/drivingSchool'
+import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { PROCESS_TYPE_LABELS } from '../../config/domain'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { useStudentEnrollments } from '../../hooks/useStudentHistory'
@@ -25,9 +28,10 @@ const simpleCategories = (process: QualificationProcess | undefined) => [...new 
 
 type ExamFormModalProps = { organizationId: number; timezone: string; presetProcess?: QualificationProcess; onClose: () => void; onCreated?: (examId: number) => void }
 
-// Agenda uma nova tentativa: aluno → processo → categoria. A numeração da tentativa é da API.
+// Agenda uma nova tentativa: aluno → processo → categoria → veículo. A numeração da tentativa é da API.
 export function ExamFormModal({ organizationId, timezone, presetProcess, onClose, onCreated }: ExamFormModalProps) {
   const create = useCreateExam(organizationId)
+  const isIndependent = useActiveOrganization().type === 'independent'
   const [text, setText] = useState('')
   const [studentId, setStudentId] = useState(presetProcess ? String(presetProcess.student?.id ?? '') : '')
   const search = useDebouncedValue(text.trim())
@@ -45,6 +49,7 @@ export function ExamFormModal({ organizationId, timezone, presetProcess, onClose
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<ExamFormInput>({
     resolver: zodResolver(examSchema),
@@ -54,15 +59,21 @@ export function ExamFormModal({ organizationId, timezone, presetProcess, onClose
       enrollment_id: '',
       date: todayInTimeZone(timezone),
       start_time: '',
-      duration: '60',
+      partner_id: isIndependent ? '' : SPACE_VALUE,
       location: '',
-      protocol: '',
       instructor_id: '',
       vehicle_id: '',
       notes: '',
     },
   })
   const [processId, category] = useWatch({ control, name: ['process_id', 'category'] })
+  const student = students.data?.data.find((s) => String(s.id) === studentId) ?? presetProcess?.student
+  // A autoescola do exame vem do cadastro do aluno, mas pode ser trocada aqui
+  const studentSchool = (student as { partner_id?: number | null } | undefined)?.partner_id
+  useEffect(() => setValue('vehicle_id', ''), [category, setValue])
+  useEffect(() => {
+    if (studentSchool !== undefined) setValue('partner_id', studentSchool ? String(studentSchool) : isIndependent ? '' : SPACE_VALUE)
+  }, [studentSchool, isIndependent, setValue])
   const process = presetProcess ?? openProcesses.find((p) => String(p.id) === processId)
   const categories = simpleCategories(process)
   const matchingEnrollments = (enrollments.data?.data ?? []).filter(
@@ -76,9 +87,8 @@ export function ExamFormModal({ organizationId, timezone, presetProcess, onClose
         enrollment_id: values.enrollment_id ? Number(values.enrollment_id) : null,
         category: values.category,
         scheduled_at: zonedTimeToIso(values.date, values.start_time, timezone),
-        duration_minutes: Number(values.duration),
+        partner_id: toPartnerId(values.partner_id),
         location: values.location || null,
-        protocol: values.protocol || null,
         notes: values.notes || null,
         instructor_id: values.instructor_id ? Number(values.instructor_id) : null,
         vehicle_id: values.vehicle_id ? Number(values.vehicle_id) : null,
@@ -159,10 +169,12 @@ export function ExamFormModal({ organizationId, timezone, presetProcess, onClose
             </Col>
           </Row>
 
-          <WindowFields register={register} errors={errors} timeZone={timezone} />
+          <DrivingSchoolField error={errors.partner_id?.message} {...register('partner_id')} />
+          <p className="small text-secondary">Nome, CPF, nascimento e identidade vão da ficha do aluno; confira se estão completos.</p>
+
+          <WindowFields register={register} errors={errors} timeZone={timezone} withDuration={false} />
 
           <FormField label="Local" error={errors.location?.message} {...register('location')} />
-          <FormField label="Protocolo (opcional)" error={errors.protocol?.message} {...register('protocol')} />
 
           <Row>
             <Col sm={6}>
@@ -176,10 +188,11 @@ export function ExamFormModal({ organizationId, timezone, presetProcess, onClose
               </SelectField>
             </Col>
             <Col sm={6}>
-              <SelectField label="Veículo (opcional)" error={errors.vehicle_id?.message} {...register('vehicle_id')}>
-                <option value="">Sem veículo</option>
-                {vehicles.data?.data
-                  .filter((v) => category === '' || v.category === category)
+              <SelectField label="Veículo (opcional)" error={errors.vehicle_id?.message} disabled={category === ''} {...register('vehicle_id')}>
+                <option value="">{category === '' ? 'Escolha a categoria primeiro' : 'Sem veículo'}</option>
+                {category !== '' &&
+                  vehicles.data?.data
+                  .filter((v) => v.category === category)
                   .map((vehicle) => (
                     <option key={vehicle.id} value={vehicle.id}>
                       {vehicle.plate} · {vehicle.model}

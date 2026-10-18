@@ -129,7 +129,7 @@ export const FEE_STATUS: Record<FeeStatus, { label: string; bg: string; icon: st
   unknown: { label: 'Situação desconhecida', bg: 'secondary', icon: 'bi-question-circle' },
   pending: { label: 'Pendente', bg: 'warning', icon: 'bi-hourglass-split' },
   payment_reported: { label: 'Pagamento informado', bg: 'info', icon: 'bi-receipt' },
-  confirmed: { label: 'Confirmada', bg: 'success', icon: 'bi-patch-check-fill' },
+  confirmed: { label: 'Pagamento confirmado', bg: 'success', icon: 'bi-patch-check-fill' },
   waived: { label: 'Isenta', bg: 'secondary', icon: 'bi-dash-circle' },
   cancelled: { label: 'Cancelada', bg: 'secondary', icon: 'bi-x-circle' },
 }

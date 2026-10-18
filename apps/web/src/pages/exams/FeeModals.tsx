@@ -169,13 +169,16 @@ const STATUS_HELP: Record<FeeStatus, string> = {
   unknown: 'Ainda não se sabe se a taxa foi paga.',
   pending: 'A guia existe e o pagamento ainda não foi feito.',
   payment_reported: 'O aluno ou alguém informou que pagou, mas ainda não houve conferência.',
-  confirmed: 'A equipe conferiu o pagamento em uma fonte confiável. Fica registrado quem conferiu, quando e a fonte.',
+  confirmed: 'A equipe conferiu que a taxa foi paga. Fica registrado quem conferiu e quando. O comprovante é opcional, mas garante que o aluno pagou.',
   waived: 'A taxa não é devida. Informe o motivo da isenção.',
   cancelled: 'A guia foi cancelada. Esta situação é definitiva.',
 }
 
 export function FeeStatusModal({ organizationId, fee, onClose }: { organizationId: number; fee: ExternalFee; onClose: () => void }) {
   const change = useFeeStatus(organizationId, fee.id)
+  const upload = useUploadExamDocument(organizationId)
+  const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
   const {
     register,
     control,
@@ -184,16 +187,26 @@ export function FeeStatusModal({ organizationId, fee, onClose }: { organizationI
     formState: { errors },
   } = useForm<FeeStatusInput>({
     resolver: zodResolver(feeStatusSchema),
-    defaultValues: { status: fee.status === 'unknown' ? 'pending' : fee.status, reason: '', confirmation_source: fee.confirmation_source ?? '', paid_by: fee.paid_by ?? '' },
+    defaultValues: { status: fee.status === 'unknown' ? 'pending' : fee.status, reason: '', paid_by: fee.paid_by ?? '' },
   })
   const status = useWatch({ control, name: 'status' })
 
-  const onSubmit = handleSubmit((values) =>
+  const onSubmit = handleSubmit(async (values) => {
+    setFileError(null)
+    let receiptId: number | undefined
+    if (values.status === 'confirmed' && file) {
+      if (file.size > DOCUMENT_MAX_MB * 1024 * 1024) return setFileError(`O arquivo deve ter no máximo ${DOCUMENT_MAX_MB} MB.`)
+      try {
+        receiptId = (await upload.mutateAsync({ file, type: 'payment_proof', processId: fee.qualification_process_id })).id
+      } catch {
+        return setFileError('Não foi possível enviar o comprovante.')
+      }
+    }
     change.mutate(
-      { status: values.status, reason: values.reason || null, confirmation_source: values.confirmation_source || null, paid_by: (values.paid_by || null) as FeeParty | null },
+      { status: values.status, reason: values.reason || null, paid_by: (values.paid_by || null) as FeeParty | null, receipt_document_id: receiptId },
       { onSuccess: onClose, onError: (error) => applyFieldErrors(error, setError) },
-    ),
-  )
+    )
+  })
   const alertMessage = formAlertMessage(change.error)
 
   return (
@@ -221,7 +234,6 @@ export function FeeStatusModal({ organizationId, fee, onClose }: { organizationI
 
           {status === 'confirmed' && (
             <>
-              <FormField label="Fonte da confirmação" hint="Ex.: consulta ao portal do órgão, extrato bancário, recibo." error={errors.confirmation_source?.message} {...register('confirmation_source')} />
               <SelectField label="Quem pagou de fato" error={errors.paid_by?.message} {...register('paid_by')}>
                 <option value="">Escolha</option>
                 {Object.entries(FEE_PARTY_LABELS).map(([value, label]) => (
@@ -230,6 +242,14 @@ export function FeeStatusModal({ organizationId, fee, onClose }: { organizationI
                   </option>
                 ))}
               </SelectField>
+              <Form.Group className="mb-3" controlId="fee-status-file">
+                <Form.Label>Comprovante de pagamento (opcional)</Form.Label>
+                <Form.Control type="file" accept={DOCUMENT_ACCEPT} isInvalid={!!fileError} onChange={(event) => setFile((event.target as HTMLInputElement).files?.[0] ?? null)} />
+                <Form.Control.Feedback type="invalid">{fileError}</Form.Control.Feedback>
+                <Form.Text muted>
+                  {fee.receipt_document_id ? 'Já há um comprovante anexado; enviar outro o substitui. ' : ''}PDF, JPG, PNG ou WebP, até {DOCUMENT_MAX_MB} MB.
+                </Form.Text>
+              </Form.Group>
               <p className="small text-secondary">
                 Se o espaço pagou por conta de outra pessoa, o adiantamento fica marcado como “reembolso a acertar”. Pagamento direto pelo aluno ao órgão não entra no caixa.
               </p>
@@ -241,7 +261,7 @@ export function FeeStatusModal({ organizationId, fee, onClose }: { organizationI
           <Button variant="outline-secondary" onClick={onClose} disabled={change.isPending}>
             Cancelar
           </Button>
-          <SubmitButton loading={change.isPending}>Salvar</SubmitButton>
+          <SubmitButton loading={change.isPending || upload.isPending}>Salvar</SubmitButton>
         </Modal.Footer>
       </form>
     </Modal>

@@ -1,33 +1,29 @@
 import { z } from 'zod'
 
-const duration = z
-  .string()
-  .trim()
-  .refine((v) => /^\d+$/.test(v) && Number(v) >= 15 && Number(v) <= 480, 'Informe de 15 a 480 minutos.')
-
+// Exame não tem duração nem protocolo: data, horário e as informações da inscrição
 const slot = {
   date: z.string().min(1, 'Informe a data.'),
   start_time: z.string().min(1, 'Informe o horário.'),
-  duration,
 }
+
+// Autoescola do exame: 'space' = o próprio espaço (só em autoescola); senão, o ID de uma parceira
+const drivingSchool = z.string().min(1, 'Escolha a autoescola do exame.')
 
 export const examSchema = z.object({
   process_id: z.string().min(1, 'Escolha o processo.'),
   category: z.string().min(1, 'Escolha a categoria.'),
   enrollment_id: z.string(),
+  partner_id: drivingSchool,
   ...slot,
   location: z.string().trim().max(150, 'Máximo de 150 caracteres.'),
-  protocol: z.string().trim().max(60, 'Máximo de 60 caracteres.'),
   instructor_id: z.string(),
   vehicle_id: z.string(),
   notes: z.string().trim().max(2000, 'Máximo de 2000 caracteres.'),
 })
 
+// Remarcar é por imprevisto: só a nova data, com o motivo que fica no histórico
 export const examRescheduleSchema = z.object({
   ...slot,
-  location: z.string().trim().max(150, 'Máximo de 150 caracteres.'),
-  instructor_id: z.string(),
-  vehicle_id: z.string(),
   reason: z.string().trim().min(3, 'Explique o motivo (mín. 3 caracteres).').max(255, 'Máximo de 255 caracteres.'),
 })
 
@@ -36,8 +32,12 @@ export const examResultSchema = z.object({
   reason: z.string().trim().max(255, 'Máximo de 255 caracteres.'),
 })
 
+// Editar corrige qualquer informação, inclusive a data digitada errada
 export const examEditSchema = z.object({
-  protocol: z.string().trim().max(60, 'Máximo de 60 caracteres.'),
+  ...slot,
+  partner_id: drivingSchool,
+  instructor_id: z.string(),
+  vehicle_id: z.string(),
   location: z.string().trim().max(150, 'Máximo de 150 caracteres.'),
   notes: z.string().trim().max(2000, 'Máximo de 2000 caracteres.'),
 })
@@ -60,12 +60,10 @@ export const feeStatusSchema = z
   .object({
     status: z.enum(['unknown', 'pending', 'payment_reported', 'confirmed', 'waived', 'cancelled']),
     reason: z.string().trim().max(255, 'Máximo de 255 caracteres.'),
-    confirmation_source: z.string().trim().max(150, 'Máximo de 150 caracteres.'),
     paid_by: z.string(),
   })
   .superRefine((d, ctx) => {
     if (d.status === 'confirmed') {
-      if (d.confirmation_source === '') ctx.addIssue({ code: 'custom', path: ['confirmation_source'], message: 'Informe a fonte da confirmação.' })
       if (d.paid_by === '') ctx.addIssue({ code: 'custom', path: ['paid_by'], message: 'Informe quem pagou.' })
     }
     if ((d.status === 'waived' || d.status === 'cancelled') && d.reason.length < 3) {

@@ -11,6 +11,10 @@ export const studentSchema = z.object({
     .toLowerCase()
     .refine((value) => value === '' || z.email().safeParse(value).success, 'Informe um e-mail válido.'),
   phone: z.string().trim().max(30, 'O telefone deve ter no máximo 30 caracteres.'),
+  identity_number: z.string().trim().max(20, 'A identidade deve ter no máximo 20 caracteres.'),
+  identity_issuer: z.string().trim().max(20, 'O órgão expedidor deve ter no máximo 20 caracteres.'),
+  // Autoescola do aluno: 'space' = o próprio espaço (só em autoescola); senão, o ID de uma parceira
+  partner_id: z.string().min(1, 'Escolha a autoescola do aluno.'),
   birth_date: z.string().refine((value) => value === '' || value < today(), 'A data de nascimento deve ser anterior a hoje.'),
 })
 

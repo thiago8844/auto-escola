@@ -7,6 +7,8 @@ import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
 import { WindowFields } from '../../components/WindowFields'
 import { EXAM_STATUS } from '../../config/domain'
+import { DrivingSchoolField } from './DrivingSchoolField'
+import { drivingSchoolValue, toPartnerId } from '../../utils/drivingSchool'
 import { useExamResult, useRescheduleExam, useUpdateExam } from '../../hooks/useExams'
 import { useInstructors } from '../../hooks/useInstructors'
 import { useVehicles } from '../../hooks/useVehicles'
@@ -24,11 +26,10 @@ import { isoToZonedParts, zonedTimeToIso } from '../../utils/timezone'
 
 type Common = { organizationId: number; timezone: string; exam: Exam; onClose: () => void }
 
-// Remarcar mantém a tentativa; a data, o local e os responsáveis anteriores ficam no histórico
+// Remarcar é para imprevisto: só a nova data, com o motivo. A data anterior fica no histórico.
+// Para corrigir uma data digitada errada, use Editar.
 export function RescheduleExamModal({ organizationId, timezone, exam, onClose }: Common) {
   const reschedule = useRescheduleExam(organizationId, exam.id)
-  const instructors = useInstructors(organizationId, { page: 1, all: true, active: true })
-  const vehicles = useVehicles(organizationId, { page: 1, all: true, status: 'active' })
   const start = isoToZonedParts(exam.scheduled_at, timezone)
   const {
     register,
@@ -37,34 +38,19 @@ export function RescheduleExamModal({ organizationId, timezone, exam, onClose }:
     formState: { errors },
   } = useForm<ExamRescheduleInput>({
     resolver: zodResolver(examRescheduleSchema),
-    defaultValues: {
-      date: start.date,
-      start_time: start.time,
-      duration: String(exam.duration_minutes),
-      location: exam.location ?? '',
-      instructor_id: exam.instructor ? String(exam.instructor.id) : '',
-      vehicle_id: exam.vehicle ? String(exam.vehicle.id) : '',
-      reason: '',
-    },
+    defaultValues: { date: start.date, start_time: start.time, reason: '' },
   })
 
   const onSubmit = handleSubmit((values) =>
     reschedule.mutate(
-      {
-        scheduled_at: zonedTimeToIso(values.date, values.start_time, timezone),
-        duration_minutes: Number(values.duration),
-        location: values.location || null,
-        reason: values.reason,
-        instructor_id: values.instructor_id ? Number(values.instructor_id) : null,
-        vehicle_id: values.vehicle_id ? Number(values.vehicle_id) : null,
-      },
+      { scheduled_at: zonedTimeToIso(values.date, values.start_time, timezone), reason: values.reason },
       { onSuccess: onClose, onError: (error) => applyFieldErrors(error, setError) },
     ),
   )
   const alertMessage = formAlertMessage(reschedule.error)
 
   return (
-    <Modal show onHide={onClose} centered size="lg" fullscreen="sm-down">
+    <Modal show onHide={onClose} centered fullscreen="sm-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">
           Remarcar exame
@@ -72,38 +58,14 @@ export function RescheduleExamModal({ organizationId, timezone, exam, onClose }:
       </Modal.Header>
       <form onSubmit={onSubmit} noValidate>
         <Modal.Body>
+          <p className="small text-secondary">Use quando houve um imprevisto. O motivo e a data anterior ficam no histórico. Digitou a data errada? Feche e use “Editar”.</p>
           {alertMessage && (
             <Alert variant="danger" role="alert">
               <i className="bi bi-calendar-x me-2" aria-hidden="true" />
               {alertMessage}
             </Alert>
           )}
-          <WindowFields register={register} errors={errors} timeZone={timezone} />
-          <FormField label="Local" error={errors.location?.message} {...register('location')} />
-          <Row>
-            <Col sm={6}>
-              <SelectField label="Instrutor" error={errors.instructor_id?.message} {...register('instructor_id')}>
-                <option value="">Sem instrutor</option>
-                {instructors.data?.data.map((i) => (
-                  <option key={i.id} value={i.id}>
-                    {i.full_name}
-                  </option>
-                ))}
-              </SelectField>
-            </Col>
-            <Col sm={6}>
-              <SelectField label="Veículo" error={errors.vehicle_id?.message} {...register('vehicle_id')}>
-                <option value="">Sem veículo</option>
-                {vehicles.data?.data
-                  .filter((v) => v.category === exam.category)
-                  .map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.plate} · {v.model}
-                    </option>
-                  ))}
-              </SelectField>
-            </Col>
-          </Row>
+          <WindowFields register={register} errors={errors} timeZone={timezone} withDuration={false} />
           <TextAreaField label="Motivo da remarcação" error={errors.reason?.message} {...register('reason')} />
         </Modal.Body>
         <Modal.Footer>
@@ -188,8 +150,13 @@ export function ExamResultModal({ organizationId, exam, correction, onClose }: O
   )
 }
 
-export function EditExamModal({ organizationId, exam, onClose }: Omit<Common, 'timezone'>) {
+// Editar corrige qualquer informação do exame, inclusive a data. Data, instrutor, veículo e autoescola só enquanto agendado.
+export function EditExamModal({ organizationId, timezone, exam, onClose }: Common) {
   const update = useUpdateExam(organizationId, exam.id)
+  const scheduled = exam.status === 'scheduled'
+  const instructors = useInstructors(organizationId, { page: 1, all: true, active: true }, scheduled)
+  const vehicles = useVehicles(organizationId, { page: 1, all: true, status: 'active' })
+  const start = isoToZonedParts(exam.scheduled_at, timezone)
   const {
     register,
     handleSubmit,
@@ -197,21 +164,38 @@ export function EditExamModal({ organizationId, exam, onClose }: Omit<Common, 't
     formState: { errors },
   } = useForm<ExamEditInput>({
     resolver: zodResolver(examEditSchema),
-    defaultValues: { protocol: exam.protocol ?? '', location: exam.location ?? '', notes: exam.notes ?? '' },
+    defaultValues: {
+      date: start.date,
+      start_time: start.time,
+      partner_id: drivingSchoolValue(exam),
+      instructor_id: exam.instructor ? String(exam.instructor.id) : '',
+      vehicle_id: exam.vehicle ? String(exam.vehicle.id) : '',
+      location: exam.location ?? '',
+      notes: exam.notes ?? '',
+    },
   })
   const onSubmit = handleSubmit((values) =>
     update.mutate(
-      { protocol: values.protocol || null, location: values.location || null, notes: values.notes || null },
+      {
+        location: values.location || null,
+        notes: values.notes || null,
+        ...(scheduled && {
+          scheduled_at: zonedTimeToIso(values.date, values.start_time, timezone),
+          partner_id: toPartnerId(values.partner_id),
+          instructor_id: values.instructor_id ? Number(values.instructor_id) : null,
+          vehicle_id: values.vehicle_id ? Number(values.vehicle_id) : null,
+        }),
+      },
       { onSuccess: onClose, onError: (error) => applyFieldErrors(error, setError) },
     ),
   )
   const alertMessage = formAlertMessage(update.error)
 
   return (
-    <Modal show onHide={onClose} centered fullscreen="sm-down">
+    <Modal show onHide={onClose} centered size="lg" fullscreen="sm-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">
-          Editar dados do exame
+          Editar exame
         </Modal.Title>
       </Modal.Header>
       <form onSubmit={onSubmit} noValidate>
@@ -221,8 +205,42 @@ export function EditExamModal({ organizationId, exam, onClose }: Omit<Common, 't
               {alertMessage}
             </Alert>
           )}
+          {scheduled ? (
+            <>
+              <p className="small text-secondary">Corrige o cadastro do exame, inclusive a data. Se houve um imprevisto, use “Remarcar” para registrar o motivo no histórico.</p>
+              <WindowFields register={register} errors={errors} timeZone={timezone} withDuration={false} />
+              <DrivingSchoolField error={errors.partner_id?.message} {...register('partner_id')} />
+            </>
+          ) : (
+            <p className="small text-secondary">Exame com resultado: só o local e as observações podem ser alterados.</p>
+          )}
           <FormField label="Local" error={errors.location?.message} {...register('location')} />
-          <FormField label="Protocolo" error={errors.protocol?.message} {...register('protocol')} />
+          {scheduled && (
+            <Row>
+              <Col sm={6}>
+                <SelectField label="Instrutor responsável" error={errors.instructor_id?.message} {...register('instructor_id')}>
+                  <option value="">Sem instrutor</option>
+                  {instructors.data?.data.map((i) => (
+                    <option key={i.id} value={i.id}>
+                      {i.full_name}
+                    </option>
+                  ))}
+                </SelectField>
+              </Col>
+              <Col sm={6}>
+                <SelectField label={`Veículo (categoria ${exam.category})`} error={errors.vehicle_id?.message} {...register('vehicle_id')}>
+                  <option value="">Sem veículo</option>
+                  {vehicles.data?.data
+                    .filter((v) => v.category === exam.category)
+                    .map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.plate} · {v.model}
+                      </option>
+                    ))}
+                </SelectField>
+              </Col>
+            </Row>
+          )}
           <TextAreaField label="Observações" error={errors.notes?.message} {...register('notes')} />
         </Modal.Body>
         <Modal.Footer>

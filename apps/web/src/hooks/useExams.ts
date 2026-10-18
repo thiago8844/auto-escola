@@ -11,6 +11,7 @@ import {
   settleReimbursement,
   updateExam,
   uploadExamDocument,
+  type ExamEditInputPayload,
   type ExamInput,
   type ExamListParams,
   type FeeInput,

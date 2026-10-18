@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Alert, Button, Card, ListGroup } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import { PageHeader } from '../../components/PageHeader'
@@ -8,11 +8,22 @@ import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useExam, useExams } from '../../hooks/useExams'
 import type { Exam } from '../../types/exam'
+import { formatDate } from '../../utils/formatDate'
 import { formatDateTime } from '../../utils/formatDateTime'
 import { canOperate } from '../../utils/permissions'
 import { EditExamModal, ExamResultModal, RescheduleExamModal } from './ExamActionModals'
 import { ExamAttachments } from './ExamAttachments'
 import { FeesPanel } from './FeesPanel'
+
+// Dados que a inscrição do exame pede; vêm da ficha do aluno
+const REGISTRATION_FIELDS = [
+  ['name', 'Nome'],
+  ['cpf', 'CPF'],
+  ['category', 'Categoria pretendida'],
+  ['birth_date', 'Data de nascimento'],
+  ['identity_number', 'Identidade'],
+  ['identity_issuer', 'Órgão expedidor'],
+] as const
 
 export default function ExamDetailPage() {
   const { examId = '' } = useParams()
@@ -51,7 +62,7 @@ function ExamDetail({ exam }: { exam: Exam }) {
                   <i className="bi bi-clipboard-check me-1" aria-hidden="true" />
                   Registrar resultado
                 </Button>
-                <Button size="sm" variant="outline-primary" onClick={() => setModal('reschedule')}>
+                <Button size="sm" variant="outline-primary" onClick={() => setModal('reschedule')} title="Para imprevistos: registra o motivo no histórico">
                   Remarcar
                 </Button>
               </>
@@ -63,7 +74,7 @@ function ExamDetail({ exam }: { exam: Exam }) {
             )}
             {staff && (
               <Button size="sm" variant="outline-secondary" onClick={() => setModal('edit')}>
-                Editar dados
+                Editar
               </Button>
             )}
           </>
@@ -90,8 +101,13 @@ function ExamDetail({ exam }: { exam: Exam }) {
           <dl className="row mb-0">
             <dt className="col-sm-4 col-md-3">Data e hora</dt>
             <dd className="col-sm-8 col-md-9 tabular-nums">
-              {formatDateTime(exam.scheduled_at, tz)} · {exam.duration_minutes} min
+              {formatDateTime(exam.scheduled_at, tz)}
               {(exam.reschedule_count ?? 0) > 0 && <span className="text-secondary"> (remarcado {exam.reschedule_count}×)</span>}
+            </dd>
+            <dt className="col-sm-4 col-md-3">Autoescola</dt>
+            <dd className="col-sm-8 col-md-9">
+              {exam.driving_school?.name ?? '—'}
+              {exam.driving_school?.kind === 'space' && <span className="text-secondary"> (este espaço)</span>}
             </dd>
             <dt className="col-sm-4 col-md-3">Local</dt>
             <dd className="col-sm-8 col-md-9">{exam.location ?? '—'}</dd>
@@ -101,8 +117,6 @@ function ExamDetail({ exam }: { exam: Exam }) {
             <dd className="col-sm-8 col-md-9">{exam.vehicle ? `${exam.vehicle.plate} · ${exam.vehicle.model}` : '—'}</dd>
             {staff && (
               <>
-                <dt className="col-sm-4 col-md-3">Protocolo</dt>
-                <dd className="col-sm-8 col-md-9 text-break">{exam.protocol ?? '—'}</dd>
                 <dt className="col-sm-4 col-md-3">Resultado</dt>
                 <dd className="col-sm-8 col-md-9">
                   <ExamStatusBadge status={exam.status} />
@@ -117,6 +131,33 @@ function ExamDetail({ exam }: { exam: Exam }) {
         </Card.Body>
       </Card>
 
+      {staff && exam.registration && (
+        <Card className="mb-4">
+          <Card.Header as="h2" className="h6 mb-0">
+            Dados da inscrição
+          </Card.Header>
+          <Card.Body>
+            <dl className="row mb-0">
+              {REGISTRATION_FIELDS.map(([key, label]) => {
+                const raw = exam.registration![key]
+                const value = key === 'birth_date' && raw ? formatDate(raw) : raw
+                return (
+                  <Fragment key={key}>
+                    <dt className="col-sm-4 col-md-3">{label}</dt>
+                    <dd className={`col-sm-8 col-md-9 ${value ? '' : 'text-danger'}`}>{value || 'Não informado'}</dd>
+                  </Fragment>
+                )
+              })}
+            </dl>
+            {exam.student_id !== undefined && exam.pending?.some((p) => p.code === 'student_data') && (
+              <Link to={links.studentEdit(exam.student_id)} className="btn btn-sm btn-outline-primary mt-3">
+                Completar cadastro do aluno
+              </Link>
+            )}
+          </Card.Body>
+        </Card>
+      )}
+
       {staff && (exam.schedule_history?.length ?? 0) > 0 && (
         <section className="mb-4" aria-labelledby="history-title">
           <h2 id="history-title" className="h4 mb-3">
@@ -126,7 +167,6 @@ function ExamDetail({ exam }: { exam: Exam }) {
             {exam.schedule_history!.map((change, index) => (
               <ListGroup.Item key={change.changed_at}>
                 <span className="fw-semibold tabular-nums">{formatDateTime(change.scheduled_at, tz)}</span>
-                {change.location && ` · ${change.location}`}
                 <span className="d-block small text-secondary">
                   Substituído em {formatDateTime(change.changed_at, tz)}
                   {change.reason ? ` — ${change.reason}` : ''} (remarcação {index + 1})
@@ -152,7 +192,7 @@ function ExamDetail({ exam }: { exam: Exam }) {
 
       {modal === 'reschedule' && <RescheduleExamModal organizationId={organization.id} timezone={tz} exam={exam} onClose={() => setModal(null)} />}
       {(modal === 'result' || modal === 'correct') && <ExamResultModal organizationId={organization.id} exam={exam} correction={modal === 'correct'} onClose={() => setModal(null)} />}
-      {modal === 'edit' && <EditExamModal organizationId={organization.id} exam={exam} onClose={() => setModal(null)} />}
+      {modal === 'edit' && <EditExamModal organizationId={organization.id} timezone={tz} exam={exam} onClose={() => setModal(null)} />}
     </>
   )
 }
