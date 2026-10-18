@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
+import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -57,12 +58,25 @@ export default function InstructorsPage() {
               rows={data.data}
               getKey={(instructor) => instructor.id}
               columns={[
-                { header: 'Nome', primary: true, cell: (instructor) => <Link to={links.instructor(instructor.id)}>{instructor.full_name}</Link> },
+                { header: 'Nome', primary: true, cell: (instructor) => instructor.full_name },
                 { header: 'Credencial', cell: (instructor) => instructor.credential_number ?? '—' },
                 { header: 'Categorias', cell: (instructor) => (instructor.categories.length > 0 ? instructor.categories.join(', ') : '—') },
                 { header: 'Conta', cell: (instructor) => (instructor.has_account ? 'Com conta própria' : 'Sem conta') },
                 { header: 'Vínculo', cell: (instructor) => <LinkStatusBadge active={instructor.active !== false} /> },
               ]}
+              preview={{
+                label: (instructor) => instructor.full_name,
+                render: (instructor) => (
+                  <RecordPreview
+                    to={links.instructor(instructor.id)}
+                    action="Abrir instrutor"
+                    fields={[
+                      { label: 'Credencial', value: instructor.credential_number },
+                      { label: 'Categorias', value: instructor.categories.join(', ') },
+                    ]}
+                  />
+                ),
+              }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

@@ -2,6 +2,7 @@ import { Button, Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
+import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -63,7 +64,7 @@ export default function StudentsPage() {
               rows={data.data}
               getKey={(student) => student.id}
               columns={[
-                { header: 'Nome', primary: true, cell: (student) => <Link to={links.student(student.id)}>{student.name}</Link> },
+                { header: 'Nome', primary: true, cell: (student) => student.name },
                 { header: 'Telefone', cell: (student) => <span className="tabular-nums">{student.phone ?? '—'}</span> },
                 { header: 'CPF', cell: (student) => <span className="tabular-nums">{student.cpf ? formatDocument(student.cpf) : '—'}</span> },
                 { header: 'Cadastro', cell: (student) => <span className="tabular-nums">{formatDate(student.created_at, organization.timezone)}</span> },
@@ -81,6 +82,20 @@ export default function StudentsPage() {
                     ]
                   : []),
               ]}
+              preview={{
+                label: (student) => student.name,
+                render: (student) => (
+                  <RecordPreview
+                    to={links.student(student.id)}
+                    action="Abrir cadastro do aluno"
+                    fields={[
+                      { label: 'E-mail', value: student.email },
+                      { label: 'Nascimento', value: student.birth_date ? formatDate(student.birth_date) : null },
+                      { label: 'Telefone', value: student.phone },
+                    ]}
+                  />
+                ),
+              }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

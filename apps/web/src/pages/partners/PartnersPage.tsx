@@ -2,6 +2,7 @@ import { Alert, Button, Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
+import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -60,7 +61,7 @@ export default function PartnersPage() {
               rows={data.data}
               getKey={(partner) => partner.id}
               columns={[
-                { header: 'Nome', primary: true, cell: (partner) => <Link to={links.partner(partner.id)}>{partner.name}</Link> },
+                { header: 'Nome', primary: true, cell: (partner) => partner.name },
                 { header: 'CPF/CNPJ', cell: (partner) => <span className="tabular-nums">{partner.document ? formatDocument(partner.document) : '—'}</span> },
                 { header: 'E-mail', cell: (partner) => <span className="text-break">{partner.email ?? '—'}</span> },
                 { header: 'Telefone', cell: (partner) => <span className="tabular-nums">{partner.phone ?? '—'}</span> },
@@ -78,6 +79,10 @@ export default function PartnersPage() {
                     ]
                   : []),
               ]}
+              preview={{
+                label: (partner) => partner.name,
+                render: (partner) => <RecordPreview to={links.partner(partner.id)} action="Abrir parceiro" fields={[]} />,
+              }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

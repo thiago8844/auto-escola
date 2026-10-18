@@ -2,6 +2,7 @@ import { Badge, Button, Col, Form, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
+import { RecordPreview } from '../../components/RecordPreview'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
@@ -91,7 +92,7 @@ export default function VehiclesPage() {
               rows={data.data}
               getKey={(vehicle) => vehicle.id}
               columns={[
-                { header: 'Placa', primary: true, cell: (vehicle) => <Link to={links.vehicle(vehicle.id)}>{vehicle.plate}</Link> },
+                { header: 'Placa', primary: true, cell: (vehicle) => vehicle.plate },
                 { header: 'Modelo', cell: (vehicle) => [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' ') },
                 { header: 'Categoria', cell: (vehicle) => vehicle.category },
                 {
@@ -126,6 +127,19 @@ export default function VehiclesPage() {
                     ]
                   : []),
               ]}
+              preview={{
+                label: (vehicle) => vehicle.plate,
+                render: (vehicle) => (
+                  <RecordPreview
+                    to={links.vehicle(vehicle.id)}
+                    action="Abrir veículo"
+                    fields={[
+                      { label: 'Adaptações', value: vehicle.adapted ? vehicle.adaptations || 'Veículo adaptado' : null },
+                      { label: 'Observações', value: vehicle.notes },
+                    ]}
+                  />
+                ),
+              }}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />
           </>

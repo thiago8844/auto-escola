@@ -29,7 +29,7 @@ export function useLesson(organizationId: number, lessonId: string) {
 }
 
 // Qualquer alteração de aula pode mexer na agenda, no histórico do aluno e na matrícula
-function useInvalidateOrganization(organizationId: number) {
+export function useInvalidateOrganization(organizationId: number) {
   const queryClient = useQueryClient()
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })
 }
