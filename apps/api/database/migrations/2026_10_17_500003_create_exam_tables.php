@@ -17,12 +17,12 @@ return new class extends Migration
             $table->unsignedBigInteger('qualification_process_id');
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('enrollment_id')->nullable();
+            // Autoescola do exame: parceiro do espaço; nulo = o próprio espaço (autoescola).
+            $table->unsignedBigInteger('partner_id')->nullable();
             $table->string('category', 3);
             $table->unsignedSmallInteger('attempt_number');
             $table->dateTime('scheduled_at');
-            $table->unsignedSmallInteger('duration_minutes')->default(60);
             $table->string('location', 150)->nullable();
-            $table->string('protocol', 60)->nullable();
             $table->text('notes')->nullable();
             $table->string('status', 12)->default('scheduled');
             $table->string('status_reason', 255)->nullable();
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedBigInteger('instructor_id')->nullable();
             $table->unsignedBigInteger('vehicle_id')->nullable();
             $table->unsignedSmallInteger('reschedule_count')->default(0);
-            $table->json('schedule_history')->nullable();
+            $table->json('schedule_history')->nullable();   // remarcações por imprevisto, com motivo
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
@@ -46,6 +46,8 @@ return new class extends Migration
                 ->references(['organization_id', 'id'])->on('students')->restrictOnDelete();
             $table->foreign(['organization_id', 'enrollment_id'], 'exams_enrollment_fk')
                 ->references(['organization_id', 'id'])->on('enrollments')->restrictOnDelete();
+            $table->foreign(['organization_id', 'partner_id'], 'exams_partner_fk')
+                ->references(['organization_id', 'id'])->on('partners')->restrictOnDelete();
             $table->foreign(['organization_id', 'vehicle_id'], 'exams_vehicle_fk')
                 ->references(['organization_id', 'id'])->on('vehicles')->restrictOnDelete();
             $table->foreign(['organization_id', 'instructor_id'], 'exams_instructor_fk')
@@ -68,7 +70,6 @@ return new class extends Migration
             $table->string('paid_by', 12)->nullable();                // quem pagou de fato
             $table->string('reimbursement', 12)->default('none');     // none | to_settle | settled
             $table->string('status_reason', 255)->nullable();
-            $table->string('confirmation_source', 150)->nullable();
             $table->foreignId('confirmed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->dateTime('confirmed_at')->nullable();
             $table->unsignedBigInteger('receipt_document_id')->nullable();

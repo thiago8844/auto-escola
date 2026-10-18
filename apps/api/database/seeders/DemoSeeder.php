@@ -10,9 +10,11 @@ use App\Enums\ChecklistItemStatus;
 use App\Enums\ChecklistSource;
 use App\Enums\LicenseCategory;
 use App\Enums\MembershipRole;
+use App\Enums\OrganizationType;
 use App\Models\Enrollment;
 use App\Models\Instructor;
 use App\Models\Organization;
+use App\Models\Partner;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -123,7 +125,14 @@ class DemoSeeder extends Seeder
 
         $student = Student::query()->firstOrCreate(
             ['organization_id' => $organization->getKey(), 'name' => $studentName],
-            ['cpf' => null, 'email' => null, 'phone' => '71999990000'],
+            [
+                'cpf' => null, 'email' => null, 'phone' => '71999990000', 'birth_date' => '2000-05-20',
+                'identity_number' => 'MG-12.345.678', 'identity_issuer' => 'SSP/MG',
+                // Espaço particular: a autoescola do aluno é uma parceira; em autoescola, o próprio espaço (nulo).
+                'partner_id' => $organization->type === OrganizationType::Independent
+                    ? Partner::query()->firstOrCreate(['organization_id' => $organization->getKey(), 'name' => 'CFC Parceiro Demo'])->getKey()
+                    : null,
+            ],
         );
 
         $vehicle = Vehicle::query()->firstOrCreate(

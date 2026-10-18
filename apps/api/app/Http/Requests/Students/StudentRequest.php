@@ -43,7 +43,22 @@ class StudentRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:30'],
             'birth_date' => ['nullable', 'date', 'before:today'],
+            'identity_number' => ['nullable', 'string', 'max:20'],
+            'identity_issuer' => ['nullable', 'string', 'max:20'],
+            // Autoescola do aluno: parceira do espaço. Em autoescola, vazio significa o próprio espaço;
+            // no espaço particular de instrutor é obrigatória.
+            'partner_id' => [
+                $organization->type === \App\Enums\OrganizationType::Independent ? ($isCreate ? 'required' : 'filled') : 'nullable',
+                'integer',
+                Rule::exists('partners', 'id')->where('organization_id', $organization->getKey())->whereNull('deleted_at'),
+            ],
         ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return ['partner_id.required' => 'Escolha a autoescola do aluno.', 'partner_id.filled' => 'Escolha a autoescola do aluno.'];
     }
 
     /**

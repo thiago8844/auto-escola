@@ -31,6 +31,12 @@ class StudentResource extends JsonResource
             'cpf' => $this->when($canSeeSensitive, $this->cpf),
             'email' => $this->when($canSeeSensitive, $this->email),
             'birth_date' => $this->when($canSeeSensitive, $this->birth_date?->toDateString()),
+            'identity_number' => $this->when($canSeeSensitive, $this->identity_number),
+            'identity_issuer' => $this->when($canSeeSensitive, $this->identity_issuer),
+            'partner_id' => $this->when($canSeeSensitive, $this->partner_id),
+            'driving_school' => $this->when($canSeeSensitive && $this->relationLoaded('partner'), fn () => $this->partner
+                ? ['kind' => 'partner', 'id' => $this->partner->id, 'name' => $this->partner->name]
+                : ['kind' => 'space', 'id' => null, 'name' => null]),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

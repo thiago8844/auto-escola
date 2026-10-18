@@ -62,7 +62,7 @@ class CommitmentFinder
         $exams = PracticalExam::query()
             ->where('organization_id', $organization->getKey())
             ->where('status', 'scheduled')
-            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$from])
+            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL '.\App\Models\PracticalExam::SLOT_MINUTES.' MINUTE) > ?', [$from])
             ->when($to, fn ($q) => $q->where('scheduled_at', '<', $to))
             ->tap($match)
             ->with(['student:id,name', 'vehicle:id,plate', 'instructor:id,full_name'])
@@ -71,7 +71,7 @@ class CommitmentFinder
                 'type' => 'exam',
                 'id' => $e->getKey(),
                 'starts_at' => $e->scheduled_at->toIso8601String(),
-                'ends_at' => $e->scheduled_at->addMinutes($e->duration_minutes)->toIso8601String(),
+                'ends_at' => $e->endsAt()->toIso8601String(),
                 'student' => $e->student?->name,
                 'enrollment_id' => $e->enrollment_id,
                 'vehicle' => $e->vehicle ? ['id' => $e->vehicle->id, 'plate' => $e->vehicle->plate] : null,
@@ -98,7 +98,7 @@ class CommitmentFinder
                 ->where('organization_id', '!=', $organization->getKey())
                 ->where('instructor_id', $instructorId)
                 ->where('status', 'scheduled')
-                ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$from])
+                ->whereRaw('DATE_ADD(scheduled_at, INTERVAL '.\App\Models\PracticalExam::SLOT_MINUTES.' MINUTE) > ?', [$from])
                 ->when($to, fn ($q) => $q->where('scheduled_at', '<', $to))
                 ->count();
     }

@@ -32,6 +32,7 @@ class ExamReport
     public function summary(ReportFilters $f): array
     {
         $now = now();
+        $slot = PracticalExam::SLOT_MINUTES;
         $rows = $this->query($f)->toBase()
             ->selectRaw("practical_exams.category as category, practical_exams.attempt_number as attempt,
                 COUNT(*) as total,
@@ -40,8 +41,8 @@ class ExamReport
                 SUM(status = 'absent') as absent,
                 SUM(status = 'incomplete') as incomplete,
                 SUM(status = 'cancelled') as cancelled,
-                SUM(status = 'scheduled' AND DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) >= ?) as scheduled,
-                SUM(status = 'scheduled' AND DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) < ?) as result_pending", [$now, $now])
+                SUM(status = 'scheduled' AND DATE_ADD(scheduled_at, INTERVAL {$slot} MINUTE) >= ?) as scheduled,
+                SUM(status = 'scheduled' AND DATE_ADD(scheduled_at, INTERVAL {$slot} MINUTE) < ?) as result_pending", [$now, $now])
             ->groupBy('practical_exams.category', 'practical_exams.attempt_number')
             ->orderBy('category')->orderBy('attempt')
             ->get()
@@ -85,7 +86,7 @@ class ExamReport
     /** @return list<string> */
     public static function csvHeaders(): array
     {
-        return ['Data e hora', 'Aluno', 'Categoria', 'Tentativa', 'Situação', 'Local', 'Protocolo', 'Instrutor', 'Veículo', 'Remarcações'];
+        return ['Data e hora', 'Aluno', 'Categoria', 'Tentativa', 'Situação', 'Local', 'Autoescola', 'Instrutor', 'Veículo', 'Remarcações'];
     }
 
     /** @return list<scalar|null> */
@@ -100,7 +101,7 @@ class ExamReport
             $exam->attempt_number,
             $status,
             $exam->location,
-            $exam->protocol,
+            $exam->partner?->name ?? 'Próprio espaço',
             $exam->instructor?->full_name,
             $exam->vehicle?->plate,
             $exam->reschedule_count,

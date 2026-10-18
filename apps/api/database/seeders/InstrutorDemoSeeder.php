@@ -123,6 +123,9 @@ final class InstrutorDemoSeeder extends Seeder
                         'email' => sprintf('aluno%02d@exemplo.demo', $i + 1),
                         'phone' => sprintf('3199000%04d', $i + 1),
                         'birth_date' => $today->subYears(19 + ($i % 18))->subDays($i * 11)->toDateString(),
+                        'identity_number' => sprintf('MG-%02d.%03d.%03d', 10 + $i % 80, 100 + $i, 200 + $i),
+                        'identity_issuer' => 'SSP/MG',
+                        'partner_id' => $partners[$i % 2]->getKey(),
                     ]);
                     $process = ($this->createProcess)($organization, [
                         'student_id' => $student->getKey(), 'type' => 'first_license', 'uf' => 'MG',
@@ -140,7 +143,7 @@ final class InstrutorDemoSeeder extends Seeder
                     $enrollment = Enrollment::create([
                         'organization_id' => $organization->getKey(), 'student_id' => $student->getKey(),
                         'qualification_process_id' => $process->getKey(),
-                        'partner_id' => $i % 5 === 0 ? $partners[$i % 2]->getKey() : null,
+                        'partner_id' => $partners[$i % 2]->getKey(),
                         'category' => 'B', 'status' => $i < 30 ? 'in_service' : ($i < 40 ? 'contracted' : 'prospect'),
                         'contracted_minutes' => $i < 40 ? ($i === 1 ? 180 : 1200) : null,
                         'price_cents' => $i < 40 ? ($i === 1 ? 27000 : 180000) : null,
@@ -181,6 +184,7 @@ final class InstrutorDemoSeeder extends Seeder
                         $exam = PracticalExam::create([
                             'organization_id' => $organization->getKey(), 'qualification_process_id' => $process->getKey(),
                             'student_id' => $student->getKey(), 'enrollment_id' => $enrollment->getKey(),
+                            'partner_id' => $student->partner_id,
                             'category' => 'B', 'attempt_number' => 1,
                             'scheduled_at' => $today->addDays(62 + 2 * $i)->setTime(10, 0)->utc(),
                             'location' => 'Unidade de exame Centro', 'status' => 'scheduled',

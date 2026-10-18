@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['organization_id', 'name', 'cpf', 'email', 'phone', 'birth_date'])]
+#[Fillable(['organization_id', 'name', 'cpf', 'email', 'phone', 'birth_date', 'identity_number', 'identity_issuer', 'partner_id'])]
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
@@ -24,6 +24,12 @@ class Student extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    /** Autoescola do aluno; nulo significa o próprio espaço. */
+    public function partner(): BelongsTo
+    {
+        return $this->belongsTo(Partner::class);
     }
 
     public function enrollments(): HasMany

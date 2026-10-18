@@ -42,7 +42,6 @@ class ScheduleExam
     private function create(Organization $organization, array $data): PracticalExam
     {
         $startsAt = CarbonImmutable::parse($data['scheduled_at']);
-        $duration = (int) ($data['duration_minutes'] ?? 60);
         $category = $data['category'];
 
         $instructorId = $data['instructor_id'] ?? null;
@@ -52,7 +51,7 @@ class ScheduleExam
         $process = QualificationProcess::query()->where('organization_id', $organization->getKey())
             ->findOrFail($data['qualification_process_id']);
 
-        $this->planner->assertResourcesFree($organization, $process->student_id, $instructorId, $vehicleId, $startsAt, $duration);
+        $this->planner->assertResourcesFree($organization, $process->student_id, $instructorId, $vehicleId, $startsAt);
 
         $process = $this->planner->lockProcess($process->getKey());
 
@@ -92,6 +91,11 @@ class ScheduleExam
             }
         }
 
+        $student = \App\Models\Student::query()->where('organization_id', $organization->getKey())->findOrFail($process->student_id);
+        // Sem escolha explícita, vale a autoescola do cadastro do aluno.
+        $partnerId = array_key_exists('partner_id', $data) ? $data['partner_id'] : $student->partner_id;
+        $this->planner->assertDrivingSchool($organization, $partnerId);
+
         $exam = PracticalExam::create([
             'organization_id' => $organization->getKey(),
             'qualification_process_id' => $process->getKey(),
@@ -100,9 +104,8 @@ class ScheduleExam
             'category' => $category,
             'attempt_number' => $this->planner->nextAttemptNumber($process, $category),
             'scheduled_at' => $startsAt->utc(),
-            'duration_minutes' => $duration,
+            'partner_id' => $partnerId,
             'location' => $data['location'] ?? null,
-            'protocol' => $data['protocol'] ?? null,
             'notes' => $data['notes'] ?? null,
             'instructor_id' => $instructorId,
             'vehicle_id' => $vehicleId,

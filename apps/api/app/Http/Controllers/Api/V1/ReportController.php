@@ -131,7 +131,7 @@ class ReportController extends Controller
         $audit->record($organization->getKey(), 'report.exported', 'Exportação CSV de exames.', ['changes' => $f->values]);
 
         $rows = (function () use ($report, $f, $tz) {
-            foreach ($report->query($f)->with(['student:id,name', 'instructor:id,full_name', 'vehicle:id,plate'])->orderBy('practical_exams.scheduled_at')->orderBy('practical_exams.id')->cursor() as $exam) {
+            foreach ($report->query($f)->with(['student:id,name', 'partner:id,name', 'instructor:id,full_name', 'vehicle:id,plate'])->orderBy('practical_exams.scheduled_at')->orderBy('practical_exams.id')->cursor() as $exam) {
                 yield $report->csvRow($exam, $tz);
             }
         })();

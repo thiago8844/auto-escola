@@ -69,7 +69,7 @@ class UtilizationReport
         $blocked = $this->minutes($this->intersect($windows, $this->merge($blockedWindows)));
 
         $used = (int) $lessons->clone()->whereBetween('starts_at', [$f->start, $f->end])->get()->sum(fn (Lesson $l) => $l->scheduledMinutes())
-            + (int) $exams->clone()->whereBetween('scheduled_at', [$f->start, $f->end])->get()->sum('duration_minutes');
+            + (int) $exams->clone()->whereBetween('scheduled_at', [$f->start, $f->end])->count() * \App\Models\PracticalExam::SLOT_MINUTES;
 
         $free = max($available - $blocked, 0);
 

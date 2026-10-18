@@ -6,6 +6,7 @@ use App\Actions\Exams\CorrectExamResult;
 use App\Actions\Exams\RecordExamResult;
 use App\Actions\Exams\RescheduleExam;
 use App\Actions\Exams\ScheduleExam;
+use App\Actions\Exams\UpdateExam;
 use App\Enums\ExamStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Exams\ExamResultRequest;
@@ -16,7 +17,6 @@ use App\Http\Requests\Exams\UpdateExamRequest;
 use App\Http\Resources\PracticalExamResource;
 use App\Models\Organization;
 use App\Models\PracticalExam;
-use App\Services\Audit;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -28,11 +28,11 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class PracticalExamController extends Controller
 {
     private const STAFF_RELATIONS = [
-        'student:id,name', 'vehicle', 'instructor:id,full_name', 'fees.exams:id',
+        'organization:id,name', 'student', 'partner:id,name', 'vehicle', 'instructor:id,full_name', 'fees.exams:id',
         'process.checklistItems', 'process.externalFees.exams:id',
     ];
 
-    private const LIMITED_RELATIONS = ['student:id,name', 'vehicle', 'instructor:id,full_name'];
+    private const LIMITED_RELATIONS = ['organization:id,name', 'student:id,name', 'partner:id,name', 'vehicle', 'instructor:id,full_name'];
 
     public function index(ListExamsRequest $request, Organization $organization): AnonymousResourceCollection
     {
@@ -80,24 +80,11 @@ class PracticalExamController extends Controller
         return $this->respond($exam);
     }
 
-    public function update(UpdateExamRequest $request, Organization $organization, PracticalExam $exam, Audit $audit): JsonResponse
+    public function update(UpdateExamRequest $request, Organization $organization, PracticalExam $exam, UpdateExam $update): JsonResponse
     {
         $this->authorize('manage', [PracticalExam::class, $organization]);
 
-        $exam->fill($request->validated());
-        $changes = collect($exam->getDirty())->map(fn ($new, $key) => ['from' => $exam->getOriginal($key), 'to' => $new])->all();
-        $exam->save();
-
-        if ($changes !== []) {
-            $audit->record($organization->getKey(), 'exam.updated', 'Dados do exame atualizados.', [
-                'student_id' => $exam->student_id,
-                'process_id' => $exam->qualification_process_id,
-                'subject' => $exam,
-                'changes' => $changes,
-            ]);
-        }
-
-        return $this->respond($exam);
+        return $this->respond($update($exam, $request->validated()));
     }
 
     public function reschedule(RescheduleExamRequest $request, Organization $organization, PracticalExam $exam, RescheduleExam $reschedule): JsonResponse

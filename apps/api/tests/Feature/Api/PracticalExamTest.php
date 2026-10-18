@@ -7,6 +7,8 @@ use App\Models\Document;
 use App\Models\Enrollment;
 use App\Models\Instructor;
 use App\Models\Organization;
+use App\Models\Partner;
+use Carbon\CarbonImmutable;
 use App\Models\PracticalExam;
 use App\Models\QualificationProcess;
 use App\Models\Student;
@@ -113,20 +115,81 @@ class PracticalExamTest extends ApiTestCase
         $this->exam('C', 15)->assertStatus(422);
     }
 
-    public function test_reschedule_preserves_previous_date_and_location(): void
+    public function test_reschedule_takes_only_the_new_date_with_a_reason_and_keeps_the_previous_one(): void
     {
         $id = $this->exam('B')->assertCreated()->json('data.id');
         [$new] = $this->window(14, 14, 60);
 
         $this->actingAsUser($this->owner)->postJson("{$this->base}/exams/{$id}/reschedule", [
-            'scheduled_at' => $new, 'location' => 'Novo local', 'reason' => 'Chuva',
+            'scheduled_at' => $new, 'reason' => 'Chuva',
         ])->assertOk()
             ->assertJsonPath('data.reschedule_count', 1)
-            ->assertJsonPath('data.location', 'Novo local')
-            ->assertJsonPath('data.schedule_history.0.location', 'Pátio do Detran')
+            ->assertJsonPath('data.location', 'Pátio do Detran')
+            ->assertJsonPath('data.schedule_history.0.reason', 'Chuva')
             ->assertJsonPath('data.attempt_number', 1);
 
         $this->actingAsUser($this->owner)->postJson("{$this->base}/exams/{$id}/reschedule", ['scheduled_at' => $new])->assertStatus(422);
+    }
+
+    public function test_edit_corrects_the_date_and_other_data_without_touching_the_reschedule_history(): void
+    {
+        $id = $this->exam('B')->assertCreated()->json('data.id');
+        [$right] = $this->window(12, 10, 60);
+
+        $this->actingAsUser($this->owner)->patchJson("{$this->base}/exams/{$id}", ['scheduled_at' => $right, 'location' => 'Detran Centro', 'notes' => 'Levar documento'])
+            ->assertOk()
+            ->assertJsonPath('data.location', 'Detran Centro')
+            ->assertJsonPath('data.reschedule_count', 0)
+            ->assertJsonPath('data.schedule_history', []);
+
+        $this->assertSame(
+            CarbonImmutable::parse($right)->utc()->toIso8601String(),
+            CarbonImmutable::parse($this->actingAsUser($this->owner)->getJson("{$this->base}/exams/{$id}")->json('data.scheduled_at'))->utc()->toIso8601String(),
+        );
+
+        $this->recordResult($id, 'failed', 'Reprovado')->assertOk();
+        $this->actingAsUser($this->owner)->patchJson("{$this->base}/exams/{$id}", ['notes' => 'Obs. depois do resultado'])->assertOk();
+        $this->actingAsUser($this->owner)->patchJson("{$this->base}/exams/{$id}", ['scheduled_at' => $right])->assertStatus(422);
+    }
+
+    public function test_exam_carries_the_driving_school_and_registration_data_from_the_student(): void
+    {
+        $partner = Partner::create(['organization_id' => $this->org->getKey(), 'name' => 'CFC Parceiro']);
+        $this->student->forceFill(['identity_number' => 'MG-12.345.678', 'identity_issuer' => 'SSP/MG', 'partner_id' => $partner->getKey()])->save();
+
+        $exam = $this->exam('B')->assertCreated()
+            ->assertJsonPath('data.driving_school.kind', 'partner')
+            ->assertJsonPath('data.driving_school.name', 'CFC Parceiro')
+            ->assertJsonPath('data.registration.identity_number', 'MG-12.345.678')
+            ->assertJsonPath('data.registration.identity_issuer', 'SSP/MG')
+            ->assertJsonPath('data.registration.category', 'B')
+            ->assertJsonMissingPath('data.protocol')
+            ->assertJsonMissingPath('data.duration_minutes')
+            ->json('data.id');
+
+        // Autoescola própria (espaço) escolhida explicitamente, em vez da do aluno.
+        $this->actingAsUser($this->owner)->patchJson("{$this->base}/exams/{$exam}", ['partner_id' => null])
+            ->assertOk()->assertJsonPath('data.driving_school.kind', 'space');
+    }
+
+    public function test_pending_flags_missing_student_registration_data(): void
+    {
+        $this->student->forceFill(['identity_number' => null, 'identity_issuer' => null])->save();
+        $id = $this->exam('B')->assertCreated()->json('data.id');
+
+        $codes = collect($this->actingAsUser($this->owner)->getJson("{$this->base}/exams/{$id}")->json('data.pending'))->pluck('code');
+        $this->assertTrue($codes->contains('student_data'));
+    }
+
+    public function test_independent_space_requires_the_driving_school_on_the_exam(): void
+    {
+        $this->org->forceFill(['type' => \App\Enums\OrganizationType::Independent])->save();
+        $this->student->forceFill(['partner_id' => null])->save();
+
+        $this->exam('B')->assertStatus(422)->assertJsonPath('error', 'driving_school_required');
+
+        $partner = Partner::create(['organization_id' => $this->org->getKey(), 'name' => 'CFC Parceiro']);
+        $this->exam('B', 10, 9, ['partner_id' => $partner->getKey()])->assertCreated()->assertJsonPath('data.driving_school.id', $partner->getKey());
     }
 
     public function test_absence_is_not_a_failure_and_results_are_final_until_corrected(): void
@@ -209,7 +272,7 @@ class PracticalExamTest extends ApiTestCase
         $this->assertNotContains('checklist', $codes);
     }
 
-    public function test_fee_confirmation_needs_source_and_a_receipt_alone_confirms_nothing(): void
+    public function test_fee_payment_confirmation_accepts_an_optional_receipt_and_a_receipt_alone_confirms_nothing(): void
     {
         $fee = $this->actingAsUser($this->owner)->postJson("{$this->base}/external-fees", [
             'qualification_process_id' => $this->process->getKey(), 'kind' => 'Taxa de exame', 'voucher_number' => 'G-1', 'amount_cents' => 9000,
@@ -224,10 +287,10 @@ class PracticalExamTest extends ApiTestCase
 
         $status = "{$this->base}/external-fees/{$fee}/status";
         $this->actingAsUser($this->owner)->postJson($status, ['status' => 'payment_reported'])->assertOk()->assertJsonPath('data.is_open', true);
+        $this->actingAsUser($this->owner)->postJson($status, ['status' => 'confirmed'])
+            ->assertStatus(422)->assertJsonPath('error', 'paid_by_required');
         $this->actingAsUser($this->owner)->postJson($status, ['status' => 'confirmed', 'paid_by' => 'student'])
-            ->assertStatus(422)->assertJsonPath('error', 'confirmation_source_required');
-        $this->actingAsUser($this->owner)->postJson($status, ['status' => 'confirmed', 'paid_by' => 'student', 'confirmation_source' => 'Consulta no portal'])
-            ->assertOk()->assertJsonPath('data.status', 'confirmed')->assertJsonPath('data.confirmed_by.id', $this->owner->getKey())
+            ->assertOk()->assertJsonPath('data.receipt_document_id', $doc->getKey())->assertJsonPath('data.status', 'confirmed')->assertJsonPath('data.confirmed_by.id', $this->owner->getKey())
             ->assertJsonPath('data.reimbursement', 'none');
     }
 
@@ -239,7 +302,7 @@ class PracticalExamTest extends ApiTestCase
         $status = "{$this->base}/external-fees/{$fee}/status";
 
         $this->actingAsUser($this->owner)->postJson($status, ['status' => 'waived'])->assertStatus(422)->assertJsonPath('error', 'reason_required');
-        $this->actingAsUser($this->owner)->postJson($status, ['status' => 'confirmed', 'paid_by' => 'organization', 'confirmation_source' => 'Recibo do banco'])
+        $this->actingAsUser($this->owner)->postJson($status, ['status' => 'confirmed', 'paid_by' => 'organization'])
             ->assertOk()->assertJsonPath('data.reimbursement', 'to_settle');
 
         $this->actingAsUser($this->owner)->postJson("{$this->base}/external-fees/{$fee}/reimbursement")->assertOk()->assertJsonPath('data.reimbursement', 'settled');
@@ -271,13 +334,13 @@ class PracticalExamTest extends ApiTestCase
         $mine = Instructor::factory()->create(['user_id' => $instructorUser->getKey()]);
         $this->org->instructors()->attach($mine->getKey(), ['active' => true]);
 
-        $own = $this->exam('B', 10, 9, ['instructor_id' => $mine->getKey(), 'protocol' => 'SECRETO', 'notes' => 'laudo X'])->assertCreated()->json('data.id');
+        $own = $this->exam('B', 10, 9, ['instructor_id' => $mine->getKey(), 'notes' => 'laudo X'])->assertCreated()->json('data.id');
         $this->exam('A', 10, 14, ['instructor_id' => $this->instructor->getKey()])->assertCreated();
 
         $rows = $this->actingAsUser($instructorUser)->getJson("{$this->base}/exams")->assertOk()->json('data');
         $this->assertCount(1, $rows);
         $this->assertSame($own, $rows[0]['id']);
-        $this->assertArrayNotHasKey('protocol', $rows[0]);
+        $this->assertArrayNotHasKey('registration', $rows[0]);
         $this->assertArrayNotHasKey('notes', $rows[0]);
         $this->assertArrayNotHasKey('fees', $rows[0]);
 

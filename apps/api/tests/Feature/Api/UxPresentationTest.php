@@ -21,7 +21,7 @@ class UxPresentationTest extends ApiTestCase
             PracticalExam::create([
                 'organization_id' => $organization->getKey(), 'student_id' => $enrollment->student_id,
                 'qualification_process_id' => $process->getKey(), 'category' => 'B', 'attempt_number' => $attempt,
-                'scheduled_at' => now()->addDays($attempt), 'duration_minutes' => 60, 'status' => 'scheduled',
+                'scheduled_at' => now()->addDays($attempt), 'status' => 'scheduled',
             ]);
         }
 

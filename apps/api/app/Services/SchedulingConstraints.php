@@ -143,7 +143,7 @@ class SchedulingConstraints
             ->where('status', 'scheduled')
             ->when($ignoreExamId, fn ($q) => $q->whereKeyNot($ignoreExamId))
             ->where('scheduled_at', '<', $endsAt)
-            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$startsAt])
+            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL '.\App\Models\PracticalExam::SLOT_MINUTES.' MINUTE) > ?', [$startsAt])
             ->exists();
     }
 

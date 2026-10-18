@@ -29,6 +29,10 @@ class InstrutorDemoSeederTest extends ApiTestCase
             'email' => InstrutorDemoSeeder::EMAIL, 'password' => InstrutorDemoSeeder::PASSWORD, 'device_name' => 'teste',
         ])->assertCreated()->assertJsonPath('user.email', InstrutorDemoSeeder::EMAIL);
         $this->assertSame(48, DB::table('students')->where('organization_id', $organizationId)->count());
+        // Todo aluno tem autoescola e os dados que a inscrição do exame pede
+        $this->assertSame(0, DB::table('students')->where('organization_id', $organizationId)
+            ->where(fn ($q) => $q->whereNull('partner_id')->orWhereNull('identity_number')->orWhereNull('identity_issuer')->orWhereNull('birth_date'))->count());
+        $this->assertSame(0, DB::table('practical_exams')->where('organization_id', $organizationId)->whereNull('partner_id')->count());
         // 8 aulas por dia útil (seg a sáb) de 45 dias de histórico a 30 de agenda, mais 2 do aluno com pacote pequeno
         $timezone = config('autoescola.default_timezone');
         $today = CarbonImmutable::now($timezone)->startOfDay();

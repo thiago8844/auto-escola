@@ -34,6 +34,7 @@ class StudentController extends Controller
 
         $students = $query
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->string('search').'%'))
+            ->with('partner:id,name')
             ->orderBy('name')
             ->paginate($this->perPage($request));
 
@@ -46,14 +47,14 @@ class StudentController extends Controller
 
         $student = $organization->students()->create($request->validated());
 
-        return (new StudentResource($student))->response()->setStatusCode(201);
+        return (new StudentResource($student->load('partner:id,name')))->response()->setStatusCode(201);
     }
 
     public function show(Request $request, Organization $organization, Student $student): JsonResponse
     {
         $this->authorize('view', [$student, $organization]);
 
-        return (new StudentResource($student))->response();
+        return (new StudentResource($student->load('partner:id,name')))->response();
     }
 
     public function update(StudentRequest $request, Organization $organization, Student $student): JsonResponse
@@ -64,7 +65,7 @@ class StudentController extends Controller
 
         $student->update($request->validated());
 
-        return (new StudentResource($student->refresh()))->response();
+        return (new StudentResource($student->refresh()->load('partner:id,name')))->response();
     }
 
     /**
@@ -111,7 +112,7 @@ class StudentController extends Controller
         $student->restore();
         $audit->record($organization->getKey(), 'student.restored', "Aluno {$student->name} restaurado.", ['student_id' => $student->getKey(), 'subject' => $student]);
 
-        return (new StudentResource($student->refresh()))->response();
+        return (new StudentResource($student->refresh()->load('partner:id,name')))->response();
     }
 
     /**

@@ -340,7 +340,7 @@ class AlertEngine
         $exams = PracticalExam::query()
             ->where('organization_id', $organization->getKey())
             ->where('status', 'scheduled')
-            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) < ?', [$now])
+            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL '.\App\Models\PracticalExam::SLOT_MINUTES.' MINUTE) < ?', [$now])
             ->with('student:id,name')
             ->limit(300)
             ->get();

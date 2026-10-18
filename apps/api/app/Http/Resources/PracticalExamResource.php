@@ -29,10 +29,11 @@ class PracticalExamResource extends JsonResource
             'attempt_number' => $this->attempt_number,
             'status' => $this->status->value,
             'scheduled_at' => $this->scheduled_at->toIso8601String(),
-            'ends_at' => $this->endsAt()->toIso8601String(),
-            'duration_minutes' => $this->duration_minutes,
             'location' => $this->location,
             'student' => $this->whenLoaded('student', fn () => ['id' => $this->student->id, 'name' => $this->student->name]),
+            'driving_school' => $this->when($this->relationLoaded('partner'), fn () => $this->partner
+                ? ['kind' => 'partner', 'id' => $this->partner->id, 'name' => $this->partner->name]
+                : ['kind' => 'space', 'id' => null, 'name' => $this->organization?->name]),
             'vehicle' => $this->whenLoaded('vehicle', fn () => $this->vehicle ? ['id' => $this->vehicle->id, 'plate' => $this->vehicle->plate, 'model' => $this->vehicle->model] : null),
             'instructor' => $this->whenLoaded('instructor', fn () => $this->instructor ? ['id' => $this->instructor->id, 'full_name' => $this->instructor->full_name] : null),
         ];
@@ -45,7 +46,16 @@ class PracticalExamResource extends JsonResource
             'qualification_process_id' => $this->qualification_process_id,
             'student_id' => $this->student_id,
             'enrollment_id' => $this->enrollment_id,
-            'protocol' => $this->protocol,
+            'partner_id' => $this->partner_id,
+            // Dados que a inscrição pede, vindos do cadastro do aluno (nada é digitado de novo).
+            'registration' => $this->whenLoaded('student', fn () => [
+                'name' => $this->student->name,
+                'cpf' => $this->student->cpf,
+                'category' => $this->category,
+                'birth_date' => $this->student->birth_date?->toDateString(),
+                'identity_number' => $this->student->identity_number,
+                'identity_issuer' => $this->student->identity_issuer,
+            ]),
             'notes' => $this->notes,
             'status_reason' => $this->status_reason,
             'result_at' => $this->result_at?->toIso8601String(),
@@ -71,6 +81,17 @@ class PracticalExamResource extends JsonResource
 
         $pending = [];
         $process = $this->process;
+
+        if ($this->relationLoaded('student')) {
+            $missing = collect([
+                'cpf' => 'CPF', 'birth_date' => 'data de nascimento',
+                'identity_number' => 'identidade', 'identity_issuer' => 'órgão expedidor',
+            ])->filter(fn ($label, $field) => blank($this->student->{$field}))->values();
+
+            if ($missing->isNotEmpty()) {
+                $pending[] = ['code' => 'student_data', 'message' => 'Faltam no cadastro do aluno: '.$missing->implode(', ').'.'];
+            }
+        }
 
         if ($process->relationLoaded('checklistItems')) {
             $items = $process->pendingRequiredItems();

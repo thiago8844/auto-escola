@@ -25,7 +25,7 @@ class ExamPlanner
     ) {}
 
     /**
-     * Garante instrutor/veículo/aluno livres na janela [início, início + duração).
+     * Garante instrutor/veículo/aluno livres na bloco do exame [início, início + PracticalExam::SLOT_MINUTES).
      */
     public function assertResourcesFree(
         Organization $organization,
@@ -33,11 +33,10 @@ class ExamPlanner
         ?int $instructorId,
         ?int $vehicleId,
         CarbonImmutable $startsAt,
-        int $durationMinutes,
         ?int $ignoreExamId = null,
     ): void {
         $startsAt = $startsAt->utc();
-        $endsAt = $startsAt->addMinutes($durationMinutes);
+        $endsAt = $startsAt->addMinutes(PracticalExam::SLOT_MINUTES);
 
         if ($instructorId !== null) {
             $instructor = $this->availability->lockInstructor($instructorId);
@@ -65,6 +64,17 @@ class ExamPlanner
 
         $this->constraints->lockStudent($studentId);
         $this->constraints->assertStudentAvailable($studentId, $startsAt, $endsAt, ignoreExamId: $ignoreExamId);
+    }
+
+    /**
+     * A inscrição no exame leva a autoescola. Nulo é o próprio espaço, que só vale em autoescola:
+     * no espaço particular de instrutor é preciso indicar a parceira.
+     */
+    public function assertDrivingSchool(Organization $organization, ?int $partnerId): void
+    {
+        if ($partnerId === null && $organization->type !== \App\Enums\OrganizationType::Cfc) {
+            throw new BusinessRuleException('Informe a autoescola do exame.', 'driving_school_required', 422);
+        }
     }
 
     /**
