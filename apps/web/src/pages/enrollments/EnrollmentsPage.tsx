@@ -33,7 +33,7 @@ export default function EnrollmentsPage() {
 
   return (
     <>
-      <PageHeader title="Matrículas" subtitle="Para criar uma matrícula, abra o aluno e escolha “Nova matrícula”." />
+      <PageHeader title="Matrículas" subtitle={staff ? 'Para criar uma matrícula, abra o aluno e escolha “Nova matrícula”.' : 'Aqui aparecem seus alunos encaminhados e matrículas com aulas suas neste espaço.'} />
 
       <form className="mb-4" onSubmit={(event) => event.preventDefault()} aria-label="Filtros de matrículas">
         <Row className="g-2">
@@ -78,7 +78,7 @@ export default function EnrollmentsPage() {
         )}
       </form>
 
-      <QueryState query={query} isEmpty={(data) => data.data.length === 0} empty={filtered ? 'Nenhuma matrícula encontrada com estes filtros.' : 'Nenhuma matrícula cadastrada ainda. Abra um aluno e escolha “Nova matrícula”.'}>
+      <QueryState query={query} isEmpty={(data) => data.data.length === 0} empty={filtered ? 'Nenhuma matrícula encontrada com estes filtros.' : staff ? 'Nenhuma matrícula cadastrada ainda. Abra um aluno e escolha “Nova matrícula”.' : 'Nenhuma matrícula atribuída ainda. A secretaria pode encaminhar um aluno para você.'}>
         {(data) => (
           <>
             <DataTable
@@ -92,14 +92,15 @@ export default function EnrollmentsPage() {
                 },
                 { header: 'Categoria', cell: (enrollment) => enrollment.category },
                 { header: 'Situação', cell: (enrollment) => <EnrollmentStatusBadge status={enrollment.status} /> },
+                { header: 'Responsável', cell: (enrollment) => enrollment.assignment?.instructor_name ?? 'Ainda não encaminhado' },
                 {
                   header: 'Serviço contratado',
                   cell: (enrollment) => <span className="tabular-nums">{enrollment.contracted_minutes ? formatMinutes(enrollment.contracted_minutes) : '—'}</span>,
                 },
-                {
+                ...(staff ? [{
                   header: 'Saldo de aulas',
-                  cell: (enrollment) => (enrollment.balance ? <BalanceBadge available={enrollment.balance.available} hasPackage={enrollment.balance.has_package} /> : '—'),
-                },
+                  cell: (enrollment: import('../../types/enrollment').Enrollment) => (enrollment.balance ? <BalanceBadge available={enrollment.balance.available} hasPackage={enrollment.balance.has_package} /> : '—'),
+                }] : []),
                 { header: 'Prática', cell: (enrollment) => <ReleaseBadge release={enrollment.practice_release} /> },
               ]}
             />

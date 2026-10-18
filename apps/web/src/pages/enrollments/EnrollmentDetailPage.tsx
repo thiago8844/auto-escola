@@ -1,3 +1,4 @@
+import { AssignmentPanel } from './AssignmentPanel'
 import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
@@ -68,6 +69,8 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
           </>
         }
       />
+
+      <AssignmentPanel organizationId={organization.id} enrollment={enrollment} operate={operate} />
 
       <Card className="mb-4">
         <Card.Body>

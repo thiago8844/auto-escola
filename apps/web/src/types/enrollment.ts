@@ -29,6 +29,7 @@ export type Enrollment = {
   // Preço e observações só vêm para a equipe
   price_cents?: number | null
   notes?: string | null
+  assignment?: { instructor_id: number; instructor_name: string; assigned_at: string } | null
   qualification_process_id: number | null
   practice_release?: PracticeRelease
   student?: Pick<Student, 'id' | 'name' | 'phone'>
