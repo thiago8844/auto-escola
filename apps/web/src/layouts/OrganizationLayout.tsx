@@ -1,5 +1,6 @@
 import { Link, Outlet, useParams } from 'react-router-dom'
 import { Alert, Spinner } from 'react-bootstrap'
+import { AlertWatcher } from '../components/AlertWatcher'
 import { QueryErrorAlert } from '../components/QueryErrorAlert'
 import { RoleBadge } from '../components/RoleBadge'
 import { organizationPaths, paths } from '../config/paths'
@@ -20,6 +21,7 @@ export function OrganizationLayout() {
     { to: links.vehicles, icon: 'bi-car-front', label: 'Veículos' },
     { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },
     { to: links.exams, icon: 'bi-clipboard-check', label: 'Exames' },
+    { to: links.alerts, icon: 'bi-bell', label: 'Pendências' },
     { to: links.availability, icon: 'bi-slash-circle', label: 'Bloqueios' },
     ...(organization && canOperate(organization.role)
       ? [
@@ -59,7 +61,12 @@ export function OrganizationLayout() {
 
   let content
   if (organization) {
-    content = <Outlet context={organization} />
+    content = (
+      <>
+        <AlertWatcher organizationId={organization.id} />
+        <Outlet context={organization} />
+      </>
+    )
   } else if (error?.kind === 'not_found') {
     content = (
       <Alert variant="warning" role="alert">

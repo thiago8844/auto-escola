@@ -22,6 +22,7 @@ export const useCriticalStore = create<CriticalState>((set, get) => ({
   acknowledge: (id, options) => {
     const alert = get().queue.find((a) => a.id === id)
     if (alert?.muteKey && options?.mute) usePreferencesStore.getState().mute(alert.muteKey)
+    alert?.onAcknowledge?.()
     set((state) => ({ queue: state.queue.filter((a) => a.id !== id) }))
   },
   clear: () => set({ queue: [] }),

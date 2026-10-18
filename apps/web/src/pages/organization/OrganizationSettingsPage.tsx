@@ -9,13 +9,14 @@ import { SelectField } from '../../components/SelectField'
 import { UFS } from '../../config/domain'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
+import { AlertSettingsCard } from './AlertSettingsCard'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { WeeklyHoursEditor } from '../../components/WeeklyHoursEditor'
 import { useSaveBusinessHours, useUpdateOrganization } from '../../hooks/useOrganizations'
 import { organizationUpdateSchema, type OrganizationUpdateInput } from '../../schemas/organization'
 import { summarizeHours } from '../../utils/summarizeHours'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
-import { canEditOrganization } from '../../utils/permissions'
+import { canEditOrganization, canOperate } from '../../utils/permissions'
 
 export default function OrganizationSettingsPage() {
   const organization = useActiveOrganization()
@@ -77,6 +78,8 @@ export default function OrganizationSettingsPage() {
             {editable && <SubmitButton loading={update.isPending}>Salvar alterações</SubmitButton>}
           </fieldset>
         </form>
+
+        {canOperate(organization.role) && <AlertSettingsCard organizationId={organization.id} editable={editable} />}
 
         <BusinessHoursCard organizationId={organization.id} hours={organization.business_hours} editable={editable} />
       </div>

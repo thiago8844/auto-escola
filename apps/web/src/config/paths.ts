@@ -30,6 +30,8 @@ export const organizationSections = {
   exams: 'exames',
   audit: 'auditoria',
   availability: 'disponibilidade',
+  alerts: 'pendencias',
+  finance: 'financeiro',
 } as const
 
 // O espaço ativo está sempre na URL
@@ -62,6 +64,8 @@ export function organizationPaths(organizationId: number | string) {
     exam: (examId: number | string) => `${base}/${organizationSections.exams}/${examId}`,
     audit: `${base}/${organizationSections.audit}`,
     availability: `${base}/${organizationSections.availability}`,
+    alerts: `${base}/${organizationSections.alerts}`,
+    finance: `${base}/${organizationSections.finance}`,
     partners: `${base}/${organizationSections.partners}`,
     partnerNew: `${base}/${organizationSections.partners}/novo`,
     partner: (partnerId: number | string) => `${base}/${organizationSections.partners}/${partnerId}`,
