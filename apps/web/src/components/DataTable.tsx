@@ -26,7 +26,7 @@ export function DataTable<T>({ columns, rows, getKey }: DataTableProps<T>) {
   return (
     <>
       <div className="d-none d-md-block">
-        <Table hover className="align-middle bg-white">
+        <Table hover className="align-middle">
           <thead>
             <tr>
               {columns.map((column) => (

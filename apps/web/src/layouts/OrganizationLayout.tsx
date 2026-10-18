@@ -27,7 +27,7 @@ export function OrganizationLayout() {
           { to: links.invitations, icon: 'bi-envelope-plus', label: 'Convites' },
         ]
       : []),
-    { to: links.settings, icon: 'bi-gear', label: 'Configurações' },
+    { to: links.settings, icon: 'bi-gear', label: 'Dados do espaço' },
   ]
 
   const sidebarHeader = (

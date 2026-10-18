@@ -7,6 +7,7 @@ export const paths = {
   verifyEmail: '/auth/email/verify/:id/:hash',
   // O e-mail de convite aponta para este caminho (com ?token=)
   acceptInvitation: '/convites/aceitar',
+  settings: '/configuracoes',
   organizations: '/espacos',
   organizationNew: '/espacos/novo',
   organization: '/espacos/:organizationId',

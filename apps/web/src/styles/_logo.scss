@@ -1,0 +1,6 @@
+// Cada logo tem versão clara e escura; o CSS mostra a do tema ativo (sem esperar o React)
+[data-bs-theme='dark'] .logo-for-light,
+[data-bs-theme='light'] .logo-for-dark,
+:root:not([data-bs-theme]) .logo-for-dark {
+  display: none;
+}

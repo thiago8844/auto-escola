@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 import { Button, Container, Nav, Navbar, Offcanvas } from 'react-bootstrap'
 import { Outlet } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { Logo } from '../components/Logo'
 import { NavItem, type NavItemProps } from '../components/NavItem'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { APP_NAME } from '../config'
+import { paths } from '../config/paths'
 import { useLogout } from '../hooks/useAuthMutations'
 import { useAuthStore } from '../stores/authStore'
 
@@ -21,13 +25,17 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
 
   return (
     <div className="app-shell d-lg-flex">
-      <Navbar expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-white border-bottom">
+      <Navbar expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-surface border-bottom">
         <Container fluid className="flex-lg-column align-items-lg-stretch flex-lg-grow-1">
-          <Navbar.Brand className="fw-semibold">{APP_NAME}</Navbar.Brand>
+          <Navbar.Brand as={Link} to={paths.home} aria-label={APP_NAME}>
+            <Logo height={32} />
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="app-menu" aria-label="Abrir menu" />
           <Navbar.Offcanvas id="app-menu" placement="start" responsive="lg" className="flex-lg-grow-1">
             <Offcanvas.Header closeButton>
-              <Offcanvas.Title>{APP_NAME}</Offcanvas.Title>
+              <Offcanvas.Title as="div">
+                <Logo height={28} />
+              </Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body className="flex-column">
               {sidebarHeader && <div className="border-bottom pb-3 mb-3">{sidebarHeader}</div>}
@@ -41,10 +49,17 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
                   <i className="bi bi-person-circle me-2" aria-hidden="true" />
                   {user?.name}
                 </p>
-                <Button variant="outline-secondary" size="sm" className="w-100" onClick={() => logout.mutate()} disabled={logout.isPending}>
-                  <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />
-                  Sair
-                </Button>
+                <div className="d-flex flex-wrap gap-2">
+                  <Link to={paths.settings} className="btn btn-outline-secondary btn-sm flex-fill">
+                    <i className="bi bi-gear me-2" aria-hidden="true" />
+                    Configurações
+                  </Link>
+                  <ThemeToggle compact align="end" />
+                  <Button variant="outline-secondary" size="sm" className="flex-fill" onClick={() => logout.mutate()} disabled={logout.isPending}>
+                    <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />
+                    Sair
+                  </Button>
+                </div>
               </div>
             </Offcanvas.Body>
           </Navbar.Offcanvas>

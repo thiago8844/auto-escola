@@ -7,6 +7,9 @@ import '@fontsource/inter/700.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './styles/theme.scss'
 import App from './App.tsx'
+import { initTheme } from './stores/themeStore'
+
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

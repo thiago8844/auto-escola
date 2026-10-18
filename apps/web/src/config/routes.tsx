@@ -3,6 +3,7 @@ import { AuthGate } from '../components/AuthGate'
 import { GuestOnly } from '../components/GuestOnly'
 import { RequireAuth } from '../components/RequireAuth'
 import { RequirePermission } from '../components/RequirePermission'
+import SettingsPage from '../pages/settings/SettingsPage'
 import { AccountLayout } from '../layouts/AccountLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
 import { OrganizationLayout } from '../layouts/OrganizationLayout'
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
             children: [
               { path: paths.organizations, element: <OrganizationsPage /> },
               { path: paths.organizationNew, element: <OrganizationCreatePage /> },
+              { path: paths.settings, element: <SettingsPage /> },
             ],
           },
           {

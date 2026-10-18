@@ -103,7 +103,7 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
                 <>
                   {CHECKLIST_TYPE_LABELS[item.type]}{' '}
                   {item.required && (
-                    <Badge bg="light" text="dark" className="border fw-normal">
+                    <Badge bg="body-secondary" text="body" className="border fw-normal">
                       Obrigatório
                     </Badge>
                   )}

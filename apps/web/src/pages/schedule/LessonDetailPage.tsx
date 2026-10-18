@@ -171,7 +171,7 @@ function RegistryForm({ lesson, completed }: { lesson: Lesson; completed: boolea
     <Card className="mb-4">
       <Card.Body>
         <Card.Title as="h2" className="h5 d-flex align-items-center gap-2">
-          Registro oficial <Badge bg={current.bg} text={current.bg === 'warning' ? 'dark' : undefined}>{current.label}</Badge>
+          Registro oficial <Badge bg={current.bg}>{current.label}</Badge>
         </Card.Title>
         <p className="small text-secondary">É o lançamento da aula no sistema oficial, feito fora daqui. Concluir a aula não preenche este registro.</p>
         {!completed && <Alert variant="info">O registro oficial só pode ser informado depois que a aula for realizada.</Alert>}

@@ -41,3 +41,11 @@
   width: auto;
   min-width: 11rem;
 }
+
+// Item ativo do menu lateral
+.app-sidebar .nav-link.active {
+  color: var(--bs-primary);
+  font-weight: 600;
+  background-color: var(--rc-active-bg);
+  border-radius: var(--bs-border-radius);
+}

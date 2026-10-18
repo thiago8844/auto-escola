@@ -102,7 +102,7 @@ export default function InvitationsPage() {
                   cell: (invitation) => {
                     const status = INVITATION_STATUS[invitation.status]
                     return (
-                      <Badge bg={status.bg} text={status.bg === 'warning' ? 'dark' : undefined}>
+                      <Badge bg={status.bg}>
                         <i className={`bi ${status.icon} me-1`} aria-hidden="true" />
                         {status.label}
                       </Badge>

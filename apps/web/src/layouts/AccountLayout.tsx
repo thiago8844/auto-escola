@@ -4,6 +4,7 @@ import { AppLayout } from './AppLayout'
 const navItems = [
   { to: paths.organizations, icon: 'bi-building', label: 'Meus espaços', end: true },
   { to: paths.organizationNew, icon: 'bi-plus-circle', label: 'Novo espaço' },
+  { to: paths.settings, icon: 'bi-gear', label: 'Configurações' },
 ]
 
 // Telas fora de um espaço: lista e criação

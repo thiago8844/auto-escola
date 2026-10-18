@@ -1,7 +1,9 @@
+@use 'sass:color';
 @use 'sass:map';
 @use 'brand' as b;
 @use 'layout';
 @use 'auth';
+@use 'logo';
 
 // Configura o Bootstrap com a identidade antes de carregá-lo.
 // Modo claro por enquanto; as cores ficam em variáveis (--rc-*) para o modo escuro depois.
@@ -28,10 +30,20 @@
   $body-secondary-color: b.$brand-text-muted,
   $link-color: b.$brand-primary,
   $border-color: b.$brand-border,
-  $card-bg: b.$brand-surface,
-  $card-border-color: b.$brand-border,
-  $input-bg: b.$brand-surface,
-  $input-border-color: b.$brand-border,
+  // Superfícies seguem o tema pelas variáveis --rc-* (trocam em [data-bs-theme='dark'])
+  $card-bg: var(--rc-surface),
+  $card-border-color: var(--bs-border-color),
+  $input-bg: var(--rc-surface),
+  $input-border-color: var(--bs-border-color),
+
+  // Modo escuro (data-bs-theme='dark')
+  $body-bg-dark: b.$dark-bg,
+  $body-color-dark: b.$dark-text,
+  $body-secondary-color-dark: b.$dark-text-muted,
+  $body-emphasis-color-dark: #ffffff,
+  $border-color-dark: b.$dark-border,
+  $link-color-dark: b.$dark-primary,
+  $link-hover-color-dark: #8fd0e4,
 
   // Fonte e tipografia (16 px para conteúdo, 14 px auxiliar, títulos de 20 a 28 px)
   $font-family-sans-serif: b.$font-family-brand,
@@ -69,6 +81,70 @@
   --rc-text: #{b.$brand-text};
   --rc-text-muted: #{b.$brand-text-muted};
   --rc-border: #{b.$brand-border};
+  --rc-active-bg: #{color.change(b.$brand-primary, $alpha: .08)};
+}
+
+// Modo escuro: Bootstrap já troca cores de fundo, texto e bordas; aqui entram a marca e as superfícies
+[data-bs-theme='dark'] {
+  --rc-primary: #{b.$dark-primary};
+  --rc-bg: #{b.$dark-bg};
+  --rc-surface: #{b.$dark-surface};
+  --rc-text: #{b.$dark-text};
+  --rc-text-muted: #{b.$dark-text-muted};
+  --rc-border: #{b.$dark-border};
+  --rc-active-bg: #{color.change(b.$dark-primary, $alpha: .14)};
+
+  --bs-primary: #{b.$dark-primary};
+  --bs-primary-rgb: #{color.channel(b.$dark-primary, 'red', $space: rgb)}, #{color.channel(b.$dark-primary, 'green', $space: rgb)}, #{color.channel(b.$dark-primary, 'blue', $space: rgb)};
+
+  .btn-primary {
+    --bs-btn-color: #{b.$dark-primary-contrast};
+    --bs-btn-bg: #{b.$dark-primary};
+    --bs-btn-border-color: #{b.$dark-primary};
+    --bs-btn-hover-color: #{b.$dark-primary-contrast};
+    --bs-btn-hover-bg: #8fd0e4;
+    --bs-btn-hover-border-color: #8fd0e4;
+    --bs-btn-active-color: #{b.$dark-primary-contrast};
+    --bs-btn-active-bg: #8fd0e4;
+    --bs-btn-active-border-color: #8fd0e4;
+    --bs-btn-disabled-color: #{b.$dark-primary-contrast};
+    --bs-btn-disabled-bg: #{b.$dark-primary};
+    --bs-btn-disabled-border-color: #{b.$dark-primary};
+  }
+
+  .btn-outline-primary {
+    --bs-btn-color: #{b.$dark-primary};
+    --bs-btn-border-color: #{b.$dark-primary};
+    --bs-btn-hover-color: #{b.$dark-primary-contrast};
+    --bs-btn-hover-bg: #{b.$dark-primary};
+    --bs-btn-hover-border-color: #{b.$dark-primary};
+    --bs-btn-active-color: #{b.$dark-primary-contrast};
+    --bs-btn-active-bg: #{b.$dark-primary};
+    --bs-btn-active-border-color: #{b.$dark-primary};
+    --bs-btn-disabled-color: #{b.$dark-primary};
+    --bs-btn-disabled-border-color: #{b.$dark-primary};
+  }
+
+  .page-link.active,
+  .active > .page-link {
+    --bs-pagination-active-color: #{b.$dark-primary-contrast};
+    --bs-pagination-active-bg: #{b.$dark-primary};
+    --bs-pagination-active-border-color: #{b.$dark-primary};
+  }
+
+  .form-check-input:checked {
+    background-color: #{b.$dark-primary};
+    border-color: #{b.$dark-primary};
+  }
+}
+
+// Fundo de menu lateral e tabelas: acompanha o tema
+.bg-surface {
+  background-color: var(--rc-surface) !important;
+}
+
+.table {
+  --bs-table-bg: var(--rc-surface);
 }
 
 // Horários e valores alinham em colunas com números tabulares

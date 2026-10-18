@@ -6,9 +6,6 @@ import type { LessonStatus } from '../types/lesson'
 import type { ChecklistItemStatus, ProcessStatus } from '../types/process'
 import type { VehicleStatus } from '../types/vehicle'
 
-// Texto escuro sobre o amarelo, para manter o contraste
-const textFor = (bg: string) => (bg === 'warning' ? 'dark' : undefined)
-
 export function EnrollmentStatusBadge({ status }: { status: EnrollmentStatus }) {
   const { label, bg } = ENROLLMENT_STATUS[status]
   return <Badge bg={bg}>{label}</Badge>
@@ -17,7 +14,7 @@ export function EnrollmentStatusBadge({ status }: { status: EnrollmentStatus }) 
 export function ProcessStatusBadge({ status }: { status: ProcessStatus }) {
   const { label, bg } = PROCESS_STATUS[status]
   return (
-    <Badge bg={bg} text={textFor(bg)}>
+    <Badge bg={bg}>
       {label}
     </Badge>
   )
@@ -26,7 +23,7 @@ export function ProcessStatusBadge({ status }: { status: ProcessStatus }) {
 export function LessonStatusBadge({ status }: { status: LessonStatus }) {
   const { label, bg, icon } = LESSON_STATUS[status]
   return (
-    <Badge bg={bg} text={textFor(bg)}>
+    <Badge bg={bg}>
       <i className={`bi ${icon} me-1`} aria-hidden="true" />
       {label}
     </Badge>
@@ -36,7 +33,7 @@ export function LessonStatusBadge({ status }: { status: LessonStatus }) {
 export function ChecklistStatusBadge({ status }: { status: ChecklistItemStatus }) {
   const { label, bg, icon } = CHECKLIST_STATUS[status]
   return (
-    <Badge bg={bg} text={textFor(bg)}>
+    <Badge bg={bg}>
       <i className={`bi ${icon} me-1`} aria-hidden="true" />
       {label}
     </Badge>
@@ -57,7 +54,7 @@ export function ReleaseBadge({ release }: { release?: PracticeRelease }) {
       Liberada
     </Badge>
   ) : (
-    <Badge bg="warning" text="dark">
+    <Badge bg="warning">
       <i className="bi bi-lock-fill me-1" aria-hidden="true" />
       Bloqueada
     </Badge>
