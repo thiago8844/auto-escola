@@ -2,7 +2,7 @@
 
 Análise da base em **17/10/2026**. Este é o checklist principal do produto até o lançamento do MVP **web**, atendendo CFCs e instrutores autônomos. Cada entrega inclui a API necessária e a experiência completa em `apps/web`.
 
-**Próximo módulo recomendado: Pacotes e saldo de aulas.** Hoje a matrícula guarda minutos contratados e preço, mas não responde com segurança quanto foi consumido, reservado e quanto ainda pode ser agendado. Esse controle será a base do resumo do aluno, dos relatórios e das cobranças.
+**Próximo módulo recomendado: Disponibilidade e frota (módulo 4).** Os módulos 1 a 3 (saldo, exames/taxas e desfecho/histórico) foram implementados na API e no web em 17/10/2026. A concorrência real com processos simultâneos e a homologação por papel no navegador continuam nos critérios de lançamento da seção 12.
 
 **Ordem definida:** saldo → exames e taxas → desfecho e histórico → disponibilidade e frota → alertas → acesso e acabamento → relatórios → financeiro básico. **O financeiro é o último módulo do MVP.** Depois do MVP entram **Vendas e atendimento** e, em uma etapa própria posterior, o aplicativo mobile.
 
@@ -46,45 +46,45 @@ Foram analisados rotas, páginas, clientes HTTP e hooks do web; models, migratio
 
 ### Lacunas encontradas no código
 
-| Constatação | Evidência | Consequência para o MVP |
-|---|---|---|
-| Minutos e preço são campos de cadastro; não há movimentação de créditos | [EnrollmentController](../apps/api/app/Http/Controllers/Api/V1/EnrollmentController.php), [ChangeLessonStatus](../apps/api/app/Actions/Lessons/ChangeLessonStatus.php) | Construir pacotes, saldo e consumo antes de cobrar por eles. |
-| Não há modelos/rotas de exames, taxas externas, caixa ou relatórios | [Rotas da API](../apps/api/routes/api.php), [rotas web](../apps/web/src/config/routes.tsx) | Exigem entregas completas de API e web. |
-| A página inicial ainda é um protótipo, com contadores `—` | [OrganizationHomePage](../apps/web/src/pages/organization/OrganizationHomePage.tsx) | Entregar painel com dados reais no módulo de relatórios. |
-| O sino guarda dados apenas em memória e não recebe eventos reais da operação | [notificationStore](../apps/web/src/stores/notificationStore.ts), [documentação dos avisos](notificacoes.md) | Persistir notificações, gerar pendências e resolver sua leitura por usuário/espaço. |
-| Agenda do espaço, agenda pessoal e histórico de aulas consultam até 100 registros; há consultas auxiliares só da primeira página | [lessons.ts](../apps/web/src/api/lessons.ts), [me.ts](../apps/web/src/api/me.ts), [useStudentHistory](../apps/web/src/hooks/useStudentHistory.ts) | Evitar agenda/histórico incompletos; nunca calcular total ou saldo a partir de uma página. |
-| A API edita dados de matrícula/processo e substitui documentos; o web expõe apenas parte dessas operações | [enrollments.ts](../apps/web/src/api/enrollments.ts), [processes.ts](../apps/web/src/api/processes.ts), [documents.ts](../apps/web/src/api/documents.ts) | Completar correções e anexação de evidências na interface. |
-| CRLV e situação do veículo são conferidos ao agendar/remarcar; aulas existentes não são reavaliadas na conclusão | [SchedulingConstraints](../apps/api/app/Services/SchedulingConstraints.php), [ChangeLessonStatus](../apps/api/app/Actions/Lessons/ChangeLessonStatus.php) | Mostrar compromissos afetados e tratar impedimentos sem apagar histórico. |
-| Liberação verifica a situação dos itens, sem checar a validade dos documentos associados | [PracticeRelease](../apps/api/app/Services/PracticeRelease.php), [QualificationProcess](../apps/api/app/Models/QualificationProcess.php) | Definir validade e revalidação operacional; upload não equivale a liberação. |
-| Não há recuperação de senha, trilha geral de auditoria nem teste de concorrência real | [Rotas da API](../apps/api/routes/api.php), [implementação da API](../apps/api/docs/implementacao.md) | Tratar acesso, rastreabilidade e concorrência antes do lançamento. |
-| Infraestrutura disponível é local; faltam procedimentos versionados de produção e recuperação | [docker-compose](../infra/docker-compose.yml) | Preparar implantação, backups, restauração e monitoramento em paralelo aos módulos. |
+| Constatação                                                                                                                      | Evidência                                                                                                                                                              | Consequência para o MVP                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Minutos e preço são campos de cadastro; não há movimentação de créditos                                                          | [EnrollmentController](../apps/api/app/Http/Controllers/Api/V1/EnrollmentController.php), [ChangeLessonStatus](../apps/api/app/Actions/Lessons/ChangeLessonStatus.php) | Construir pacotes, saldo e consumo antes de cobrar por eles.                               |
+| Não há modelos/rotas de exames, taxas externas, caixa ou relatórios                                                              | [Rotas da API](../apps/api/routes/api.php), [rotas web](../apps/web/src/config/routes.tsx)                                                                             | Exigem entregas completas de API e web.                                                    |
+| A página inicial ainda é um protótipo, com contadores `—`                                                                        | [OrganizationHomePage](../apps/web/src/pages/organization/OrganizationHomePage.tsx)                                                                                    | Entregar painel com dados reais no módulo de relatórios.                                   |
+| O sino guarda dados apenas em memória e não recebe eventos reais da operação                                                     | [notificationStore](../apps/web/src/stores/notificationStore.ts), [documentação dos avisos](notificacoes.md)                                                           | Persistir notificações, gerar pendências e resolver sua leitura por usuário/espaço.        |
+| Agenda do espaço, agenda pessoal e histórico de aulas consultam até 100 registros; há consultas auxiliares só da primeira página | [lessons.ts](../apps/web/src/api/lessons.ts), [me.ts](../apps/web/src/api/me.ts), [useStudentHistory](../apps/web/src/hooks/useStudentHistory.ts)                      | Evitar agenda/histórico incompletos; nunca calcular total ou saldo a partir de uma página. |
+| A API edita dados de matrícula/processo e substitui documentos; o web expõe apenas parte dessas operações                        | [enrollments.ts](../apps/web/src/api/enrollments.ts), [processes.ts](../apps/web/src/api/processes.ts), [documents.ts](../apps/web/src/api/documents.ts)               | Completar correções e anexação de evidências na interface.                                 |
+| CRLV e situação do veículo são conferidos ao agendar/remarcar; aulas existentes não são reavaliadas na conclusão                 | [SchedulingConstraints](../apps/api/app/Services/SchedulingConstraints.php), [ChangeLessonStatus](../apps/api/app/Actions/Lessons/ChangeLessonStatus.php)              | Mostrar compromissos afetados e tratar impedimentos sem apagar histórico.                  |
+| Liberação verifica a situação dos itens, sem checar a validade dos documentos associados                                         | [PracticeRelease](../apps/api/app/Services/PracticeRelease.php), [QualificationProcess](../apps/api/app/Models/QualificationProcess.php)                               | Definir validade e revalidação operacional; upload não equivale a liberação.               |
+| Não há recuperação de senha, trilha geral de auditoria nem teste de concorrência real                                            | [Rotas da API](../apps/api/routes/api.php), [implementação da API](../apps/api/docs/implementacao.md)                                                                  | Tratar acesso, rastreabilidade e concorrência antes do lançamento.                         |
+| Infraestrutura disponível é local; faltam procedimentos versionados de produção e recuperação                                    | [docker-compose](../infra/docker-compose.yml)                                                                                                                          | Preparar implantação, backups, restauração e monitoramento em paralelo aos módulos.        |
 
 ### Verificação desta análise
 
-| Verificação executada | Resultado em 17/10/2026 |
-|---|---|
-| `php artisan test --compact` em `apps/api` | **152 testes, 584 asserções, aprovados** |
-| `pnpm --dir apps/web lint` | Aprovado |
-| `pnpm --dir apps/web build` | Aprovado; avisos de depreciação Sass/Bootstrap e pacote JS acima de 500 kB |
-| Homologação por papel no navegador e implantação de produção | Não executadas nesta análise; permanecem no checklist de lançamento |
+| Verificação executada                                        | Resultado em 17/10/2026                                                    |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `php artisan test --compact` em `apps/api`                   | **152 testes, 584 asserções, aprovados**                                   |
+| `pnpm --dir apps/web lint`                                   | Aprovado                                                                   |
+| `pnpm --dir apps/web build`                                  | Aprovado; avisos de depreciação Sass/Bootstrap e pacote JS acima de 500 kB |
+| Homologação por papel no navegador e implantação de produção | Não executadas nesta análise; permanecem no checklist de lançamento        |
 
 Esses resultados verificam a base atual. Não significam que os módulos planejados estejam implementados nem que o MVP já esteja pronto. Não há script de testes automatizados do web no `package.json` atual.
 
 ## 3. Sequência de entrega
 
-| Ordem | Módulo | Estado atual | Entrega que fecha a etapa |
-|---|---|---|---|
-| 0 | Base operacional web + API | Implementada, com lacunas listadas acima | Preservar o que existe durante as próximas entregas. |
-| 1 | **Pacotes e saldo de aulas** | Falta | Contratação, reserva, consumo e extrato confiáveis por matrícula/percurso. |
-| 2 | **Exames práticos e taxas externas** | Falta | Agendamento, tentativas, resultado e evidências de taxas. |
-| 3 | **Desfecho do processo e histórico** | Parcial: situação editável e marca de conferência | Acompanhar aprovação, emissão e encerramento com rastreabilidade. |
-| 4 | **Disponibilidade e frota** | Parcial: conflitos, CRLV e ativo/inativo | Bloqueios de horário, manutenção e tratamento dos compromissos afetados. |
-| 5 | **Pendências e alertas reais** | Parcial: componentes visuais | Central persistente com alertas úteis e acesso ao item que precisa de ação. |
-| 6 | **Acesso, correções e acabamento web** | Parcial | Recuperação de conta, fluxos de edição completos e consultas sem truncamento. |
-| 7 | **Relatórios e painel de gestão** | Falta; início ainda é protótipo | Dados reais, filtros, totais consistentes e exportação operacional. |
-| 8 | **Financeiro básico — último módulo do MVP** | Falta | Receitas/despesas, parcelas, formas de pagamento, contas bancárias/caixa, transferências e relatórios financeiros. |
-| Após o MVP | **Vendas e atendimento** | Futuro | Organizar interessados, próximos contatos, propostas e conversão em matrícula. |
-| Etapa posterior | **Aplicativo mobile** | Fora deste checklist | Planejamento próprio após a conclusão do web. |
+| Ordem           | Módulo                                       | Estado atual                                      | Entrega que fecha a etapa                                                                                          |
+| --------------- | -------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 0               | Base operacional web + API                   | Implementada, com lacunas listadas acima          | Preservar o que existe durante as próximas entregas.                                                               |
+| 1               | **Pacotes e saldo de aulas**                 | Falta                                             | Contratação, reserva, consumo e extrato confiáveis por matrícula/percurso.                                         |
+| 2               | **Exames práticos e taxas externas**         | Falta                                             | Agendamento, tentativas, resultado e evidências de taxas.                                                          |
+| 3               | **Desfecho do processo e histórico**         | Parcial: situação editável e marca de conferência | Acompanhar aprovação, emissão e encerramento com rastreabilidade.                                                  |
+| 4               | **Disponibilidade e frota**                  | Parcial: conflitos, CRLV e ativo/inativo          | Bloqueios de horário, manutenção e tratamento dos compromissos afetados.                                           |
+| 5               | **Pendências e alertas reais**               | Parcial: componentes visuais                      | Central persistente com alertas úteis e acesso ao item que precisa de ação.                                        |
+| 6               | **Acesso, correções e acabamento web**       | Parcial                                           | Recuperação de conta, fluxos de edição completos e consultas sem truncamento.                                      |
+| 7               | **Relatórios e painel de gestão**            | Falta; início ainda é protótipo                   | Dados reais, filtros, totais consistentes e exportação operacional.                                                |
+| 8               | **Financeiro básico — último módulo do MVP** | Falta                                             | Receitas/despesas, parcelas, formas de pagamento, contas bancárias/caixa, transferências e relatórios financeiros. |
+| Após o MVP      | **Vendas e atendimento**                     | Futuro                                            | Organizar interessados, próximos contatos, propostas e conversão em matrícula.                                     |
+| Etapa posterior | **Aplicativo mobile**                        | Fora deste checklist                              | Planejamento próprio após a conclusão do web.                                                                      |
 
 A preparação de produção e os testes de lançamento acontecem ao longo das entregas. A conferência final após o financeiro não é um novo módulo. Relatórios operacionais vêm antes dele; os indicadores financeiros entram junto com o módulo 8, quando houver dados reais.
 
@@ -92,18 +92,20 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 **Objetivo:** a equipe saber o que foi contratado, o que já foi utilizado e o que ainda está disponível, sem depender de planilha. Não implementar recebimentos ou caixa nesta etapa.
 
-- [ ] Registrar contratações e acréscimos de aulas/minutos por matrícula, com descrição, quantidade, duração de referência e valor em centavos quando houver.
-- [ ] Separar minutos contratados, reservados em aulas agendadas, realizados, consumidos comercialmente e disponíveis. Apresentar a equivalência em aulas somente com duração explícita.
-- [ ] Manter extrato de créditos, reservas, consumo, liberação e ajustes, com origem, data, responsável e motivo. Saldo deve ser calculado pela API sobre todos os movimentos.
-- [ ] Concluir uma aula gerar um único consumo transacional. Repetição, duplo clique e duas requisições concorrentes nunca podem descontar duas vezes.
-- [ ] Definir por contratação a política de falta e cancelamento, inclusive aviso prévio quando usado. Falta cobrada pode consumir crédito, mas nunca soma minutos de instrução realizada.
-- [ ] Cancelamento liberar a reserva; remarcação transferir a reserva sem duplicá-la. Estorno de consumo existente deve gerar movimento compensatório, preservando o original.
-- [ ] Ajuste de duração de aula já realizada recalcular o consumo conforme a política acordada, com diferença rastreável; proibir alteração silenciosa do extrato.
-- [ ] Definir o comportamento para saldo insuficiente, aula avulsa e matrícula sem pacote: aviso, bloqueio ou exceção autorizada com motivo. Pendência comercial não dispensa liberação para prática.
-- [ ] Tratar A/B separadamente em contratações simultâneas, compatibilizando matrículas AB existentes sem duplicar o processo nem transferir créditos entre categorias sem registro.
-- [ ] Preparar a entrada dos dados atuais: como aproveitar `contracted_minutes`, aulas realizadas/faltas e agendamentos existentes sem conceder ou consumir créditos em duplicidade; registrar saldo inicial conciliado.
-- [ ] Entregar no web contratação/acréscimo, resumo e extrato na matrícula, saldo no aluno e informação de disponibilidade ao agendar/concluir; limitar ajustes à equipe autorizada.
-- [ ] Verificar consumo, falta conforme contrato, cancelamento, acréscimo, ajuste, concorrência e isolamento entre espaços; conferir o mesmo saldo na API, aluno e matrícula.
+- [x] Registrar contratações e acréscimos de aulas/minutos por matrícula, com descrição, quantidade, duração de referência e valor em centavos quando houver.
+- [x] Separar minutos contratados, reservados em aulas agendadas, realizados, consumidos comercialmente e disponíveis. Apresentar a equivalência em aulas somente com duração explícita.
+- [x] Manter extrato de créditos, reservas, consumo, liberação e ajustes, com origem, data, responsável e motivo. Saldo deve ser calculado pela API sobre todos os movimentos.
+- [x] Concluir uma aula gerar um único consumo transacional. Repetição, duplo clique e duas requisições concorrentes nunca podem descontar duas vezes.
+- [x] Definir por contratação a política de falta e cancelamento, inclusive aviso prévio quando usado. Falta cobrada pode consumir crédito, mas nunca soma minutos de instrução realizada.
+- [x] Cancelamento liberar a reserva; remarcação transferir a reserva sem duplicá-la. Estorno de consumo existente deve gerar movimento compensatório, preservando o original.
+- [x] Ajuste de duração de aula já realizada recalcular o consumo conforme a política acordada, com diferença rastreável; proibir alteração silenciosa do extrato.
+- [x] Definir o comportamento para saldo insuficiente, aula avulsa e matrícula sem pacote: aviso, bloqueio ou exceção autorizada com motivo. Pendência comercial não dispensa liberação para prática.
+- [x] Tratar A/B separadamente em contratações simultâneas, compatibilizando matrículas AB existentes sem duplicar o processo nem transferir créditos entre categorias sem registro.
+- [x] Preparar a entrada dos dados atuais: como aproveitar `contracted_minutes`, aulas realizadas/faltas e agendamentos existentes sem conceder ou consumir créditos em duplicidade; registrar saldo inicial conciliado.
+- [x] Entregar no web contratação/acréscimo, resumo e extrato na matrícula, saldo no aluno e informação de disponibilidade ao agendar/concluir; limitar ajustes à equipe autorizada.
+- [x] Verificar consumo, falta conforme contrato, cancelamento, acréscimo, ajuste, concorrência e isolamento entre espaços; conferir o mesmo saldo na API, aluno e matrícula.
+
+**Implementação:** livro-razão append-only (`enrollment_credit_entries`) com chave de deduplicação por aula, pacotes com política de consumo/falta/cancelamento, saldo por categoria em matrículas AB, conciliação dos dados antigos na migration `500005` e estorno/ajuste só para proprietário e gestor. Testes: `CreditBalanceTest`.
 
 **Aceite:** contratar 500 minutos, reservar 100 e realizar uma aula de 50 deve explicar cada parcela do saldo e manter o mesmo resultado após recarregar a página ou repetir a requisição.
 
@@ -111,17 +113,19 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 **Objetivo:** acompanhar cada tentativa e seus documentos, sem tratar aprovação como emissão nem comprovante como confirmação automática.
 
-- [ ] Criar tentativas por processo, percurso/categoria e matrícula quando aplicável, com número, data/hora no fuso do espaço, local, protocolo, observações e anexos privados.
-- [ ] Separar agendado, cancelado/remarcado, aprovado, reprovado, ausente e não concluído. Definir transições e resultado por tentativa; ausência não é reprovação.
-- [ ] Remarcar preservando data/local anteriores; nova tentativa de exame não pode sobrescrever a tentativa anterior nem duplicar a numeração por concorrência.
-- [ ] Registrar veículo e instrutor responsáveis quando houver; reservar sua janela de indisponibilidade e considerar conflitos com aulas e outros exames, inclusive entre espaços para o instrutor, sem revelar dados externos.
-- [ ] Exibir pendências para exame conforme processo e conferência aplicável. Não inventar mínimo nacional de aulas, prazo de reteste ou reconhecimento oficial automático.
-- [ ] Criar taxas externas por processo e/ou tentativa: tipo, guia, valor emitido, emissão, vencimento, pagador, referência e comprovante; permitir várias taxas por tentativa sem contar duas vezes uma taxa compartilhada.
-- [ ] Diferenciar situação desconhecida, pendente, pagamento informado, confirmado, isenta com motivo e cancelada. Registrar quem conferiu, quando e a fonte da confirmação.
-- [ ] Separar responsável pela obrigação, quem efetivamente pagou e eventual adiantamento/reembolso a acertar no financeiro. Pagamento direto pelo aluno ao órgão não entra no caixa do CFC.
-- [ ] Entregar agenda/lista de exames, cadastro, remarcação, resultado, histórico de tentativas e taxas no aluno/processo, com busca e filtros de período, categoria e situação.
-- [ ] Restringir taxas e documentos à equipe; definir o resumo operacional necessário ao instrutor responsável, sem expor laudos, caixa ou exames de colegas.
-- [ ] Verificar processo AB com resultados diferentes em A/B, remarcação, ausência, taxa compartilhada, comprovante sem confirmação e isolamento por espaço.
+- [x] Criar tentativas por processo, percurso/categoria e matrícula quando aplicável, com número, data/hora no fuso do espaço, local, protocolo, observações e anexos privados.
+- [x] Separar agendado, cancelado/remarcado, aprovado, reprovado, ausente e não concluído. Definir transições e resultado por tentativa; ausência não é reprovação.
+- [x] Remarcar preservando data/local anteriores; nova tentativa de exame não pode sobrescrever a tentativa anterior nem duplicar a numeração por concorrência.
+- [x] Registrar veículo e instrutor responsáveis quando houver; reservar sua janela de indisponibilidade e considerar conflitos com aulas e outros exames, inclusive entre espaços para o instrutor, sem revelar dados externos.
+- [x] Exibir pendências para exame conforme processo e conferência aplicável. Não inventar mínimo nacional de aulas, prazo de reteste ou reconhecimento oficial automático.
+- [x] Criar taxas externas por processo e/ou tentativa: tipo, guia, valor emitido, emissão, vencimento, pagador, referência e comprovante; permitir várias taxas por tentativa sem contar duas vezes uma taxa compartilhada.
+- [x] Diferenciar situação desconhecida, pendente, pagamento informado, confirmado, isenta com motivo e cancelada. Registrar quem conferiu, quando e a fonte da confirmação.
+- [x] Separar responsável pela obrigação, quem efetivamente pagou e eventual adiantamento/reembolso a acertar no financeiro. Pagamento direto pelo aluno ao órgão não entra no caixa do CFC.
+- [x] Entregar agenda/lista de exames, cadastro, remarcação, resultado, histórico de tentativas e taxas no aluno/processo, com busca e filtros de período, categoria e situação.
+- [x] Restringir taxas e documentos à equipe; definir o resumo operacional necessário ao instrutor responsável, sem expor laudos, caixa ou exames de colegas.
+- [x] Verificar processo AB com resultados diferentes em A/B, remarcação, ausência, taxa compartilhada, comprovante sem confirmação e isolamento por espaço.
+
+**Implementação:** tentativas numeradas por processo+categoria (`practical_exams`), remarcação com histórico, conflitos de instrutor/veículo/aluno com aulas e exames (inclusive entre espaços), taxas externas (`external_fees`) sem efeito em caixa, anexos privados e resumo restrito ao instrutor. Testes: `PracticalExamTest`.
 
 **Aceite:** registrar reprovação em B, manter o histórico, contratar aula adicional e registrar nova tentativa aprovada, sem alterar o resultado de A nem gerar receita fictícia pelas taxas.
 
@@ -129,16 +133,18 @@ A preparação de produção e os testes de lançamento acontecem ao longo das e
 
 **Objetivo:** responder em qual etapa o aluno está, o que falta e quem alterou informações importantes.
 
-- [ ] Separar situação comercial da matrícula, liberação para prática, resultado por categoria e situação da emissão. Cada uma precisa ter regra e apresentação próprias.
-- [ ] Acompanhar aprovado com emissão pendente, documento emitido/disponível e entrega quando aplicável, com datas, referências e evidências privadas. Distinguir PPD/CNH e modalidade do documento conforme o caso.
-- [ ] Tratar AB com A aprovada e B pendente/reprovada, sem encerrar o processo inteiro; registrar eventual renúncia e sua confirmação separadamente.
-- [ ] Definir regras para conclusão, encerramento, desistência e reabertura com motivo, permissões e tratamento de aulas futuras, créditos e obrigações ainda abertas.
-- [ ] Manter acompanhamento de futura definitiva como pendência quando aplicável, sem exigir que o aluno conclua esse prazo posterior para o sistema poder ser lançado.
-- [ ] Registrar eventos do processo: mudanças de situação, conferência, resultado, correção, referência de transferência e encerramento. Guardar autor, data, motivo e alterações relevantes.
-- [ ] Criar trilha de auditoria das ações críticas da base: papel/acesso, convite, vínculo, contratação/saldo, aula, registro oficial, documento e resultado. Incluir eventos financeiros quando o módulo 8 entrar.
-- [ ] Corrigir dados por operação explícita, preservando versões e movimentos anteriores; definir como mudanças de categoria, parceiro ou processo de matrícula com histórico afetam saldo e exames.
-- [ ] Oferecer no aluno/processo uma linha do tempo paginada e um resumo do próximo passo, com as informações filtradas conforme o papel.
-- [ ] Verificar aprovação sem emissão, AB parcial, correção de resultado, encerramento com pendências e consulta após revogar o acesso de um membro.
+- [x] Separar situação comercial da matrícula, liberação para prática, resultado por categoria e situação da emissão. Cada uma precisa ter regra e apresentação próprias.
+- [x] Acompanhar aprovado com emissão pendente, documento emitido/disponível e entrega quando aplicável, com datas, referências e evidências privadas. Distinguir PPD/CNH e modalidade do documento conforme o caso.
+- [x] Tratar AB com A aprovada e B pendente/reprovada, sem encerrar o processo inteiro; registrar eventual renúncia e sua confirmação separadamente.
+- [x] Definir regras para conclusão, encerramento, desistência e reabertura com motivo, permissões e tratamento de aulas futuras, créditos e obrigações ainda abertas.
+- [x] Manter acompanhamento de futura definitiva como pendência quando aplicável, sem exigir que o aluno conclua esse prazo posterior para o sistema poder ser lançado.
+- [x] Registrar eventos do processo: mudanças de situação, conferência, resultado, correção, referência de transferência e encerramento. Guardar autor, data, motivo e alterações relevantes.
+- [x] Criar trilha de auditoria das ações críticas da base: papel/acesso, convite, vínculo, contratação/saldo, aula, registro oficial, documento e resultado. Incluir eventos financeiros quando o módulo 8 entrar.
+- [x] Corrigir dados por operação explícita, preservando versões e movimentos anteriores; definir como mudanças de categoria, parceiro ou processo de matrícula com histórico afetam saldo e exames.
+- [x] Oferecer no aluno/processo uma linha do tempo paginada e um resumo do próximo passo, com as informações filtradas conforme o papel.
+- [x] Verificar aprovação sem emissão, AB parcial, correção de resultado, encerramento com pendências e consulta após revogar o acesso de um membro.
+
+**Implementação:** resultado por categoria derivado dos exames, emissão (pendente/emitido/entregue, PPD/CNH), renúncia separada da confirmação, conclusão/encerramento/reabertura com conferência de pendências, trilha `audit_events` append-only com linha do tempo por aluno/processo e tela de auditoria (proprietário/gestor). Testes: `ProcessOutcomeTest`.
 
 **Aceite:** conseguir reconstruir o percurso do aluno e explicar cada alteração importante sem consultar logs técnicos ou perder tentativas anteriores.
 
@@ -313,13 +319,13 @@ Nome sugerido no menu: **Vendas**. Dentro dele, usar **Interessados**, **Atendim
 
 As escolhas abaixo não impedem começar o próximo módulo. Cada uma deve ser registrada antes de implementar a regra que depende dela.
 
-| Momento | Decisão pendente | Direção proposta para o MVP |
-|---|---|---|
-| Módulo 1 | Consumo pelo tempo agendado ou efetivamente realizado? Falta consome? | Política explícita por contratação, com minutos realizados separados do consumo comercial. |
-| Módulo 1 | Reserva e saldo insuficiente; aulas avulsas e migração do contratado atual | Não conceder crédito implícito nem permitir consumo duplicado; exceção exige motivo. |
-| Módulos 1–3 | Como distribuir crédito/exame em matrícula AB existente? | Controlar percurso por categoria sem duplicar o processo, com migração compatível. |
-| Módulo 4 | O que fazer com aulas futuras ao desativar instrutor/veículo? | Listar impacto e exigir providência explícita, preservando o histórico. |
-| Módulo 6 | Política de senha e ações disponíveis à equipe | Registrar escolha para produção e refletir a mesma regra em API/web. |
-| Módulo 8 | Aluno ou parceiro paga o autônomo? Há repasse? | Suportar pagador identificado, sem presumir que todo aluno paga diretamente. |
-| Módulo 8 | Quem adianta taxa, como reembolsa e o que `staff` pode fazer? | Separar taxa externa, adiantamento e caixa; permissões por operação. |
-| Lançamento | Localidade inicial, volume esperado e processo de suporte | Confirmar no piloto e registrar as condições atendidas pelo primeiro lançamento. |
+| Momento     | Decisão pendente                                                           | Direção proposta para o MVP                                                                |
+| ----------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Módulo 1    | Consumo pelo tempo agendado ou efetivamente realizado? Falta consome?      | Política explícita por contratação, com minutos realizados separados do consumo comercial. |
+| Módulo 1    | Reserva e saldo insuficiente; aulas avulsas e migração do contratado atual | Não conceder crédito implícito nem permitir consumo duplicado; exceção exige motivo.       |
+| Módulos 1–3 | Como distribuir crédito/exame em matrícula AB existente?                   | Controlar percurso por categoria sem duplicar o processo, com migração compatível.         |
+| Módulo 4    | O que fazer com aulas futuras ao desativar instrutor/veículo?              | Listar impacto e exigir providência explícita, preservando o histórico.                    |
+| Módulo 6    | Política de senha e ações disponíveis à equipe                             | Registrar escolha para produção e refletir a mesma regra em API/web.                       |
+| Módulo 8    | Aluno ou parceiro paga o autônomo? Há repasse?                             | Suportar pagador identificado, sem presumir que todo aluno paga diretamente.               |
+| Módulo 8    | Quem adianta taxa, como reembolsa e o que `staff` pode fazer?              | Separar taxa externa, adiantamento e caixa; permissões por operação.                       |
+| Lançamento  | Localidade inicial, volume esperado e processo de suporte                  | Confirmar no piloto e registrar as condições atendidas pelo primeiro lançamento.           |
