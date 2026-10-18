@@ -7,7 +7,7 @@ import { APP_NAME } from '../config'
 // Moldura das telas de login, cadastro e confirmação de e-mail
 export function AuthLayout() {
   return (
-    <Container as="main" className="min-vh-100 d-flex flex-column align-items-center justify-content-center py-5 position-relative">
+    <Container as="main" className="min-vh-100 d-flex flex-column align-items-center justify-content-center px-3 py-5 position-relative">
       <div className="position-absolute top-0 end-0 p-3">
         <ThemeToggle compact />
       </div>

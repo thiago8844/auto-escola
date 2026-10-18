@@ -33,6 +33,8 @@ export function OrganizationLayout() {
         ]
       : []),
     { to: links.settings, icon: 'bi-gear', label: 'Dados do espaço' },
+    // Agenda pessoal reúne as aulas de todos os espaços
+    { to: paths.myLessons, icon: 'bi-calendar-check', label: 'Minha agenda' },
   ]
 
   const sidebarHeader = (

@@ -3,6 +3,8 @@ import { AuthGate } from '../components/AuthGate'
 import { GuestOnly } from '../components/GuestOnly'
 import { RequireAuth } from '../components/RequireAuth'
 import { RequirePermission } from '../components/RequirePermission'
+import MyLessonsPage from '../pages/me/MyLessonsPage'
+import MyProfilePage from '../pages/me/MyProfilePage'
 import SettingsPage from '../pages/settings/SettingsPage'
 import { AccountLayout } from '../layouts/AccountLayout'
 import { AuthLayout } from '../layouts/AuthLayout'
@@ -76,6 +78,8 @@ export const router = createBrowserRouter([
               { path: paths.organizations, element: <OrganizationsPage /> },
               { path: paths.organizationNew, element: <OrganizationCreatePage /> },
               { path: paths.settings, element: <SettingsPage /> },
+              { path: paths.myLessons, element: <MyLessonsPage /> },
+              { path: paths.myProfile, element: <MyProfilePage /> },
             ],
           },
           {

@@ -8,6 +8,8 @@ export const paths = {
   // O e-mail de convite aponta para este caminho (com ?token=)
   acceptInvitation: '/convites/aceitar',
   settings: '/configuracoes',
+  myLessons: '/minha-agenda',
+  myProfile: '/perfil-profissional',
   organizations: '/espacos',
   organizationNew: '/espacos/novo',
   organization: '/espacos/:organizationId',

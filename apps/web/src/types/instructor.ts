@@ -1,6 +1,7 @@
 import type { LicenseCategory } from './enrollment'
 
 // Sem e-mail nem ID de conta: a API só informa se há conta vinculada
+// Perfil profissional do próprio usuário (GET /me/instructor)
 export type Instructor = {
   id: number
   full_name: string
