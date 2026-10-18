@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\Finance\ReportController as FinanceReport;
 use App\Http\Controllers\Api\V1\FleetOverviewController;
 use App\Http\Controllers\Api\V1\InvitationAcceptController;
 use App\Http\Controllers\Api\V1\InvitationController;
+use App\Http\Controllers\Api\V1\LessonCommunicationController;
 use App\Http\Controllers\Api\V1\LessonController;
 use App\Http\Controllers\Api\V1\MaintenanceController;
 use App\Http\Controllers\Api\V1\MeInstructorController;
@@ -116,6 +117,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('partners', PartnerController::class);
                 Route::post('partners/{partner}/restore', [PartnerController::class, 'restore'])->withTrashed();
                 Route::apiResource('students', StudentController::class);
+                Route::get('students/{student}/communications', [LessonCommunicationController::class, 'studentIndex']);
                 Route::post('students/{student}/restore', [StudentController::class, 'restore'])->withTrashed();
                 Route::apiResource('enrollments', EnrollmentController::class)
                     ->only(['index', 'store', 'show', 'update']);
@@ -285,6 +287,11 @@ Route::prefix('v1')->group(function () {
                 Route::post('lessons/{lesson}/reschedule', [LessonController::class, 'reschedule']);
                 Route::post('lessons/{lesson}/reassign', [LessonController::class, 'reassign']);
                 Route::patch('lessons/{lesson}/status', [LessonController::class, 'updateStatus']);
+                Route::get('lessons/{lesson}/communications/preview', [LessonCommunicationController::class, 'preview']);
+                Route::get('lessons/{lesson}/communications', [LessonCommunicationController::class, 'index']);
+                Route::post('lessons/{lesson}/communications/email', [LessonCommunicationController::class, 'sendEmail'])->middleware('throttle:10,1');
+                Route::post('lessons/{lesson}/communications/whatsapp', [LessonCommunicationController::class, 'openWhatsApp'])->middleware('throttle:20,1');
+                Route::post('lessons/{lesson}/communications/{communicationId}/mark-sent', [LessonCommunicationController::class, 'markWhatsAppSent']);
             });
     });
 });
