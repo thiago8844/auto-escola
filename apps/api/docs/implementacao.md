@@ -2,7 +2,7 @@
 
 Registro do que foi construído nesta etapa, das decisões tomadas, do que **não** está pronto e dos próximos passos.
 
-> Escopo desta etapa: **somente a API** (`apps/api`) e sua documentação. Web e mobile não foram tocados.
+> Este documento registra a construção da base da **API** (`apps/api`). A base web já foi implementada posteriormente. O escopo e a ordem atuais do MVP estão no [checklist de módulos do MVP web](../../../docs/modulos-checklist.md); mobile fica para uma etapa posterior.
 
 ## Estado
 
@@ -11,7 +11,7 @@ Registro do que foi construído nesta etapa, das decisões tomadas, do que **nã
 | Infraestrutura local (MySQL + Mailpit) | ✅ |
 | Migrations, models e enums do domínio | ✅ |
 | Autenticação SPA (sessão) e mobile (token) | ✅ |
-| Confirmação de e-mail | ✅ (resposta em JSON; sem página de frontend) |
+| Confirmação de e-mail | ✅ (API responde JSON; o e-mail aponta para a página web de confirmação) |
 | Espaços, membros e papéis | ✅ |
 | Convites e aceite | ✅ |
 | Identidade e vínculos de instrutor | ✅ |
@@ -19,16 +19,17 @@ Registro do que foi construído nesta etapa, das decisões tomadas, do que **nã
 | Aulas: agenda, conflito, remarcação, status | ✅ |
 | Agenda pessoal consolidada (`/me/lessons`) | ✅ |
 | Seeder de demonstração | ✅ |
-| Testes automatizados | ✅ 149 testes, 571 asserções |
-| Documentação em `docs/` | ✅ |
+| Testes automatizados | ✅ 152 testes, 584 asserções (17/10/2026) |
+| Documentação geral em `docs/` e técnica em `apps/api/docs/` | ✅ |
 | **Fase 1 do MVP** (ver [lacunas-mvp-api.md](lacunas-mvp-api.md)) | ✅ |
 | Processo de habilitação e checklist de liberação para a prática | ✅ |
 | Documentos privados (upload, conferência, versões, download) | ✅ |
 | Veículos, aula com veículo, conflito de veículo e de aluno | ✅ |
 | Execução da aula (duração real, motivo, evolução, registro oficial) | ✅ |
 | Fuso horário por espaço | ✅ |
-| Exames práticos, taxas, pacotes/saldo, financeiro (Fases 2 a 4) | 📋 Não implementado |
-| Frontend web e mobile | 📋 Não implementado (fora do escopo desta etapa) |
+| Pacotes/saldo, exames práticos, taxas, relatórios e financeiro | 📋 Não implementados; financeiro será o último módulo do MVP |
+| Frontend web | ✅ Base operacional implementada em `apps/web`; complementos no checklist principal |
+| Aplicativo mobile | 📋 Etapa posterior ao web |
 
 ## Fase 1 do MVP — o que entrou
 
@@ -67,7 +68,7 @@ Detalhes dos endpoints em [api.md](api.md); tabelas em [modelo-de-dados.md](mode
 
 ### Limitações da Fase 1
 
-- **Sem exame prático, taxas, pacotes/saldo e financeiro** (Fases 2 a 4). `contracted_minutes` e `price_cents` são só registro; nenhum saldo é calculado.
+- **Sem exame prático, taxas, pacotes/saldo e financeiro.** `contracted_minutes` e `price_cents` são só registro; nenhum saldo é calculado. A ordem de entrega está no checklist principal.
 - **Sem alerta** de CRLV a vencer nem de documento vencido; só o bloqueio no agendamento.
 - **Aulas já agendadas não são reavaliadas** se o veículo ficar inativo ou o CRLV vencer depois. O bloqueio vale ao agendar e ao remarcar.
 - **Sem exclusão de documento.** Para corrigir, rejeite (`rejected`) ou substitua por nova versão.
@@ -85,7 +86,7 @@ Detalhes dos endpoints em [api.md](api.md); tabelas em [modelo-de-dados.md](mode
 php artisan test
 ```
 
-Última execução: **149 testes, 571 asserções, todos aprovados**, contra o MySQL `autoescola_test`, com código de saída 0.
+Execução em **17/10/2026**: **152 testes, 584 asserções, todos aprovados**, contra o MySQL `autoescola_test`, com código de saída 0.
 
 Os testes cobrem os cenários exigidos na especificação:
 
@@ -109,9 +110,9 @@ Os testes cobrem os cenários exigidos na especificação:
 | Documentos privados, versões, download e permissões | `DocumentTest` |
 | Fuso horário do espaço | `OrganizationTimezoneTest` |
 
-### Verificação em HTTP real (fora da suíte)
+### Verificação histórica em HTTP real (fora da suíte)
 
-Além dos testes, executei estes fluxos contra um `php artisan serve` real, com dados de demonstração:
+Na construção da base, estes fluxos foram verificados contra um `php artisan serve` real, com dados de demonstração. A análise atual do MVP repetiu a suíte automatizada, sem repetir esta homologação HTTP:
 
 - **Login mobile:** `POST /auth/token` emite token; `GET /me/lessons` com `Bearer` retorna 3 aulas, uma em cada espaço, sem CPF do aluno.
 - **Login SPA:** preflight CORS com credenciais; `GET /sanctum/csrf-cookie`; login sem `X-XSRF-TOKEN` retorna **419**; com o header, **200**; `GET /auth/user` reconhece a sessão; logout retorna **204** e depois a sessão é recusada com **401**.
@@ -221,27 +222,20 @@ Estas coisas **não estão resolvidas**. Não considere que estão prontas.
 ### Técnicas
 - **Concorrência não tem teste automatizado de concorrência real.** A solução (lock por instrutor) está implementada e documentada, e os testes cobrem a regra em sequência. Falta um teste com requisições paralelas de verdade.
 - **Mensagens de validação do Laravel estão em inglês.** Apenas mensagens de regra de negócio estão em português. Para traduzir: publicar `lang/pt_BR` e definir `APP_LOCALE=pt_BR`.
-- **Link de confirmação de e-mail responde JSON.** Não há página do frontend para ele.
+- **Link de confirmação de e-mail:** a resposta da API é JSON, mas a página web e o direcionamento do e-mail para ela já foram implementados.
 - **`DatabaseSeeder` padrão** ainda cria `test@example.com`. Não foi alterado.
 - **Sem limite de taxa** para `GET`s autenticados, só para login, cadastro, token, reenvio e aceite.
 - **Produção:** o Mailpit é só para desenvolvimento. Não há configuração de SMTP real para produção.
 - **Porta 8000** está ocupada nesta máquina; o script `dev:api` do `package.json` raiz a usa. Documentado em [setup-api.md](setup-api.md#6-rodar-a-api).
 
 ### Repositório
-- Nada foi commitado. O repositório ainda tem `apps/` inteiro como não rastreado (estado original).
+- A base da API e do web está versionada; consultar o histórico do git para as entregas.
 - Os arquivos `apps/api/.env`, `.env.testing` e `infra/.env` são locais e ignorados pelo git.
 
 ## Próximos passos
 
-Ordem sugerida, do mais útil para o mais distante:
+A fonte principal de TODOs e prioridades é o **[checklist de módulos do MVP web](../../../docs/modulos-checklist.md)**. O [mapa de lacunas da API](lacunas-mvp-api.md) relaciona as entregas de backend à mesma sequência.
 
-1. ~~Fuso horário por espaço~~ ✅ Feito na Fase 1.
-2. **Teste de concorrência real** (dois processos agendando o mesmo horário), para comprovar o lock.
-3. **Tradução de validação** (`lang/pt_BR`).
-4. **Fluxo de redefinição de senha** e **página de confirmação de e-mail** no frontend.
-5. **Decisão sobre aulas futuras ao desativar instrutor** (manter, cancelar ou bloquear).
-6. **Lembretes de aula** (fila e notificação).
-7. **Auditoria** de alterações de papel, convite e status de aula.
-8. **Web e mobile** consumindo a API (fora desta etapa).
-9. **Fases 2 a 4 do MVP** (exames práticos, taxas, pacotes e saldo, financeiro, relatórios): ver [lacunas-mvp-api.md](lacunas-mvp-api.md).
-10. **Laravel Boost**, se você quiser as diretrizes geradas para o projeto.
+O próximo módulo recomendado é **Pacotes e saldo de aulas**. Depois vêm exames/taxas, desfecho/histórico, disponibilidade/frota, alertas, acesso/acabamento e relatórios. **Financeiro básico é o último módulo do MVP**; Vendas e atendimento vêm após ele. Mobile terá planejamento próprio posterior.
+
+Concorrência real, tradução, recuperação de senha, impacto de desativação, auditoria, homologação e preparação de produção permanecem pendentes nos módulos/critérios correspondentes. A página de confirmação de e-mail e a base web já existem.

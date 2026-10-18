@@ -4,6 +4,8 @@ Como lançar avisos no `apps/web`: toasts, o sino (central de notificações) e 
 
 > Status: ✅ base implementada no web. 📋 Ainda não há notificações reais: a lista do sino começa vazia e nenhum fluxo do sistema as gera. A API não tem endpoint de notificações.
 
+Os TODOs de persistência, geração de pendências, destinatários e integração com o sino estão no módulo **Pendências e alertas reais** do [checklist do MVP web](modulos-checklist.md). Os alertas financeiros entram junto com o financeiro, último módulo do MVP.
+
 ## Os três tipos de aviso
 
 | Tipo | Onde aparece | Quando usar |

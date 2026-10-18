@@ -1,127 +1,44 @@
 # Lacunas do MVP na API
 
-Comparação entre o fluxo de habilitação ([fluxo-habilitacao-brasil-mg.md](fluxo-habilitacao-brasil-mg.md)) e o que a API tem hoje. Foco: **receber o aluno já pronto para a prática** e acompanhá-lo até a CNH.
+Atualizado em **17/10/2026**. O escopo e a ordem de implementação passaram a ser mantidos no **[checklist de módulos do MVP web](../../../docs/modulos-checklist.md)**. Este documento é um mapa técnico de backend; não mantém um segundo backlog com prioridades diferentes.
 
-Legenda: ✅ existe · 🟡 existe parcialmente · 📋 falta · 🔮 futuro (fora do MVP)
+A base web já existe. As antigas Fases 2 a 4 foram reorganizadas: pacotes/saldo primeiro, relatórios antes do financeiro e **financeiro como último módulo do MVP**. Vendas e atendimento ficam após o MVP; mobile em etapa própria posterior.
 
-## 1. Escopo do MVP
+## Base implementada
 
-**Entra:** alunos, processo em andamento, aulas, agenda, exames práticos (tentativas, taxa, comprovante, resultado), veículos (cadastro, disponibilidade, manutenção) e financeiro simples (contas a pagar/receber, receitas e despesas).
+Espaços CFC/particular, membros, papéis, convites, instrutor global e vínculos, parceiros, alunos, matrículas, processos/checklist, documentos privados, veículos, agenda, conflitos, execução e registro oficial manual.
 
-**Não entra (🔮):** teoria, turmas, professores, clínicas, abertura oficial do processo e integrações com Detran. Ficam no rascunho da seção 6.
+A antiga **Fase 1** descreve essa base em [implementacao.md](implementacao.md#fase-1-do-mvp--o-que-entrou). Endpoints atuais em [api.md](api.md); estrutura em [modelo-de-dados.md](modelo-de-dados.md).
 
-**CFC × autônomo:** o autônomo atende vários CFCs. Hoje isso já é possível: `Partner` (parceiro) por espaço e `enrollments.partner_id` ligam o aluno a cada auto escola.
+## Entregas de API por módulo
 
-## 2. O que já existe
+Os nomes de entidades abaixo são propostas, não tabelas ou endpoints já disponíveis. As tarefas e critérios completos estão no checklist principal.
 
-| Área | Estado |
+| Módulo | Complementos necessários no backend |
 |---|---|
-| Espaços CFC/particular, membros, papéis, convites | ✅ |
-| Instrutor com vínculo em vários espaços e conflito entre espaços | ✅ |
-| Parceiros (auto escolas do autônomo) | ✅ |
-| Alunos (nome, CPF, contato, nascimento) | ✅ |
-| Matrícula: situação, minutos contratados, preço, processo (Fase 1) | ✅ |
-| Processo de habilitação, checklist, documentos, veículos (Fase 1) | ✅ |
-| Aulas: veículo, conflito de aluno e veículo, duração real, evolução, registro oficial (Fase 1) | ✅ |
+| 1. Pacotes e saldo | Contratações/acréscimos, movimentos de crédito/reserva/consumo/estorno, política de falta/cancelamento, transações, idempotência, migração dos dados existentes e agregação completa por matrícula/percurso. |
+| 2. Exames e taxas | Tentativas por categoria (`exam_attempts`), remarcações e resultados, reservas de recursos, taxas externas (`process_fees`), comprovantes e conferência separada do pagamento informado. |
+| 3. Desfecho e histórico | Situação por percurso, emissão/entrega, transições de encerramento/reabertura, eventos do processo (`process_events`), auditoria e correções rastreáveis. |
+| 4. Disponibilidade e frota | Bloqueios de veículo/instrutor, manutenções, impacto em compromissos existentes, validade documental e revalidação operacional. |
+| 5. Alertas | Notificações persistentes, leitura por destinatário, escopo por espaço, deduplicação, agendador/fila e geração por pendência. |
+| 6. Acesso e acabamento | Recuperação/alteração de senha, validação em português, edição segura, paginação/consultas de histórico e recuperação de cadastros arquivados quando aplicável. |
+| 7. Relatórios | Agregações e filtros operacionais por período/fuso/papel, painel real, resumo do aluno e exportação completa. |
+| 8. Financeiro — último | Receitas/despesas, categorias, contas bancárias/caixas, formas de pagamento, parcelas a receber/pagar, pagamentos parciais/divididos, baixas/estornos, recorrência simples, transferências, extratos, adiantamentos/reembolsos, parceiro pagador, permissões e relatórios/alertas financeiros. |
 
-## 3. Lacunas, em ordem de implementação
+Preparação de produção, backups/restauração, testes de concorrência real e homologação são critérios transversais do checklist principal.
 
-### Fase 1 — Dar para começar a dar aula ✅ Implementada
+## Regras que continuam valendo
 
-Detalhes em [implementacao.md](implementacao.md#fase-1-do-mvp--o-que-entrou) e [api.md](api.md).
+1. Resultado pertence à tentativa e à categoria, nunca à situação global do aluno.
+2. AB é um processo com dois percursos; aprovação em A não conclui automaticamente B.
+3. Upload não conclui etapa; comprovante não confirma taxa; aula realizada não significa registro oficial confirmado.
+4. Aprovação prática não significa documento emitido. O tipo de documento e a emissão dependem do percurso acompanhado.
+5. Não fixar carga oficial, tentativas, reteste ou preço nacional sem conferência de aplicabilidade e fonte/data. Referência de domínio em [fluxo-habilitacao-brasil-mg.md](../../../docs/fluxo-habilitacao-brasil-mg.md).
+6. CPF/Renach compartilhado não concede acesso entre espaços; conflitos de instrutor não revelam a origem externa.
+7. Falta cobrada pode consumir crédito comercial, mas não soma minutos de instrução realizada.
+8. Taxa paga diretamente ao órgão não gera entrada no caixa do CFC. Adiantamento e reembolso devem ser identificados separadamente.
+9. Pendência comercial não dispensa liberação para a prática; conferência interna não equivale a confirmação oficial.
 
-| # | Lacuna | Detalhe | Status |
-|---|---|---|---|
-| 1.1 | **Processo de habilitação** (`qualification_processes`) | Tipo (primeira, adição, mudança, aperfeiçoamento), UF, município, Renach/protocolo, data de abertura, categorias atuais e pretendidas, situação (em preparação, ativo, com pendência, aguardando emissão, concluído, encerrado). A matrícula passa a referenciá-lo. Seção 3 e 21 do fluxo. | ✅ |
-| 1.2 | **Checklist de liberação para prática** | Teoria aprovada, licença de aprendizagem, exame médico/psicológico (só o resultado operacional), toxicológico quando aplicável. Cada item: situação, origem, quem conferiu, data. Upload **não** conclui etapa. | ✅ |
-| 1.3 | **Matrícula completa** | Hoje só tem categoria. Falta: situação (interessado, contratado, em atendimento, encerrado, rescindido), vínculo com o processo, serviço contratado, aulas/minutos contratados, preço. | ✅ |
-| 1.4 | **Documentos privados** (`documents`) | Upload em disco privado, tipo, titular, validade nullable, situação (anexado, conferido, rejeitado, substituído), versão, download autorizado. Serve à licença, comprovantes, guias, "papelzinho" do exame, CRLV. | ✅ |
-| 1.5 | **Veículos** (`vehicles`) | Placa, modelo, categoria atendida, adaptações, CRLV/validade, situação, dono (espaço). | ✅ |
-| 1.6 | **Aula com veículo** | `lessons.vehicle_id`, conflito de veículo, conflito de **aluno** (hoje aceita duas aulas ao mesmo tempo), compatibilidade categoria × veículo × instrutor. | ✅ |
-| 1.7 | **Execução da aula** | Duração real × contratada, evolução/observação pedagógica, motivo de falta/cancelamento, situação do registro oficial (não informado, pendente, confirmado, rejeitado) com evidência manual. | ✅ |
-| 1.8 | **Fuso horário por espaço** | Já listado como limitação: o dia local do CFC sai deslocado 3 h. Afeta agenda e relatórios. | ✅ |
+## Planejamento posterior
 
-### Fase 2 — Ciclo completo até a CNH
-
-| # | Lacuna | Detalhe | Status |
-|---|---|---|---|
-| 2.1 | **Exames práticos** (`exam_attempts`) | Por categoria (AB tem dois percursos). Agendamento (data, local, comprovante), resultado (aprovado, reprovado, ausente, não concluído), número da tentativa, remarcação preservando histórico. Falta ≠ reprovação. | 📋 |
-| 2.2 | **Taxas externas** (`process_fees`) | Guia, valor emitido, vencimento, quem pagou (aluno, CFC, instrutor), situação (desconhecida, pendente, paga informada, confirmada, isenta com motivo, cancelada), comprovante. Vários por tentativa; compartilhadas por processo. Nada de `exam_paid` booleano. | 📋 |
-| 2.3 | **Desfecho do exame** | Aprovou → "aprovado — emissão pendente" → PPD → definitiva. Reprovou → registrar, oferecer **nova aula** (contratar mais) ou novo exame. Resultado fica na tentativa, nunca em `student.status`. | 📋 |
-| 2.4 | **Pacotes e saldo** | Pacote de aulas, saldo por matrícula. Regras explícitas: concluir consome, falta consome conforme contrato, cancelamento estorna, conclusão repetida não desconta duas vezes (idempotência). | 📋 |
-| 2.5 | **Histórico do processo** (`process_events`) | Decisões, renúncia de categoria, troca de CFC, retificação de resultado, com antes/depois e responsável. | 📋 |
-| 2.6 | **Alertas de pendência** | Licença/CRLV a vencer, manutenção, taxa não paga antes do exame, aluno sem aula há X dias, exame sem taxa. | 📋 |
-
-### Fase 3 — Veículos e financeiro
-
-| # | Lacuna | Detalhe | Status |
-|---|---|---|---|
-| 3.1 | **Disponibilidade do veículo** | Bloqueios (manutenção, documentos vencidos, indisponível), usados pela agenda. | 📋 |
-| 3.2 | **Manutenções** | Data, tipo, custo, oficina, km, próxima revisão. Gera despesa no financeiro. | 📋 |
-| 3.3 | **Plano de contas simples** | Categorias de receita/despesa (aula, taxa repassada, combustível, manutenção, aluguel...). | 📋 |
-| 3.4 | **Contas a receber** | Cobrança por matrícula/pacote, parcelas, vencimento, situação, pagamento real (forma, data, recibo). | 📋 |
-| 3.5 | **Contas a pagar** | Fornecedor, vencimento, pagamento, vínculo opcional (veículo, manutenção). | 📋 |
-| 3.6 | **Lançamentos** | Receitas e despesas avulsas, fluxo de caixa por período. | 📋 |
-| 3.7 | **Adiantamento de taxa** | Se o CFC/instrutor paga a taxa do Detran, controlar adiantamento e reembolso, sem contá-la como receita. | 📋 |
-| 3.8 | **Visão por parceiro (autônomo)** | Receita, aulas e repasses por auto escola associada. | 📋 |
-| 3.9 | **Papel financeiro** | Hoje instrutor não vê financeiro; definir quem lê/edita (owner, admin, financeiro). | 📋 |
-
-### Fase 4 — Relatórios e infraestrutura
-
-| # | Lacuna | Status |
-|---|---|---|
-| 4.1 | Resumo do aluno: aulas feitas, saldo, agenda, exames, taxas, situação (o "foram feitas x aulas") | 📋 |
-| 4.2 | Painel: aulas da semana, exames próximos, aprovados/reprovados, contas vencendo | 📋 |
-| 4.3 | Auditoria (quem alterou o quê) | 📋 |
-| 4.4 | Mensagens de validação em pt_BR; redefinição de senha | 📋 |
-| 4.5 | Teste de concorrência real; decisão sobre aulas futuras ao desativar instrutor | 📋 |
-
-## 4. Regras que a IA não pode quebrar (resumo do fluxo)
-
-1. Resultado pertence à tentativa, não ao aluno.
-2. AB = um processo, dois percursos; aprovar A não encerra AB.
-3. Upload, pagamento interno ou aula concluída **não** implicam etapa, taxa reconhecida ou registro oficial.
-4. Aprovação prática ≠ documento emitido.
-5. Não fixar mínimos de horas, limite de tentativas, intervalo de reteste nem preço nacional: tudo configurável, com fonte e data (V01, V04, V07, V09 do fluxo).
-6. Compartilhar CPF/Renach não dá acesso entre espaços.
-7. Pendência regulatória não se resolve mudando situação comercial.
-
-## 5. Modelo proposto (resumo)
-
-```
-students ─┬─ qualification_processes ─┬─ process_steps (checklist)
-          │                           ├─ process_events
-          │                           ├─ process_fees ── documents
-          │                           └─ enrollments ─┬─ package/saldo
-          │                                           ├─ lessons ── vehicles
-          │                                           ├─ exam_attempts ── process_fees
-          │                                           └─ receivables ── payments
-vehicles ── vehicle_blocks, vehicle_maintenances ── payables
-financial_categories ── payables / receivables / transactions
-```
-
-`enrollments` mantém a semântica atual (percurso/contratação por categoria); apenas ganha `qualification_process_id` nullable, para não quebrar o que existe.
-
-## 6. 🔮 Rascunho do futuro (fora do MVP)
-
-- [ ] Teoria: catálogo de cursos, turmas, calendário, salas, professores, presença, avaliações, certificado interno, prova teórica oficial separada de simulados.
-- [ ] Abertura e acompanhamento integral do processo (biometria, médico, psicológico, toxicológico como fluxo, não só resultado).
-- [ ] Regras por UF/município versionadas (`uf`, vigência, fonte, data de conferência, `confirmed`/`needs_review`); processos antigos não são recalculados.
-- [ ] Clínicas e laboratórios: encaminhamento e retorno.
-- [ ] Reavaliação, recurso e contestação de resultado.
-- [ ] PCD: adaptações, Junta Médica, veículo adaptado, Libras.
-- [ ] Transferência de UF e troca de CFC com importação de horas reconhecidas.
-- [ ] Contratos, aditivos, recibos em PDF, assinatura eletrônica, NFS-e.
-- [ ] Integrações oficiais (Renach, agendamento), só com documentação técnica e autorização.
-- [ ] Credenciais de instrutor e validade; cursos profissionais (transporte escolar, produtos perigosos).
-- [ ] Conversão horas × horas-aula e carga mínima oficial por categoria (V09).
-- [ ] Notificações e lembretes ao aluno (e-mail, push, WhatsApp).
-- [ ] Web e mobile.
-
-## 7. Perguntas abertas
-
-1. Pagamento do aluno ao autônomo: por aula, por pacote ou misto? Há repasse para a auto escola parceira? (define 3.4 e 3.8)
-2. Instrutor autônomo cobra o aluno ou a auto escola paga o instrutor? Os dois cenários existem?
-3. Falta consome crédito por padrão ou depende de aviso prévio?
-4. Aluno pode ter processo em um CFC e aulas com o autônomo no mesmo processo?
-5. Quem paga a taxa do exame no dia a dia: aluno direto ao Detran ou o CFC adianta?
+Vendas e atendimento, mobile, teoria/turmas, serviços oficiais completos, clínicas, integrações, emissão fiscal e demais expansões estão registrados nas seções finais do [checklist principal](../../../docs/modulos-checklist.md). Não precisam ser implementados para concluir o MVP web definido ali.

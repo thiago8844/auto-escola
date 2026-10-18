@@ -1,7 +1,7 @@
 # Arquitetura
 
 Este documento explica **como o sistema pensa** o problema: espaços de trabalho, identidade de instrutor, vínculos, parceiros e isolamento.
-Para os campos e constraints, veja [modelo-de-dados.md](modelo-de-dados.md). Para os papéis, veja [permissoes.md](permissoes.md).
+Para os campos e constraints, veja [modelo-de-dados.md](../apps/api/docs/modelo-de-dados.md). Para os papéis, veja [permissoes.md](permissoes.md). Para os próximos módulos e critérios de lançamento, veja o [checklist do MVP web](modulos-checklist.md).
 
 > Status: ✅ implementado e coberto por testes, salvo onde indicado como 📋.
 
@@ -191,12 +191,14 @@ Administradores só convidam `staff` e `instructor`. Convidar `owner` ou `admin`
 
 Dois fluxos independentes, mesmo backend:
 
-- **SPA (web):** sessão com cookie do Sanctum. Não há token guardado no navegador. Detalhes em [api.md](api.md#autenticação).
+- **SPA (web):** sessão com cookie do Sanctum. Não há token guardado no navegador. Detalhes em [api.md](../apps/api/docs/api.md#autenticação).
 - **Mobile:** token Bearer do Sanctum, emitido por `POST /auth/token`.
 
 Confirmação de e-mail: o cadastro dispara um e-mail com link assinado (`signed`) para `GET /api/v1/auth/email/verify/{id}/{hash}`. Não bloqueia o login, mas **é exigida para aceitar convites**.
 
-> 📋 **Limitação:** o link de confirmação responde JSON. Ainda não há página do frontend para ele. Também não existe fluxo de redefinição de senha.
+O link de confirmação enviado por e-mail aponta para uma página web, que repassa a assinatura à API e apresenta o resultado. A API responde JSON.
+
+> 📋 **Limitação:** ainda não existe fluxo de redefinição de senha. Está previsto no módulo de acesso e acabamento do [checklist do MVP web](modulos-checklist.md).
 
 ## 12. Exclusão lógica e histórico
 

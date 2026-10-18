@@ -68,7 +68,7 @@ Não há coluna de organização: o perfil é global.
 | `id` | bigint PK | |
 | `organization_id` | FK → `organizations`, `RESTRICT` | |
 | `user_id` | FK → `users`, `CASCADE` | |
-| `role` | enum(`owner`, `admin`, `staff`, `instructor`) | Ver [permissoes.md](permissoes.md). |
+| `role` | enum(`owner`, `admin`, `staff`, `instructor`) | Ver [permissoes.md](../../../docs/permissoes.md). |
 | timestamps | | |
 
 **Constraints:** `UNIQUE (organization_id, user_id)` e índice em `user_id`.
@@ -283,4 +283,4 @@ Estado derivado (não persistido): `accepted` > `revoked` > `expired` > `pending
 | `partners`, `students` | Exclusão lógica. |
 | `enrollments`, `lessons`, `invitations`, `instructors` | A API não expõe exclusão. |
 
-Detalhes e justificativas em [arquitetura.md](arquitetura.md#12-exclusão-lógica-e-histórico).
+Detalhes e justificativas em [arquitetura.md](../../../docs/arquitetura.md#12-exclusão-lógica-e-histórico).

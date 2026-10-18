@@ -1,91 +1,77 @@
-# Documentação do sistema de auto escola
+# Documentação — Rota Certa Gestão
 
-Sistema de gestão para CFCs (autoescolas) e instrutores autônomos. Um mesmo módulo atende os dois casos: o que muda são o tipo do espaço de trabalho e o papel de cada pessoa nele.
+Sistema de gestão para CFCs e instrutores autônomos, com **API Laravel e base web React já implementadas**. O foco atual é completar o MVP web. O aplicativo mobile terá uma etapa própria posterior.
 
-Esta pasta documenta **a API** (`apps/api`). Web (`apps/web`) e mobile (`apps/mobile`) ainda não foram desenvolvidos nesta etapa.
+Para decidir o próximo trabalho, comece pelo **[checklist de módulos do MVP web](modulos-checklist.md)**. Ele reúne a análise do código, a base existente, os TODOs por módulo, os critérios de aceite e de lançamento e o planejamento posterior.
 
-## Ordem sugerida de leitura
+## Ordem de entrega do MVP
 
-| # | Documento | Para quê |
-|---|---|---|
-| 1 | [arquitetura.md](arquitetura.md) | Entender o modelo: espaços, identidade do instrutor, vínculos, isolamento, agenda. Comece aqui. |
-| 2 | [modelo-de-dados.md](modelo-de-dados.md) | Tabelas, campos, constraints e relações, com diagrama. |
-| 3 | [permissoes.md](permissoes.md) | Quem pode fazer o quê, por papel. |
-| 4 | [setup-api.md](setup-api.md) | Subir o MySQL, configurar, migrar, popular e rodar os testes. |
-| 5 | [api.md](api.md) | Endpoints, autenticação (SPA e mobile), payloads, respostas, erros e exemplos. |
-| 6 | [implementacao.md](implementacao.md) | O que foi feito, decisões, limitações e próximos passos. |
-| 7 | [lacunas-mvp-api.md](lacunas-mvp-api.md) | O que falta na API para o MVP (aluno → aulas → exame → CNH) e o rascunho do futuro. |
-| 8 | [web-checklist.md](web-checklist.md) | Checklist das telas do web, por módulo e em ordem de importância. |
-| 9 | [identidade-visual.md](identidade-visual.md) | Cores, estados, tipografia e espaçamento do web. Use antes de criar telas. |
-| 10 | [notificacoes.md](notificacoes.md) | Toasts, sino de notificações e alerta máximo do web: como lançar cada um. |
+1. **Pacotes e saldo de aulas** — próximo módulo recomendado.
+2. Exames práticos e taxas externas.
+3. Desfecho do processo e histórico.
+4. Disponibilidade e frota.
+5. Pendências e alertas reais.
+6. Acesso, correções e acabamento web.
+7. Relatórios e painel de gestão.
+8. **Financeiro básico — último módulo do MVP**: receitas, despesas, parcelas, várias formas de pagamento, contas bancárias/caixa, transferências, relatórios e alertas.
 
-Se você quer só **rodar o projeto**, vá direto para [setup-api.md](setup-api.md).
+Após relatórios e financeiro: **Vendas e atendimento**, com interessados, próximos contatos e propostas, sem exigir que o usuário conheça os termos “CRM” ou “lead”. O mobile será planejado depois da conclusão do web.
 
-## Legenda de status
+## Documentos
 
-Cada documento indica o estado do que descreve:
-
-- ✅ **Implementado e verificado**: há código e teste (ou verificação em HTTP real).
-- 📋 **Planejado**: está na especificação ou nos próximos passos, mas **não existe** ainda.
-
-Nada marcado como ✅ depende de funcionalidade planejada.
-
-## Estado atual em uma tela
-
-| Área | Status |
+| Documento | Conteúdo |
 |---|---|
-| Autenticação (SPA por sessão e mobile por token) | ✅ |
-| Espaços (CFC e particular), membros e papéis | ✅ |
-| Convites com token de uso único e expiração | ✅ |
-| Perfil de instrutor global, com ou sem conta | ✅ |
-| Vínculo profissional por espaço | ✅ |
-| Parceiros, alunos, matrículas | ✅ |
-| Aulas, conflito de agenda entre organizações, transições de status | ✅ |
-| Agenda pessoal consolidada (`/me/lessons`) | ✅ |
-| Processo de habilitação e checklist de liberação para a prática | ✅ |
-| Documentos privados | ✅ |
-| Veículos e aula com veículo (conflito de veículo e de aluno) | ✅ |
-| Execução da aula: duração real, evolução, registro oficial | ✅ |
-| Fuso horário por espaço | ✅ |
-| Dados de demonstração | ✅ |
-| Testes automatizados | ✅ 149 testes passando |
-| Exames práticos, taxas, pacotes e saldo, financeiro | 📋 (Fases 2 a 4) |
-| Frontend web e mobile | 📋 |
+| [Checklist de módulos](modulos-checklist.md) | Fonte principal do escopo, sequência e pendências até o lançamento web. Substitui os checklists antigos de telas web. |
+| [Arquitetura](arquitetura.md) | Espaços, identidade do instrutor, vínculos, isolamento e agenda. |
+| [Modelo de dados](../apps/api/docs/modelo-de-dados.md) | Tabelas, campos, constraints e relações existentes. |
+| [Permissões](permissoes.md) | Acesso por papel na base atual. As novas permissões serão definidas em cada módulo. |
+| [Setup da API](../apps/api/docs/setup-api.md) | MySQL, e-mail local, configuração, migrations, demonstração e testes. |
+| [Referência da API](../apps/api/docs/api.md) | Endpoints, autenticação, payloads, respostas e erros implementados. |
+| [Implementação da API](../apps/api/docs/implementacao.md) | Decisões da base, verificações e limitações técnicas. |
+| [Lacunas da API](../apps/api/docs/lacunas-mvp-api.md) | Mapa das entregas de backend para o checklist principal, sem sequência concorrente. |
+| [Setup do web](../apps/web/README.md) | Configuração, execução, lint e build. |
+| [Identidade visual](identidade-visual.md) | Cores, estados, tipografia e espaçamento. |
+| [Avisos e notificações](notificacoes.md) | Toasts, sino e alerta máximo existentes; integração operacional ainda pendente. |
+| [Fluxo de habilitação](fluxo-habilitacao-brasil-mg.md) | Referência de domínio e cenários, incluindo serviços fora do MVP. Não amplia o escopo por si só. |
 
-## Início rápido
+## Estado atual
+
+| Área | Situação |
+|---|---|
+| Conta, confirmação de e-mail, espaços, equipe e convites | Implementados na API e no web; recuperação de senha pendente. |
+| Alunos, parceiros, instrutores, matrículas e processos | Base implementada; há complementos de edição e histórico no checklist. |
+| Documentos privados, veículos, agenda e execução de aulas | Base implementada; saldo, bloqueios por período e manutenção pendentes. |
+| Agenda pessoal do instrutor em vários espaços | Implementada. |
+| Toasts, sino e alerta máximo | Componentes implementados; notificações operacionais persistentes pendentes. |
+| Painel inicial | Protótipo com contadores sem dados. |
+| Pacotes/saldo, exames/taxas, relatórios e financeiro | Planejados no checklist principal. |
+| Vendas e atendimento | Depois do MVP. |
+| Aplicativo mobile | Etapa posterior; não está desenvolvido. |
+
+Verificação em **17/10/2026**: API com **152 testes e 584 asserções aprovados**; lint e build do web aprovados. O build registra avisos de Sass/Bootstrap e tamanho do JavaScript. Homologação no navegador e preparação de produção continuam pendentes; os resultados atuais não certificam o lançamento.
+
+## Rodar o projeto
+
+Siga o [setup da API](../apps/api/docs/setup-api.md) para infraestrutura, ambiente, migrations e demonstração. Para a interface, siga o [setup do web](../apps/web/README.md).
+
+Com os ambientes preparados, a partir da raiz:
 
 ```bash
-# 1. Infraestrutura (MySQL e Mailpit)
-cp infra/.env.example infra/.env   # e troque as senhas
-docker-compose -f infra/docker-compose.yml --env-file infra/.env up -d
-
-# 2. API
-cd apps/api
-composer install
-cp .env.example .env && php artisan key:generate   # ajuste DB_PASSWORD
-cp .env.testing.example .env.testing               # ajuste DB_PASSWORD e APP_KEY
-php artisan migrate
-php artisan db:seed --class=DemoSeeder             # dados de demonstração (dev)
-
-# 3. Rodar e testar
-php artisan serve --port=8010
-php artisan test
+# Em terminais separados:
+php apps/api/artisan serve --port=8010
+pnpm dev:web
 ```
 
-Login de demonstração: `joao@autoescola.demo` / `demo-autoescola-123`. Detalhes em [setup-api.md](setup-api.md#5-dados-de-demonstração-seeder).
+Configure `VITE_API_URL=http://localhost:8010` no web ao usar essa porta. Credenciais de demonstração e instruções do seeder estão no [setup da API](../apps/api/docs/setup-api.md#5-dados-de-demonstração-seeder).
 
-## Conceitos centrais em uma frase cada
+## Conceitos centrais
 
-- **Espaço de trabalho** (`organization`): uma autoescola (`cfc`) ou uma operação particular (`independent`).
-- **Papel** (`owner`, `admin`, `staff`, `instructor`): o que uma pessoa pode fazer dentro de um espaço específico.
-- **Instrutor**: uma pessoa, com identidade global. Pode ter conta ou não.
-- **Vínculo de acesso**: permite entrar no espaço. **Vínculo profissional**: permite receber aulas nele. São separados.
-- **Parceiro**: um CFC externo, cadastrado localmente, sem acesso ao sistema.
-- **Aula**: existe uma única vez, na organização que a criou. A agenda pessoal do instrutor a mostra sem copiar.
+- **Espaço de trabalho:** uma autoescola (`cfc`) ou operação particular (`independent`); os módulos são compartilhados.
+- **Papel:** define o que a pessoa pode fazer naquele espaço. Uma pessoa pode ter papéis diferentes em espaços diferentes.
+- **Instrutor:** identidade profissional global, com conta opcional. Acesso ao espaço e vínculo profissional são separados.
+- **Parceiro:** CFC externo cadastrado localmente; não ganha acesso ao sistema.
+- **Aluno e matrícula:** cadastro local da pessoa e sua contratação/percurso por categoria.
+- **Processo:** acompanhamento interno com referências e evidências, separado do sistema oficial.
+- **Aula:** um único registro na organização de origem; a agenda pessoal não cria cópias.
 
-## Convenções desta documentação
-
-- Português claro, com exemplos concretos.
-- Nomes de campos, endpoints e códigos de erro estão no formato exato da API (em inglês quando o código é em inglês).
-- Exemplos de resposta foram capturados de uma execução real.
-- Credenciais citadas são **somente de demonstração**.
+Ao concluir uma entrega, atualize o checklist principal e a referência técnica correspondente. Funcionalidade planejada deve continuar identificada como pendente até estar implementada e verificada.

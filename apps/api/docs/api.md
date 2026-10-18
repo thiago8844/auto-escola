@@ -12,7 +12,7 @@ Referência dos endpoints implementados, com autenticação, payloads, respostas
 - Respostas de sucesso de recursos ficam em `data`. Listagens trazem `links` e `meta` (paginação do Laravel).
 - IDs são inteiros.
 - Datas em ISO 8601 com fuso (`2026-10-19T09:00:00+00:00`). A API armazena e devolve em UTC.
-- Permissões e papéis: ver [permissoes.md](permissoes.md).
+- Permissões e papéis: ver [permissoes.md](../../../docs/permissoes.md).
 
 ---
 
@@ -757,7 +757,7 @@ Criação:
 
 ### Checklist de liberação
 
-Itens criados por tipo de processo (padrões do produto, não verdade legal; ver [fluxo-habilitacao-brasil-mg.md](fluxo-habilitacao-brasil-mg.md), V03 e V11):
+Itens criados por tipo de processo (padrões do produto, não verdade legal; ver [fluxo-habilitacao-brasil-mg.md](../../../docs/fluxo-habilitacao-brasil-mg.md), V03 e V11):
 
 | Tipo do processo | Obrigatórios | Opcionais (situação `unknown`) |
 |---|---|---|
@@ -1008,4 +1008,4 @@ Só a equipe. É o registro do lançamento **oficial** da aula (feito fora do si
 
 *Equipe* = owner, admin ou staff. *Parcial* = instrutor, só o atribuído a ele.
 
-Para o detalhamento de cada permissão, veja [permissoes.md](permissoes.md).
+Para o detalhamento de cada permissão, veja [permissoes.md](../../../docs/permissoes.md).
