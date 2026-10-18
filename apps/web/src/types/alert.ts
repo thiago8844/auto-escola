@@ -28,6 +28,7 @@ export type AlertSettings = {
   document_lead_days: number
   exam_lead_days: number
   fee_lead_days: number
+  finance_lead_days: number
   release_lead_days: number
   low_balance_minutes: number
   inactive_days: number

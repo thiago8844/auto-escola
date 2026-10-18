@@ -10,6 +10,7 @@ import { ENROLLMENT_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
 import { BalancePanel } from './BalancePanel'
 import { EnrollmentEditModal } from './EnrollmentEditModal'
+import { EnrollmentFinancePanel } from './EnrollmentFinancePanel'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCompleteLesson, useEnrollment, useEnrollmentLessons, useUpdateEnrollmentStatus } from '../../hooks/useEnrollments'
 import { notify } from '../../stores/toastStore'
@@ -105,6 +106,8 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
       {operate && (
         <BalancePanel organizationId={organization.id} timezone={organization.timezone} enrollment={enrollment} canAdjust={organization.role === 'owner' || organization.role === 'admin'} />
       )}
+
+      {operate && <EnrollmentFinancePanel organization={organization} enrollment={enrollment} canManage={organization.role === 'owner' || organization.role === 'admin'} />}
 
       <section className="mb-4" aria-labelledby="release-title">
         <h2 id="release-title" className="h4 mb-3">

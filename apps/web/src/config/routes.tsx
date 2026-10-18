@@ -16,6 +16,12 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import AccountsPage from '../pages/finance/AccountsPage'
+import EntriesPage from '../pages/finance/EntriesPage'
+import FinanceLayout from '../pages/finance/FinanceLayout'
+import FinanceOverviewPage from '../pages/finance/OverviewPage'
+import ReceiptPage from '../pages/finance/ReceiptPage'
+import FinanceSetupPage from '../pages/finance/SetupPage'
 import ReportsPage from '../pages/reports/ReportsPage'
 import StudentSummaryPage from '../pages/students/StudentSummaryPage'
 import AlertsPage from '../pages/alerts/AlertsPage'
@@ -126,6 +132,19 @@ export const router = createBrowserRouter([
                   { path: `${organizationSections.schedule}/nova`, element: <LessonFormPage /> },
                   { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
                   { path: organizationSections.reports, element: <ReportsPage /> },
+                  // Financeiro: equipe; o instrutor nunca acessa o caixa
+                  {
+                    path: organizationSections.finance,
+                    element: <FinanceLayout />,
+                    children: [
+                      { index: true, element: <FinanceOverviewPage /> },
+                      { path: 'receitas', element: <EntriesPage type="receivable" /> },
+                      { path: 'despesas', element: <EntriesPage type="payable" /> },
+                      { path: 'contas', element: <AccountsPage /> },
+                      { path: 'cadastros', element: <FinanceSetupPage /> },
+                      { path: 'recibo/:paymentId', element: <ReceiptPage /> },
+                    ],
+                  },
                   { path: `${organizationSections.students}/:studentId/resumo`, element: <StudentSummaryPage /> },
                   { path: organizationSections.partners, element: <PartnersPage /> },
                   { path: `${organizationSections.partners}/novo`, element: <PartnerFormPage /> },

@@ -24,7 +24,7 @@ export function alertPath(organizationId: number, alert: Pick<AlertItem, 'subjec
       return links.instructor(subject.id)
     case 'receivable':
     case 'payable':
-      return links.finance
+      return `${subject.type === 'receivable' ? links.financeReceivables : links.financePayables}?lancamento=${subject.id}`
     default:
       return links.alerts
   }

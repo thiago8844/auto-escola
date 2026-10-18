@@ -9,6 +9,7 @@ import { useFees, useSettleReimbursement } from '../../hooks/useExams'
 import type { Exam, ExternalFee } from '../../types/exam'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
+import { ChargeModal } from '../finance/ChargeModal'
 import { FeeFormModal, FeeStatusModal } from './FeeModals'
 
 type FeesPanelProps = { organizationId: number; timezone: string; processId: number; exams: Exam[]; examId?: number }
@@ -20,6 +21,7 @@ export function FeesPanel({ organizationId, timezone, processId, exams, examId }
   const receipt = useDocumentFile(organizationId)
   const [editing, setEditing] = useState<ExternalFee | 'new' | null>(null)
   const [changing, setChanging] = useState<ExternalFee | null>(null)
+  const [financing, setFinancing] = useState<{ fee: ExternalFee; kind: 'reimbursement' | 'advance' } | null>(null)
 
   return (
     <section aria-labelledby={`fees-title-${examId ?? 'p'}`} className="mb-4">
@@ -115,6 +117,16 @@ export function FeesPanel({ organizationId, timezone, processId, exams, examId }
                           Comprovante
                         </Button>
                       )}
+                      {fee.paid_by === 'organization' && fee.status !== 'cancelled' && (
+                        <>
+                          <Button variant="outline-primary" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill' : 'me-2'} onClick={() => setFinancing({ fee, kind: 'advance' })}>
+                            Lançar adiantamento
+                          </Button>
+                          <Button variant="outline-primary" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill' : 'me-2'} onClick={() => setFinancing({ fee, kind: 'reimbursement' })}>
+                            Cobrar reembolso
+                          </Button>
+                        </>
+                      )}
                       {fee.reimbursement === 'to_settle' && (
                         <Button variant="outline-success" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill' : undefined} disabled={settle.isPending} onClick={() => settle.mutate(fee.id)}>
                           Reembolso acertado
@@ -137,6 +149,24 @@ export function FeesPanel({ organizationId, timezone, processId, exams, examId }
           exams={exams}
           presetExamId={examId}
           onClose={() => setEditing(null)}
+        />
+      )}
+      {financing && (
+        <ChargeModal
+          organizationId={organizationId}
+          timezone={timezone}
+          title={financing.kind === 'reimbursement' ? `Cobrar reembolso: ${financing.fee.kind}` : `Adiantamento: ${financing.fee.kind}`}
+          path={`/external-fees/${financing.fee.id}/finance/${financing.kind}`}
+          type={financing.kind === 'reimbursement' ? 'receivable' : 'payable'}
+          description={
+            financing.kind === 'reimbursement'
+              ? 'O espaço pagou esta taxa por conta de outra pessoa: gera a cobrança do reembolso. É repasse, não receita de aula.'
+              : 'Registra a saída do dinheiro que o espaço adiantou ao órgão oficial. É repasse, não despesa operacional.'
+          }
+          defaultTotalCents={financing.fee.amount_cents ?? null}
+          defaultDue={financing.fee.due_date}
+          withParty={financing.kind === 'advance'}
+          onClose={() => setFinancing(null)}
         />
       )}
       {changing && <FeeStatusModal organizationId={organizationId} fee={changing} onClose={() => setChanging(null)} />}

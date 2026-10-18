@@ -13,6 +13,7 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
 import { formatDateTime } from '../../utils/formatDateTime'
 import { BlockModal } from '../availability/BlockModal'
+import { ChargeModal } from '../finance/ChargeModal'
 import { UploadDocumentModal } from '../students/UploadDocumentModal'
 import { CompleteMaintenanceModal, NewMaintenanceModal } from './MaintenanceModals'
 
@@ -31,6 +32,7 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
   const [completing, setCompleting] = useState<Maintenance | null>(null)
   const [cancelling, setCancelling] = useState<Maintenance | null>(null)
   const [releasing, setReleasing] = useState<AvailabilityBlock | null>(null)
+  const [expensing, setExpensing] = useState<Maintenance | null>(null)
   const release = useReleaseBlock(organization.id)
   const cancel = useCancelMaintenance(organization.id)
 
@@ -156,6 +158,11 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
                               {m.next_due_km !== null && <> · próxima aos {m.next_due_km.toLocaleString('pt-BR')} km</>}
                             </div>
                           </div>
+                          {m.status !== 'cancelled' && (
+                            <Button size="sm" variant="outline-primary" onClick={() => setExpensing(m)}>
+                              Lançar despesa
+                            </Button>
+                          )}
                           {m.status === 'scheduled' && (
                             <div className="d-flex gap-2">
                               <Button size="sm" variant="success" onClick={() => setCompleting(m)}>
@@ -230,6 +237,20 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
       {modal === 'block' && <BlockModal organization={organization} vehicleId={vehicleId} onClose={() => setModal(null)} />}
       {modal === 'maintenance' && <NewMaintenanceModal organization={organization} vehicleId={vehicleId} onClose={() => setModal(null)} />}
       {completing && <CompleteMaintenanceModal organization={organization} maintenance={completing} onClose={() => setCompleting(null)} />}
+      {expensing && (
+        <ChargeModal
+          organizationId={organization.id}
+          timezone={organization.timezone}
+          title={`Despesa da manutenção: ${expensing.type}`}
+          path={`/maintenances/${expensing.id}/finance/expense`}
+          type="payable"
+          description="Gera a conta a pagar desta manutenção. Repetir a ação não cria outro lançamento: a referência da manutenção é única."
+          defaultTotalCents={expensing.actual_cost_cents ?? expensing.estimated_cost_cents}
+          defaultDue={expensing.performed_on ?? expensing.scheduled_on}
+          withParty
+          onClose={() => setExpensing(null)}
+        />
+      )}
       {releasing && (
         <ReasonModal
           title="Liberar veículo"

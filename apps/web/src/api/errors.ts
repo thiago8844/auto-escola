@@ -53,6 +53,7 @@ const CODE_MESSAGES: Record<string, string> = {
   stale_record: 'Este registro foi alterado por outra pessoa depois que você abriu a tela. Recarregue para ver a versão atual e refaça a alteração.',
   idempotency_key_reused: 'Esta solicitação já foi enviada com outro conteúdo. Recarregue a tela e tente de novo.',
   request_in_progress: 'Esta ação já está sendo processada. Aguarde um instante.',
+  entry_already_exists: 'Este lançamento já foi gerado. Abra o existente em vez de criar outro.',
   email_not_verified: 'Confirme seu e-mail antes de aceitar o convite.',
 }
 
@@ -104,6 +105,8 @@ export class ApiError extends Error {
   readonly status?: number
   readonly code?: string
   readonly fieldErrors: Record<string, string>
+  // Corpo bruto da resposta de erro (ex.: existing_entry_id quando o lançamento já existe)
+  readonly body?: Record<string, unknown>
 
   constructor(init: {
     kind: ApiErrorKind
@@ -111,6 +114,7 @@ export class ApiError extends Error {
     status?: number
     code?: string
     fieldErrors?: Record<string, string>
+    body?: Record<string, unknown>
   }) {
     super(init.message)
     this.name = 'ApiError'
@@ -118,6 +122,7 @@ export class ApiError extends Error {
     this.status = init.status
     this.code = init.code
     this.fieldErrors = init.fieldErrors ?? {}
+    this.body = init.body
   }
 }
 
@@ -145,5 +150,5 @@ export function toApiError(error: unknown): ApiError {
     message = body.message
   }
 
-  return new ApiError({ kind, message, status, code, fieldErrors })
+  return new ApiError({ kind, message, status, code, fieldErrors, body: body as Record<string, unknown> | undefined })
 }

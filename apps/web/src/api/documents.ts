@@ -18,6 +18,14 @@ export async function listStudentDocuments(organizationId: number | string, stud
 }
 
 // Anexos privados de uma tentativa de exame
+// Anexos privados de um lançamento financeiro (contrato, comprovantes)
+export async function listEntryDocuments(organizationId: number | string, entryId: number | string): Promise<Paginated<StudentDocument>> {
+  return fetchAllPages(async (page) => {
+    const { data } = await http.get<Paginated<StudentDocument>>(base(organizationId), { params: { finance_entry_id: entryId, per_page: 100, page }, ...handledByScreen })
+    return data
+  })
+}
+
 export async function listExamDocuments(organizationId: number | string, examId: number | string): Promise<Paginated<StudentDocument>> {
   return fetchAllPages(async (page) => {
     const { data } = await http.get<Paginated<StudentDocument>>(base(organizationId), {
@@ -29,7 +37,14 @@ export async function listExamDocuments(organizationId: number | string, examId:
 }
 
 // A quem o documento pertence (ao menos um) e, se for nova versão, qual documento ele substitui
-export type DocumentOwner = { student_id?: number; vehicle_id?: number; qualification_process_id?: number; replaces_document_id?: number }
+export type DocumentOwner = {
+  student_id?: number
+  vehicle_id?: number
+  qualification_process_id?: number
+  finance_entry_id?: number
+  finance_payment_id?: number
+  replaces_document_id?: number
+}
 
 export async function uploadDocument(organizationId: number | string, owner: DocumentOwner, input: DocumentUploadInput): Promise<StudentDocument> {
   const form = new FormData()

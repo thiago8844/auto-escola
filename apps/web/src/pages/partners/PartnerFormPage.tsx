@@ -11,6 +11,10 @@ import { QueryState } from '../../components/QueryState'
 import { SubmitButton } from '../../components/SubmitButton'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { Link } from 'react-router-dom'
+import { Money } from '../finance/shared'
+import { usePartnerFinance } from '../../hooks/useFinance'
+import { canOperate } from '../../utils/permissions'
 import { useArchive } from '../../hooks/useArchive'
 import { useCreatePartner, usePartner, useUpdatePartner } from '../../hooks/usePartners'
 import { partnerSchema, type PartnerInput } from '../../schemas/partner'
@@ -39,6 +43,7 @@ function PartnerForm({ partner }: { partner?: Partner }) {
   const update = useUpdatePartner(organization.id, String(partner?.id ?? ''), partner?.updated_at)
   const save = partner ? update : create
   const { archive } = useArchive(organization.id, 'partners')
+  const finance = usePartnerFinance(organization.id, partner && canOperate(organization.role) ? partner.id : null)
 
   const {
     register,
@@ -73,6 +78,16 @@ function PartnerForm({ partner }: { partner?: Partner }) {
           <FormField label="Telefone (opcional)" type="tel" error={errors.phone?.message} {...register('phone')} />
           <SubmitButton loading={save.isPending}>{partner ? 'Salvar alterações' : 'Cadastrar parceiro'}</SubmitButton>
         </form>
+
+        {partner && finance.data && (
+          <Alert variant="light" className="border">
+            <div className="fw-semibold mb-1">Financeiro com este parceiro</div>
+            <div className="small">
+              A receber (parceiro paga): <Money cents={finance.data.receivable.outstanding_cents} strong /> de <Money cents={finance.data.receivable.total_cents} /> · repasses a pagar: <Money cents={finance.data.payable.outstanding_cents} strong />
+            </div>
+            <Link to={`${organizationPaths(organization.id).financeReceivables}?q=${encodeURIComponent(partner.name)}`} className="small">Ver cobranças deste parceiro</Link>
+          </Alert>
+        )}
 
         {partner && (
           <ArchiveCard

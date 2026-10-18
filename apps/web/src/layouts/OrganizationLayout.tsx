@@ -25,6 +25,7 @@ export function OrganizationLayout() {
     { to: links.availability, icon: 'bi-slash-circle', label: 'Bloqueios' },
     ...(organization && canOperate(organization.role)
       ? [
+          { to: links.finance, icon: 'bi-cash-coin', label: 'Financeiro' },
           { to: links.reports, icon: 'bi-bar-chart-line', label: 'Relatórios' },
           { to: links.instructors, icon: 'bi-person-badge', label: 'Instrutores' },
           { to: links.partners, icon: 'bi-building', label: 'Parceiros' },

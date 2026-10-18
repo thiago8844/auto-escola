@@ -174,4 +174,11 @@ export const AUDIT_CATEGORIES: Record<string, { label: string; icon: string }> =
   process: { label: 'Processo', icon: 'bi-diagram-3' },
   enrollment: { label: 'Matrícula', icon: 'bi-journal-text' },
   document: { label: 'Documentos', icon: 'bi-file-earmark-text' },
+  finance: { label: 'Financeiro', icon: 'bi-cash-coin' },
+  availability: { label: 'Disponibilidade', icon: 'bi-slash-circle' },
+  maintenance: { label: 'Manutenção', icon: 'bi-wrench-adjustable' },
+  report: { label: 'Relatórios', icon: 'bi-bar-chart-line' },
+  student: { label: 'Alunos', icon: 'bi-mortarboard' },
+  vehicle: { label: 'Veículos', icon: 'bi-car-front' },
+  partner: { label: 'Parceiros', icon: 'bi-building' },
 }
