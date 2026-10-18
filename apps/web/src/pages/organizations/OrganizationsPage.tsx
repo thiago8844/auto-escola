@@ -41,19 +41,19 @@ export default function OrganizationsPage() {
         <Row xs={1} md={2} xl={3} className="g-4">
           {data.data.map((organization) => (
             <Col key={organization.id}>
-              <Card className="h-100">
+              <Card className="h-100 space-card">
                 <Card.Body className="d-flex flex-column">
                   <Card.Title as="h2" className="h5 text-break">
-                    {organization.name}
+                    {/* O link cobre o card inteiro (stretched-link); os botões extras ficam acima dele */}
+                    <Link to={organizationPaths(organization.id).home} className="stretched-link text-reset text-decoration-none">
+                      {organization.name}
+                    </Link>
                   </Card.Title>
                   <p className="small text-secondary mb-3">{ORGANIZATION_TYPE_LABELS[organization.type]}</p>
-                  <div className="d-flex align-items-center justify-content-between mt-auto">
+                  <div className="mt-auto">
                     <RoleBadge role={organization.role} />
-                    <Link to={organizationPaths(organization.id).home} className="btn btn-primary btn-sm">
-                      Abrir
-                    </Link>
                   </div>
-                  <div className="mt-3">{defaultSpace === String(organization.id) ? <Badge bg="light" text="body" className="border"><i className="bi bi-star-fill me-1" aria-hidden="true" />Meu espaço inicial</Badge> : <Button variant="link" size="sm" className="px-0" onClick={() => setDefaultSpace(String(organization.id))}>Usar como espaço inicial</Button>}</div>
+                  <div className="mt-3 position-relative z-2">{defaultSpace === String(organization.id) ? <Badge bg="light" text="body" className="border"><i className="bi bi-star-fill me-1" aria-hidden="true" />Meu espaço inicial</Badge> : <Button variant="link" size="sm" className="px-0" onClick={() => setDefaultSpace(String(organization.id))}>Usar como espaço inicial</Button>}</div>
                 </Card.Body>
               </Card>
             </Col>
