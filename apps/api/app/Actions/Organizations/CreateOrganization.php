@@ -50,6 +50,9 @@ class CreateOrganization
                 'document' => $data['document'] ?? null,
                 'email' => $data['email'] ?? null,
                 'phone' => $data['phone'] ?? null,
+                'address' => $data['address'] ?? null,
+                'city' => $data['city'] ?? null,
+                'state' => $data['state'] ?? null,
                 'timezone' => $data['timezone'] ?? config('autoescola.default_timezone'),
             ]);
 

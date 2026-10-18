@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Organizations;
 
+use App\Http\Requests\Processes\QualificationProcessRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,6 +15,10 @@ class UpdateOrganizationRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->filled('state')) {
+            $this->merge(['state' => strtoupper(trim((string) $this->input('state')))]);
+        }
+
         if ($this->has('document')) {
             $this->merge(['document' => preg_replace('/\D/', '', (string) $this->input('document'))]);
         }
@@ -33,6 +38,9 @@ class UpdateOrganizationRequest extends FormRequest
             'document' => ['nullable', 'string', 'max:20', Rule::unique('organizations', 'document')->ignore($organization)],
             'email' => ['nullable', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'state' => ['nullable', 'string', Rule::in(QualificationProcessRequest::UFS)],
             'timezone' => ['sometimes', 'timezone:all'],
         ];
     }

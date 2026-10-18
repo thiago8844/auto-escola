@@ -20,6 +20,37 @@ class OrganizationTimezoneTest extends ApiTestCase
             ->assertUnprocessable()->assertJsonValidationErrors('timezone');
     }
 
+    public function test_organization_stores_address_and_normalizes_state(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAsUser($user)->postJson($this->prefix.'/organizations', [
+            'name' => 'CFC Endereço', 'type' => 'cfc', 'address' => 'Rua A, 100', 'city' => 'Belo Horizonte', 'state' => 'mg',
+        ])->assertCreated()
+            ->assertJsonPath('data.address', 'Rua A, 100')
+            ->assertJsonPath('data.city', 'Belo Horizonte')
+            ->assertJsonPath('data.state', 'MG');
+
+        $id = $response->json('data.id');
+        $this->actingAsUser($user)->patchJson($this->prefix."/organizations/{$id}", ['address' => null, 'state' => 'XX'])
+            ->assertUnprocessable()->assertJsonValidationErrors('state');
+        $this->actingAsUser($user)->patchJson($this->prefix."/organizations/{$id}", ['address' => null, 'state' => 'sp'])
+            ->assertOk()->assertJsonPath('data.address', null)->assertJsonPath('data.state', 'SP');
+    }
+
+    public function test_personal_agenda_lessons_carry_the_timezone_of_their_organization(): void
+    {
+        $owner = User::factory()->create();
+        $org = $this->organizationWithOwner('cfc', $owner);
+        $org->update(['timezone' => 'America/Manaus']);
+        $instructor = $this->linkInstructor($org);
+        $instructor->update(['user_id' => $owner->getKey()]);
+        $this->lessonFor($org, $instructor, $this->enrollmentFor($org), '2026-10-21T12:00:00Z', '2026-10-21T12:50:00Z');
+
+        $this->actingAsUser($owner)->getJson($this->prefix.'/me/lessons')
+            ->assertOk()->assertJsonPath('data.0.organization.timezone', 'America/Manaus');
+    }
+
     public function test_day_filter_uses_the_organization_timezone(): void
     {
         $owner = User::factory()->create();

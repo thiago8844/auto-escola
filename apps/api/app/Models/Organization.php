@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Espaço de trabalho: uma autoescola (cfc) ou uma operação particular (independent).
  */
-#[Fillable(['name', 'type', 'document', 'email', 'phone', 'timezone'])]
+#[Fillable(['name', 'type', 'document', 'email', 'phone', 'address', 'city', 'state', 'timezone'])]
 class Organization extends Model
 {
     use HasFactory;

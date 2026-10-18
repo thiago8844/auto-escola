@@ -367,7 +367,7 @@ Resposta `200` (exemplo real, uma aula de três):
       "starts_at": "2026-10-19T09:00:00+00:00",
       "ends_at": "2026-10-19T10:00:00+00:00",
       "notes": "Aula de demonstração",
-      "organization": { "id": 1, "name": "CFC Alfa", "type": "cfc" },
+      "organization": { "id": 1, "name": "CFC Alfa", "type": "cfc", "timezone": "America/Sao_Paulo" },
       "instructor": { "id": 1, "full_name": "João Silva" },
       "enrollment": {
         "id": 1,
@@ -396,7 +396,7 @@ Observações:
 
 Lista os espaços a que você tem acesso, com seu papel em cada um.
 
-Resposta `200`: `{"data": [{id, name, type, document, email, phone, role, created_at}], ...}`
+Resposta `200`: `{"data": [{id, name, type, document, email, phone, address, city, state, timezone, role, created_at}], ...}`
 
 ### `POST /organizations`
 
@@ -405,11 +405,12 @@ Cria um espaço. Você vira `owner`. Se o tipo for `independent`, seu perfil de 
 Body:
 
 ```json
-{ "name": "CFC Alfa", "type": "cfc", "document": "12.345.678/0001-90", "email": "contato@cfcalfa.example", "phone": "7133334444" }
+{ "name": "CFC Alfa", "type": "cfc", "document": "12.345.678/0001-90", "email": "contato@cfcalfa.example", "phone": "7133334444", "address": "Rua das Flores, 100", "city": "Belo Horizonte", "state": "MG" }
 ```
 
 - `type`: `cfc` ou `independent`. Obrigatório.
 - `document`: aceita máscara; a API guarda só os dígitos. Único entre organizações.
+- `address` (até 255), `city` (até 100) e `state` (sigla de UF, aceita minúscula): opcionais.
 - `timezone`: opcional, fuso IANA (ex.: `America/Manaus`). Padrão `America/Sao_Paulo`. Define o "dia" dos filtros de agenda; os horários seguem em UTC.
 
 Resposta `201` com `"role": "owner"`. Erro `422 independent_space_exists` se você já for dono de um espaço particular.
@@ -420,7 +421,7 @@ Resposta `200` com `role` do usuário. `404` se você não tiver acesso.
 
 ### `PATCH /organizations/{organization}`
 
-Owner e admin. Campos: `name`, `document`, `email`, `phone`. Enviar `type` retorna `422`.
+Owner e admin. Campos: `name`, `document`, `email`, `phone`, `address`, `city`, `state`, `timezone`. Enviar `type` retorna `422`.
 
 ---
 

@@ -43,6 +43,7 @@ class LessonResource extends JsonResource
                 'id' => $this->organization->id,
                 'name' => $this->organization->name,
                 'type' => $this->organization->type->value,
+                'timezone' => $this->organization->timezone,
             ]),
             'instructor' => $this->when($this->relationLoaded('instructor'), fn () => [
                 'id' => $this->instructor->id,

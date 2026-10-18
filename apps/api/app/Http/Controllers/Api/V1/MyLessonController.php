@@ -22,7 +22,7 @@ class MyLessonController extends Controller
         $instructor = $user->instructor;
 
         $query = Lesson::query()
-            ->with(['organization:id,name,type', 'instructor:id,full_name', 'vehicle', 'enrollment.student'])
+            ->with(['organization:id,name,type,timezone', 'instructor:id,full_name', 'vehicle', 'enrollment.student'])
             ->whereIn('organization_id', $user->organizations()->select('organizations.id'));
 
         if ($instructor === null) {
