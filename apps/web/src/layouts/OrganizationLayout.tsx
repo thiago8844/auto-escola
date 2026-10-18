@@ -8,7 +8,6 @@ import { paths } from '../config/paths'
 import { useOrganization } from '../hooks/useOrganizations'
 import { arrangeNavigation, organizationNavigation } from '../config/navigation'
 import { usePreferencesStore } from '../stores/preferencesStore'
-import { NavigationSettings } from '../components/NavigationSettings'
 import { AppLayout } from './AppLayout'
 
 // Layout de /espacos/:organizationId. Carrega o espaço e só mostra as páginas se ele existir.
@@ -65,7 +64,7 @@ export function OrganizationLayout() {
   }
 
   return (
-    <AppLayout navItems={menu.primary} moreNavItems={menu.secondary} menuTools={organization && <NavigationSettings organization={organization} />} sidebarHeader={sidebarHeader}>
+    <AppLayout navItems={menu.primary} moreNavItems={menu.secondary} sidebarHeader={sidebarHeader}>
       {content}
     </AppLayout>
   )
