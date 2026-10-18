@@ -18,8 +18,8 @@ final class DemoDataset
     /** @param Closure(): array{0: User, 1: Organization, 2?: list<User>} $build */
     public function rebuildDemoDataset(string $key, string $email, Closure $build): void
     {
-        if (! app()->environment(['local', 'testing'])) {
-            throw new RuntimeException('Seeders de demonstração só podem rodar em local/testing.');
+        if (! app()->environment(['local', 'testing']) && ! config('autoescola.demo_reset_allowed')) {
+            throw new RuntimeException('Demonstração fora de local/testing só com DEMO_RESET_ALLOWED=true (use php artisan demo:reset).');
         }
 
         $oldFiles = DB::transaction(function () use ($key, $email, $build): array {

@@ -71,6 +71,20 @@ return [
 
     'support_email' => env('AUTOESCOLA_SUPPORT_EMAIL'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Demonstração em produção
+    |--------------------------------------------------------------------------
+    |
+    | Liga o `demo:reset` (apaga e recria a demonstração) fora de local/testing.
+    | Deixe false no dia a dia e ligue só na hora de rodar o reset. A senha das
+    | contas de demonstração em produção vem de DEMO_SEED_PASSWORD (mín. 8 caracteres).
+    |
+    */
+
+    'demo_reset_allowed' => (bool) env('DEMO_RESET_ALLOWED', false),
+    'demo_seed_password' => env('DEMO_SEED_PASSWORD'),
+
     'documents_disk' => env('DOCUMENTS_DISK', 'local'),
     'document_max_kb' => (int) env('DOCUMENT_MAX_KB', 10240),
 

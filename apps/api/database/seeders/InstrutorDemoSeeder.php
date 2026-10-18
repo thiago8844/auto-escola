@@ -33,6 +33,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 final class InstrutorDemoSeeder extends Seeder
@@ -65,19 +66,36 @@ final class InstrutorDemoSeeder extends Seeder
         private readonly AlertEngine $alertEngine,
     ) {}
 
+    /** Em produção a senha vem de DEMO_SEED_PASSWORD: nunca use a senha de desenvolvimento num ambiente público. */
+    private function password(): string
+    {
+        if (! app()->environment('production')) {
+            return self::PASSWORD;
+        }
+
+        $password = (string) config('autoescola.demo_seed_password');
+
+        if (strlen($password) < 8) {
+            throw new RuntimeException('Defina DEMO_SEED_PASSWORD (mínimo 8 caracteres) para gerar a demonstração em produção.');
+        }
+
+        return $password;
+    }
+
     public function run(): void
     {
         $timezone = config('autoescola.default_timezone');
         $now = CarbonImmutable::now($timezone);
         $today = $now->startOfDay();
         $path = 'demo/'.self::KEY.'/'.Str::uuid();
+        $password = $this->password();
 
         try {
-            $this->dataset->rebuildDemoDataset(self::KEY, self::EMAIL, function () use ($today, $now, $timezone, $path): array {
+            $this->dataset->rebuildDemoDataset(self::KEY, self::EMAIL, function () use ($today, $now, $timezone, $path, $password): array {
                 $user = User::create([
                     'name' => 'Rafael Andrade',
                     'email' => self::EMAIL,
-                    'password' => self::PASSWORD,
+                    'password' => $password,
                 ]);
                 $user->forceFill(['email_verified_at' => $now])->save();
                 $organization = ($this->createOrganization)($user, [
