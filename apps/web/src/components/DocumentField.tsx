@@ -1,13 +1,8 @@
-import type { ComponentProps } from 'react'
 import { Form } from 'react-bootstrap'
 import { useController, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { NumberFormatBase } from 'react-number-format'
 import { formatDocument, onlyDigits } from '../utils/formatDocument'
-
-// Adaptador de tipos: o NumberFormatBase espera um componente de <input> simples
-function BootstrapInput(props: Omit<ComponentProps<typeof Form.Control>, 'as'>) {
-  return <Form.Control {...props} />
-}
+import { BootstrapInput } from './BootstrapInput'
 
 type DocumentFieldProps<T extends FieldValues> = {
   control: Control<T>

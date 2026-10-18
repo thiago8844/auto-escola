@@ -11,6 +11,12 @@ import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import EnrollmentDetailPage from '../pages/enrollments/EnrollmentDetailPage'
+import EnrollmentFormPage from '../pages/enrollments/EnrollmentFormPage'
+import EnrollmentsPage from '../pages/enrollments/EnrollmentsPage'
+import ProcessDetailPage from '../pages/processes/ProcessDetailPage'
+import ProcessesPage from '../pages/processes/ProcessesPage'
+import ProcessFormPage from '../pages/processes/ProcessFormPage'
 import StudentDetailPage from '../pages/students/StudentDetailPage'
 import StudentFormPage from '../pages/students/StudentFormPage'
 import StudentsPage from '../pages/students/StudentsPage'
@@ -70,11 +76,18 @@ export const router = createBrowserRouter([
               { path: organizationSections.settings, element: <OrganizationSettingsPage /> },
               { path: organizationSections.students, element: <StudentsPage /> },
               { path: `${organizationSections.students}/:studentId`, element: <StudentDetailPage /> },
+              { path: organizationSections.enrollments, element: <EnrollmentsPage /> },
+              { path: `${organizationSections.enrollments}/:enrollmentId`, element: <EnrollmentDetailPage /> },
               {
                 element: <RequirePermission allow={canOperate} />,
                 children: [
                   { path: `${organizationSections.students}/novo`, element: <StudentFormPage /> },
                   { path: `${organizationSections.students}/:studentId/editar`, element: <StudentFormPage /> },
+                  { path: `${organizationSections.students}/:studentId/matriculas/nova`, element: <EnrollmentFormPage /> },
+                  { path: `${organizationSections.students}/:studentId/processos/novo`, element: <ProcessFormPage /> },
+                  // Processo e checklist têm dados de saúde: só a equipe
+                  { path: organizationSections.processes, element: <ProcessesPage /> },
+                  { path: `${organizationSections.processes}/:processId`, element: <ProcessDetailPage /> },
                 ],
               },
               {

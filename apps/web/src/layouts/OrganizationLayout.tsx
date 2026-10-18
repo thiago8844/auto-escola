@@ -4,7 +4,7 @@ import { QueryErrorAlert } from '../components/QueryErrorAlert'
 import { RoleBadge } from '../components/RoleBadge'
 import { organizationPaths, paths } from '../config/paths'
 import { useOrganization } from '../hooks/useOrganizations'
-import { canManageMembers } from '../utils/permissions'
+import { canManageMembers, canOperate } from '../utils/permissions'
 import { AppLayout } from './AppLayout'
 
 // Layout de /espacos/:organizationId. Carrega o espaço e só mostra as páginas se ele existir.
@@ -16,6 +16,8 @@ export function OrganizationLayout() {
   const navItems = [
     { to: links.home, icon: 'bi-speedometer2', label: 'Início', end: true },
     { to: links.students, icon: 'bi-mortarboard', label: 'Alunos' },
+    { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },
+    ...(organization && canOperate(organization.role) ? [{ to: links.processes, icon: 'bi-clipboard-check', label: 'Processos' }] : []),
     ...(organization && canManageMembers(organization.role)
       ? [
           { to: links.members, icon: 'bi-people', label: 'Membros' },
