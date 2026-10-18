@@ -52,13 +52,12 @@ return [
     | Política de senha
     |--------------------------------------------------------------------------
     |
-    | Decisão de produto (módulo 6): em produção a senha tem no mínimo 8 caracteres; em desenvolvimento e testes
-    | o mínimo continua 3 para facilitar o trabalho. Sobrescreva com AUTOESCOLA_PASSWORD_MIN. Não há exigência de
+    | Mínimo de 3 caracteres em todos os ambientes, para facilitar o uso. Sobrescreva com AUTOESCOLA_PASSWORD_MIN. Não há exigência de
     | símbolos, para não dificultar o uso; o web mostra o mínimo vigente.
     |
     */
 
-    'password_min' => (int) env('AUTOESCOLA_PASSWORD_MIN', env('APP_ENV') === 'production' ? 8 : 3),
+    'password_min' => (int) env('AUTOESCOLA_PASSWORD_MIN', 3),
 
     /*
     |--------------------------------------------------------------------------

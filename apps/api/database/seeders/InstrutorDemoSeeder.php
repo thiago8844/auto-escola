@@ -75,8 +75,8 @@ final class InstrutorDemoSeeder extends Seeder
 
         $password = (string) config('autoescola.demo_seed_password');
 
-        if (strlen($password) < 8) {
-            throw new RuntimeException('Defina DEMO_SEED_PASSWORD (mínimo 8 caracteres) para gerar a demonstração em produção.');
+        if (strlen($password) < 3) {
+            throw new RuntimeException('Defina DEMO_SEED_PASSWORD (mínimo 3 caracteres) para gerar a demonstração em produção.');
         }
 
         return $password;
