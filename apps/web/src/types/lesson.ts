@@ -5,6 +5,7 @@ export type RegistryStatus = 'not_informed' | 'pending' | 'confirmed' | 'rejecte
 export type Lesson = {
   id: number
   status: LessonStatus
+  category?: string | null
   starts_at: string
   ends_at: string
   scheduled_minutes: number

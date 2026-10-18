@@ -1,4 +1,5 @@
 import type { ChecklistItemType, LicenseCategory, PracticeRelease } from './enrollment'
+import type { ProcessOutcome } from './outcome'
 import type { Student } from './student'
 
 export type ProcessType = 'first_license' | 'category_addition' | 'category_change' | 'refresher'
@@ -38,5 +39,7 @@ export type QualificationProcess = {
   student?: Student
   practice_release?: PracticeRelease
   checklist?: ChecklistItem[]
+  // Desfecho: resultado por categoria, emissão e próximo passo (detalhe do processo)
+  outcome?: ProcessOutcome
   created_at: string
 }

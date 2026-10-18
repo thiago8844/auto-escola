@@ -13,7 +13,13 @@ import { useProcess, useUpdateProcessStatus } from '../../hooks/useProcesses'
 import { notify } from '../../stores/toastStore'
 import type { ChecklistItem, ProcessStatus, QualificationProcess } from '../../types/process'
 import { formatDate } from '../../utils/formatDate'
+import { Timeline } from '../../components/Timeline'
+import { useExams } from '../../hooks/useExams'
+import { ExamFormModal } from '../exams/ExamFormModal'
+import { ExamsSummary } from '../exams/ExamsSummary'
+import { FeesPanel } from '../exams/FeesPanel'
 import { ChecklistItemModal } from './ChecklistItemModal'
+import { OutcomePanel } from './OutcomePanel'
 
 export default function ProcessDetailPage() {
   const { processId = '' } = useParams()
@@ -32,6 +38,9 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
   const links = organizationPaths(organization.id)
   const updateStatus = useUpdateProcessStatus(organization.id, String(process.id))
   const [editing, setEditing] = useState<ChecklistItem | null>(null)
+  const [schedulingExam, setSchedulingExam] = useState(false)
+  const exams = useExams(organization.id, { page: 1, perPage: 100, processId: process.id, order: 'asc' })
+  const closed = process.status === 'completed' || process.status === 'closed'
 
   return (
     <>
@@ -49,16 +58,19 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
                 className="form-narrow"
                 aria-label="Situação do processo"
                 value={process.status}
-                disabled={updateStatus.isPending}
+                disabled={updateStatus.isPending || closed}
                 onChange={(event) =>
                   updateStatus.mutate(event.target.value as ProcessStatus, { onSuccess: () => notify.success('Situação atualizada.') })
                 }
               >
-                {Object.entries(PROCESS_STATUS).map(([value, { label }]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
+                {/* Concluir e encerrar são operações próprias, com motivo e conferência de pendências */}
+                {Object.entries(PROCESS_STATUS)
+                  .filter(([value]) => value === process.status || (value !== 'completed' && value !== 'closed'))
+                  .map(([value, { label }]) => (
+                    <option key={value} value={value} disabled={closed}>
+                      {label}
+                    </option>
+                  ))}
               </Form.Select>
             </dd>
             <dt className="col-sm-4 col-md-3">UF / município</dt>
@@ -81,7 +93,21 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
         </Card.Body>
       </Card>
 
-      <section aria-labelledby="checklist-title">
+      {process.outcome && (
+        <OutcomePanel
+          organizationId={organization.id}
+          timezone={organization.timezone}
+          process={process}
+          canReopen={organization.role === 'owner' || organization.role === 'admin'}
+          onScheduleExam={() => setSchedulingExam(true)}
+        />
+      )}
+
+      <ExamsSummary organizationId={organization.id} timezone={organization.timezone} filter={{ processId: process.id }} onSchedule={closed ? undefined : () => setSchedulingExam(true)} />
+
+      <FeesPanel organizationId={organization.id} timezone={organization.timezone} processId={process.id} exams={exams.data?.data ?? []} />
+
+      <section aria-labelledby="checklist-title" className="mb-5">
         <h2 id="checklist-title" className="h4 mb-3">
           Checklist de liberação para a prática
         </h2>
@@ -137,6 +163,14 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
         />
       </section>
 
+      <section aria-labelledby="timeline-title">
+        <h2 id="timeline-title" className="h4 mb-3">
+          Linha do tempo do processo
+        </h2>
+        <Timeline organizationId={organization.id} timezone={organization.timezone} scope={{ kind: 'process', id: process.id }} emptyMessage="Nenhum evento registrado neste processo." />
+      </section>
+
+      {schedulingExam && <ExamFormModal organizationId={organization.id} timezone={organization.timezone} presetProcess={process} onClose={() => setSchedulingExam(false)} />}
       {editing && <ChecklistItemModal organizationId={organization.id} processId={String(process.id)} item={editing} onClose={() => setEditing(null)} />}
     </>
   )

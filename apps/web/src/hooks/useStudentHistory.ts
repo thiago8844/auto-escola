@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
-import { listStudentDocuments } from '../api/documents'
+import { listExamDocuments, listStudentDocuments } from '../api/documents'
 import { listEnrollments } from '../api/enrollments'
 import { listLessons } from '../api/lessons'
 import { queryKeys } from '../lib/queryKeys'
@@ -33,6 +33,15 @@ export function useStudentDocuments(organizationId: number, studentId: string, e
   return useQuery({
     queryKey: queryKeys.organizations.documents(organizationId, params),
     queryFn: () => listStudentDocuments(organizationId, studentId),
+    enabled,
+  })
+}
+
+export function useExamDocuments(organizationId: number, examId: number, enabled: boolean) {
+  const params = { examId }
+  return useQuery({
+    queryKey: queryKeys.organizations.documents(organizationId, params),
+    queryFn: () => listExamDocuments(organizationId, examId),
     enabled,
   })
 }

@@ -1,8 +1,10 @@
 import { Badge } from 'react-bootstrap'
-import { CHECKLIST_STATUS, DOCUMENT_STATUS, ENROLLMENT_STATUS, LESSON_STATUS, PROCESS_STATUS, VEHICLE_STATUS } from '../config/domain'
+import { CATEGORY_RESULT, CHECKLIST_STATUS, DOCUMENT_STATUS, ENROLLMENT_STATUS, EXAM_STATUS, FEE_STATUS, ISSUANCE_STATUS, LESSON_STATUS, PROCESS_STATUS, VEHICLE_STATUS } from '../config/domain'
 import type { DocumentStatus } from '../types/document'
 import type { EnrollmentStatus, PracticeRelease } from '../types/enrollment'
+import type { ExamStatus, FeeStatus } from '../types/exam'
 import type { LessonStatus } from '../types/lesson'
+import type { CategoryResult, IssuanceStatus } from '../types/outcome'
 import type { ChecklistItemStatus, ProcessStatus } from '../types/process'
 import type { VehicleStatus } from '../types/vehicle'
 
@@ -85,3 +87,17 @@ export function LinkStatusBadge({ active }: { active: boolean }) {
     </Badge>
   )
 }
+
+function IconBadge({ label, bg, icon }: { label: string; bg: string; icon: string }) {
+  return (
+    <Badge bg={bg}>
+      <i className={`bi ${icon} me-1`} aria-hidden="true" />
+      {label}
+    </Badge>
+  )
+}
+
+export const ExamStatusBadge = ({ status }: { status: ExamStatus }) => <IconBadge {...EXAM_STATUS[status]} />
+export const FeeStatusBadge = ({ status }: { status: FeeStatus }) => <IconBadge {...FEE_STATUS[status]} />
+export const CategoryResultBadge = ({ result }: { result: CategoryResult }) => <IconBadge {...CATEGORY_RESULT[result]} />
+export const IssuanceStatusBadge = ({ status }: { status: IssuanceStatus }) => <IconBadge {...ISSUANCE_STATUS[status]} />

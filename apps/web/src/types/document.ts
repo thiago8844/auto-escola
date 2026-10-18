@@ -25,6 +25,7 @@ export type StudentDocument = {
   status: DocumentStatus
   student_id: number | null
   qualification_process_id: number | null
+  practical_exam_id?: number | null
   version: number
   issuer: string | null
   issued_at: string | null

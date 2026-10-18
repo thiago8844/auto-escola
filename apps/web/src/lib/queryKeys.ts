@@ -23,6 +23,13 @@ export const queryKeys = {
     partner: (id: number | string, partnerId: number | string) => ['organizations', String(id), 'partner', String(partnerId)] as const,
     lessons: (id: number | string, params: object) => ['organizations', String(id), 'lessons', params] as const,
     documents: (id: number | string, params: object) => ['organizations', String(id), 'documents', params] as const,
+    balance: (id: number | string, enrollmentId: number | string) => ['organizations', String(id), 'balance', String(enrollmentId)] as const,
+    creditEntries: (id: number | string, enrollmentId: number | string, page: number) => ['organizations', String(id), 'credit-entries', String(enrollmentId), page] as const,
+    exams: (id: number | string, params: object) => ['organizations', String(id), 'exams', params] as const,
+    exam: (id: number | string, examId: number | string) => ['organizations', String(id), 'exam', String(examId)] as const,
+    fees: (id: number | string, params: object) => ['organizations', String(id), 'fees', params] as const,
+    closureCheck: (id: number | string, processId: number | string) => ['organizations', String(id), 'closure-check', String(processId)] as const,
+    timeline: (id: number | string, params: object) => ['organizations', String(id), 'timeline', params] as const,
     invitationsAll: (id: number | string) => ['organizations', String(id), 'invitations'] as const,
   },
 }

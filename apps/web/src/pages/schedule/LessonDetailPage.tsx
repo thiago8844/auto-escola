@@ -107,7 +107,7 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
       {operate && <RegistryForm key={`${lesson.registry.status}-${lesson.registry.reference}-${lesson.registry.document_id}`} lesson={lesson} completed={completed} />}
 
       {modal === 'reschedule' && <RescheduleModal organizationId={organization.id} timeZone={timeZone} lesson={lesson} onClose={() => setModal(null)} />}
-      {modal === 'status' && <StatusModal organizationId={organization.id} lesson={lesson} canCancel={operate} release={release} onClose={() => setModal(null)} />}
+      {modal === 'status' && <StatusModal organizationId={organization.id} lesson={lesson} canCancel={operate} release={release} balance={enrollment.data?.balance} onClose={() => setModal(null)} />}
     </>
   )
 }

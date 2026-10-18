@@ -8,9 +8,11 @@ import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
 import { useChangeLessonStatus } from '../../hooks/useLessons'
 import { lessonStatusSchema, type LessonStatusInput } from '../../schemas/lesson'
+import type { Balance } from '../../types/balance'
 import type { PracticeRelease } from '../../types/enrollment'
 import type { Lesson } from '../../types/lesson'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { formatMinutes } from '../../utils/formatMinutes'
 
 type StatusModalProps = {
   organizationId: number
@@ -18,10 +20,12 @@ type StatusModalProps = {
   // Instrutor só marca realizada ou falta; cancelar é da equipe
   canCancel: boolean
   release?: PracticeRelease
+  // Saldo da matrícula (só a equipe): mostra o efeito da mudança antes de confirmar
+  balance?: Balance
   onClose: () => void
 }
 
-export function StatusModal({ organizationId, lesson, canCancel, release, onClose }: StatusModalProps) {
+export function StatusModal({ organizationId, lesson, canCancel, release, balance, onClose }: StatusModalProps) {
   const change = useChangeLessonStatus(organizationId, String(lesson.id))
   const practiceBlocked = release !== undefined && !release.released
 
@@ -35,7 +39,8 @@ export function StatusModal({ organizationId, lesson, canCancel, release, onClos
     resolver: zodResolver(lessonStatusSchema),
     defaultValues: { status: practiceBlocked ? 'missed' : 'completed', reason: '', actual_minutes: '', evolution: '', notes: '' },
   })
-  const status = useWatch({ control, name: 'status' })
+  const [status, actualMinutes] = useWatch({ control, name: ['status', 'actual_minutes'] })
+  const effect = balanceEffect(lesson, balance, status, actualMinutes)
 
   const onSubmit = handleSubmit((values) =>
     change.mutate(values, { onSuccess: onClose, onError: (error) => applyFieldErrors(error, setError) }),
@@ -76,6 +81,13 @@ export function StatusModal({ organizationId, lesson, canCancel, release, onClos
             <FormField label="Motivo (opcional)" error={errors.reason?.message} {...register('reason')} />
           )}
           <TextAreaField label="Observações (opcional)" error={errors.notes?.message} {...register('notes')} />
+
+          {effect && (
+            <Alert variant="light" className="border small mb-0" role="status">
+              <i className="bi bi-hourglass-split me-2" aria-hidden="true" />
+              {effect}
+            </Alert>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={onClose} disabled={change.isPending}>
@@ -86,4 +98,26 @@ export function StatusModal({ organizationId, lesson, canCancel, release, onClos
       </form>
     </Modal>
   )
+}
+
+// Explica o que acontecerá com a reserva e o consumo, conforme a política do contrato
+function balanceEffect(lesson: Lesson, balance: Balance | undefined, status: string, actualInput: string): string | null {
+  if (!balance?.has_package) return null
+  const scheduled = lesson.scheduled_minutes
+  const policy = balance.policy
+  const released = `A reserva de ${formatMinutes(scheduled)} será liberada.`
+
+  if (status === 'completed') {
+    const actual = /^\d+$/.test(actualInput) ? Number(actualInput) : scheduled
+    const consumed = policy?.consume_basis === 'scheduled' ? scheduled : actual
+    return `${released} Serão consumidos ${formatMinutes(consumed)} do pacote; sobram ${formatMinutes(balance.available + scheduled - consumed)} disponíveis.`
+  }
+  if (status === 'missed') {
+    return policy?.absence_charge === 'full'
+      ? `${released} Pelo contrato, a falta consome ${formatMinutes(scheduled)} (não conta como instrução realizada).`
+      : `${released} Pelo contrato, a falta não consome saldo.`
+  }
+  const hoursLeft = (new Date(lesson.starts_at).getTime() - Date.now()) / 3_600_000
+  const late = policy?.late_cancel_charge === 'full' && policy.cancel_notice_hours != null && hoursLeft < policy.cancel_notice_hours
+  return late ? `${released} Cancelamento com menos de ${policy?.cancel_notice_hours} h de aviso: consome ${formatMinutes(scheduled)}.` : `${released} Nenhum minuto será consumido.`
 }

@@ -20,6 +20,10 @@ export const scheduleSchema = z.object({
   enrollment_id: z.string().min(1, 'Escolha a matrícula.'),
   instructor_id: z.string().min(1, 'Escolha o instrutor.'),
   vehicle_id: z.string(),
+  // Categoria da aula em matrícula conjunta (AB...) quando não há veículo
+  category: z.string(),
+  // Exceção autorizada para agendar com saldo insuficiente
+  override_reason: z.string().trim().max(255, 'Máximo de 255 caracteres.'),
   ...windowFields,
   notes: z.string().trim().max(2000, 'Máximo de 2000 caracteres.'),
 })

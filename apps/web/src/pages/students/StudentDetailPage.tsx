@@ -4,15 +4,19 @@ import { Link, useParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
+import { BalanceBadge } from '../../components/BalanceBar'
 import { DocumentStatusBadge, EnrollmentStatusBadge, LessonStatusBadge, ReleaseBadge } from '../../components/StatusBadges'
 import { DOCUMENT_STATUS, DOCUMENT_TYPE_LABELS } from '../../config/domain'
 import type { DocumentStatus } from '../../types/document'
+import { Timeline } from '../../components/Timeline'
+import { ExamsSummary } from '../exams/ExamsSummary'
 import { UploadDocumentModal } from './UploadDocumentModal'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useDocumentFile, useUpdateDocumentStatus } from '../../hooks/useDocuments'
 import { useEnrollmentsLessons, useStudentDocuments, useStudentEnrollments } from '../../hooks/useStudentHistory'
 import { useStudent } from '../../hooks/useStudents'
+import type { Enrollment } from '../../types/enrollment'
 import type { Student } from '../../types/student'
 import { formatDate } from '../../utils/formatDate'
 import { formatDateTime } from '../../utils/formatDateTime'
@@ -116,6 +120,21 @@ function StudentDetail({ student }: { student: Student }) {
                   header: 'Serviço contratado',
                   cell: (enrollment) => <span className="tabular-nums">{enrollment.contracted_minutes ? formatMinutes(enrollment.contracted_minutes) : '—'}</span>,
                 },
+                ...(operate
+                  ? [
+                      {
+                        header: 'Saldo de aulas',
+                        cell: (enrollment: Enrollment) =>
+                          enrollment.balance ? (
+                            <Link to={links.enrollment(enrollment.id)} className="text-decoration-none">
+                              <BalanceBadge available={enrollment.balance.available} hasPackage={enrollment.balance.has_package} />
+                            </Link>
+                          ) : (
+                            '—'
+                          ),
+                      },
+                    ]
+                  : []),
                 { header: 'Prática', cell: (enrollment) => <ReleaseBadge release={enrollment.practice_release} /> },
               ]}
             />
@@ -159,6 +178,17 @@ function StudentDetail({ student }: { student: Student }) {
           </>
         )}
       </section>
+
+      {operate && <ExamsSummary organizationId={organization.id} timezone={organization.timezone} filter={{ studentId: student.id }} />}
+
+      {operate && (
+        <section aria-labelledby="timeline-title" className="mb-5">
+          <h2 id="timeline-title" className="h4 mb-3">
+            Linha do tempo do aluno
+          </h2>
+          <Timeline organizationId={organization.id} timezone={organization.timezone} scope={{ kind: 'student', id: student.id }} emptyMessage="Nenhum evento registrado para este aluno ainda." />
+        </section>
+      )}
 
       {operate && (
         <section aria-labelledby="documents-title">

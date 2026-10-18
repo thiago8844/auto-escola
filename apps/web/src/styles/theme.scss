@@ -152,3 +152,120 @@
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+// Saldo de aulas: números grandes, rótulos pequenos e barra segmentada
+.balance-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.balance-stat {
+  padding: 12px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  background: var(--rc-surface);
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-secondary-color);
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.2;
+
+    &[data-negative] {
+      color: var(--bs-danger);
+    }
+  }
+}
+
+.balance-stat-main {
+  grid-column: span 2;
+  border-color: var(--bs-success);
+
+  @media (min-width: 768px) {
+    grid-column: auto;
+  }
+}
+
+.balance-eq {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+}
+
+.balance-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.balance-hint {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bs-secondary-color);
+  line-height: 1;
+}
+
+.balance-bar {
+  border-radius: 999px;
+  background: var(--bs-secondary-bg);
+}
+
+// Linha do tempo: marcador à esquerda, conteúdo à direita
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--bs-border-color);
+  }
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.timeline-marker {
+  flex: none;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--bs-border-color);
+  background: var(--rc-surface);
+  color: var(--bs-secondary-color);
+}
+
+.next-step {
+  border-left: 4px solid var(--bs-primary);
+}

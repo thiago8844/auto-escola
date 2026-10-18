@@ -7,6 +7,7 @@ import { ReleasePanel } from '../../components/ReleasePanel'
 import { EnrollmentStatusBadge, LessonStatusBadge } from '../../components/StatusBadges'
 import { ENROLLMENT_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
+import { BalancePanel } from './BalancePanel'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCompleteLesson, useEnrollment, useEnrollmentLessons, useUpdateEnrollmentStatus } from '../../hooks/useEnrollments'
 import { notify } from '../../stores/toastStore'
@@ -91,6 +92,10 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
           </dl>
         </Card.Body>
       </Card>
+
+      {operate && (
+        <BalancePanel organizationId={organization.id} timezone={organization.timezone} enrollment={enrollment} canAdjust={organization.role === 'owner' || organization.role === 'admin'} />
+      )}
 
       <section className="mb-4" aria-labelledby="release-title">
         <h2 id="release-title" className="h4 mb-3">

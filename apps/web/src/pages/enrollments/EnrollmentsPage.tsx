@@ -3,6 +3,7 @@ import { DataTable } from '../../components/DataTable'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
 import { QueryState } from '../../components/QueryState'
+import { BalanceBadge } from '../../components/BalanceBar'
 import { EnrollmentStatusBadge, ReleaseBadge } from '../../components/StatusBadges'
 import { PAGE_SIZE } from '../../config/organization'
 import { organizationPaths } from '../../config/paths'
@@ -39,6 +40,10 @@ export default function EnrollmentsPage() {
                 {
                   header: 'Serviço contratado',
                   cell: (enrollment) => <span className="tabular-nums">{enrollment.contracted_minutes ? formatMinutes(enrollment.contracted_minutes) : '—'}</span>,
+                },
+                {
+                  header: 'Saldo de aulas',
+                  cell: (enrollment) => (enrollment.balance ? <BalanceBadge available={enrollment.balance.available} hasPackage={enrollment.balance.has_package} /> : '—'),
                 },
                 { header: 'Prática', cell: (enrollment) => <ReleaseBadge release={enrollment.practice_release} /> },
               ]}

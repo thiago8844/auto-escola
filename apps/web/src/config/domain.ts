@@ -1,6 +1,8 @@
 import type { DocumentStatus, DocumentType } from '../types/document'
 import type { ChecklistItemType, EnrollmentStatus, LicenseCategory } from '../types/enrollment'
+import type { ExamStatus, FeeParty, FeeStatus } from '../types/exam'
 import type { LessonStatus, RegistryStatus } from '../types/lesson'
+import type { CategoryResult, IssuanceStatus } from '../types/outcome'
 import type { VehicleStatus } from '../types/vehicle'
 import type { ChecklistItemStatus, ChecklistSource, ProcessStatus, ProcessType } from '../types/process'
 
@@ -111,4 +113,65 @@ export const REGISTRY_STATUS: Record<RegistryStatus, { label: string; bg: string
   pending: { label: 'Pendente', bg: 'warning' },
   confirmed: { label: 'Confirmado', bg: 'success' },
   rejected: { label: 'Rejeitado', bg: 'danger' },
+}
+
+// Ausência não é reprovação: cada situação tem rótulo e cor próprios
+export const EXAM_STATUS: Record<ExamStatus, { label: string; bg: string; icon: string }> = {
+  scheduled: { label: 'Agendado', bg: 'info', icon: 'bi-calendar-event' },
+  approved: { label: 'Aprovado', bg: 'success', icon: 'bi-patch-check-fill' },
+  failed: { label: 'Reprovado', bg: 'danger', icon: 'bi-x-octagon' },
+  absent: { label: 'Ausente', bg: 'warning', icon: 'bi-person-x' },
+  incomplete: { label: 'Não concluído', bg: 'warning', icon: 'bi-hourglass-bottom' },
+  cancelled: { label: 'Cancelado', bg: 'secondary', icon: 'bi-x-circle' },
+}
+
+export const FEE_STATUS: Record<FeeStatus, { label: string; bg: string; icon: string }> = {
+  unknown: { label: 'Situação desconhecida', bg: 'secondary', icon: 'bi-question-circle' },
+  pending: { label: 'Pendente', bg: 'warning', icon: 'bi-hourglass-split' },
+  payment_reported: { label: 'Pagamento informado', bg: 'info', icon: 'bi-receipt' },
+  confirmed: { label: 'Confirmada', bg: 'success', icon: 'bi-patch-check-fill' },
+  waived: { label: 'Isenta', bg: 'secondary', icon: 'bi-dash-circle' },
+  cancelled: { label: 'Cancelada', bg: 'secondary', icon: 'bi-x-circle' },
+}
+
+export const FEE_PARTY_LABELS: Record<FeeParty, string> = {
+  student: 'Aluno',
+  partner: 'CFC parceiro',
+  organization: 'Este espaço',
+  other: 'Outra pessoa',
+}
+
+export const REIMBURSEMENT_LABELS = { none: 'Sem reembolso', to_settle: 'Reembolso a acertar', settled: 'Reembolso acertado' } as const
+
+export const CATEGORY_RESULT: Record<CategoryResult, { label: string; bg: string; icon: string }> = {
+  pending: { label: 'Exame por agendar', bg: 'secondary', icon: 'bi-hourglass' },
+  scheduled: { label: 'Exame agendado', bg: 'info', icon: 'bi-calendar-event' },
+  approved: { label: 'Aprovado', bg: 'success', icon: 'bi-patch-check-fill' },
+  failed: { label: 'Reprovado', bg: 'danger', icon: 'bi-x-octagon' },
+  absent: { label: 'Ausente na última tentativa', bg: 'warning', icon: 'bi-person-x' },
+  incomplete: { label: 'Não concluído', bg: 'warning', icon: 'bi-hourglass-bottom' },
+  renounced: { label: 'Renunciada', bg: 'secondary', icon: 'bi-slash-circle' },
+}
+
+export const ISSUANCE_STATUS: Record<IssuanceStatus, { label: string; bg: string; icon: string }> = {
+  not_started: { label: 'Não iniciada', bg: 'secondary', icon: 'bi-dash-circle' },
+  pending: { label: 'Emissão pendente', bg: 'warning', icon: 'bi-hourglass-split' },
+  issued: { label: 'Emitido', bg: 'info', icon: 'bi-file-earmark-check' },
+  delivered: { label: 'Entregue ao aluno', bg: 'success', icon: 'bi-box2-heart' },
+}
+
+export const ISSUANCE_KIND_LABELS = { ppd: 'PPD (Permissão para Dirigir)', cnh: 'CNH definitiva' } as const
+
+export const CLOSURE_KIND_LABELS = { completed: 'Concluído', abandoned: 'Desistência', other: 'Encerrado' } as const
+
+// Categorias da linha do tempo e da auditoria
+export const AUDIT_CATEGORIES: Record<string, { label: string; icon: string }> = {
+  access: { label: 'Acesso', icon: 'bi-shield-lock' },
+  balance: { label: 'Saldo de aulas', icon: 'bi-hourglass-split' },
+  lesson: { label: 'Aulas', icon: 'bi-calendar-check' },
+  exam: { label: 'Exames', icon: 'bi-clipboard-check' },
+  fee: { label: 'Taxas externas', icon: 'bi-receipt' },
+  process: { label: 'Processo', icon: 'bi-diagram-3' },
+  enrollment: { label: 'Matrícula', icon: 'bi-journal-text' },
+  document: { label: 'Documentos', icon: 'bi-file-earmark-text' },
 }

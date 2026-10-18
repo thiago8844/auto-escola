@@ -14,6 +14,15 @@ export async function listStudentDocuments(organizationId: number | string, stud
   return data
 }
 
+// Anexos privados de uma tentativa de exame
+export async function listExamDocuments(organizationId: number | string, examId: number | string): Promise<Paginated<StudentDocument>> {
+  const { data } = await http.get<Paginated<StudentDocument>>(base(organizationId), {
+    params: { practical_exam_id: examId, per_page: 100 },
+    ...handledByScreen,
+  })
+  return data
+}
+
 export async function uploadDocument(organizationId: number | string, studentId: number, input: DocumentUploadInput): Promise<StudentDocument> {
   const form = new FormData()
   form.append('file', input.file[0])

@@ -1,4 +1,5 @@
 import type { LessonNotesInput, LessonStatusInput, RegistryInput, RescheduleInput, ScheduleInput } from '../schemas/lesson'
+import type { BalanceWarning } from '../types/balance'
 import type { Lesson, LessonStatus } from '../types/lesson'
 import type { Paginated } from '../types/organization'
 import { zonedTimeToIso } from '../utils/timezone'
@@ -40,19 +41,23 @@ function toWindow(input: { date: string; start_time: string; duration: string },
   return { starts_at: startsAt, ends_at: endsAt }
 }
 
-export async function createLesson(organizationId: number | string, input: ScheduleInput, timeZone: string): Promise<Lesson> {
-  const { data } = await http.post<{ data: Lesson }>(
+export type CreatedLesson = Lesson & { warnings: BalanceWarning[] }
+
+export async function createLesson(organizationId: number | string, input: ScheduleInput, timeZone: string): Promise<CreatedLesson> {
+  const { data } = await http.post<{ data: Lesson; warnings?: BalanceWarning[] }>(
     base(organizationId),
     {
       enrollment_id: Number(input.enrollment_id),
       instructor_id: Number(input.instructor_id),
       vehicle_id: input.vehicle_id ? Number(input.vehicle_id) : null,
+      category: input.category || null,
+      override_reason: input.override_reason?.trim() || undefined,
       notes: orNull(input.notes),
       ...toWindow(input, timeZone),
     },
     handledByScreen,
   )
-  return data.data
+  return { ...data.data, warnings: data.warnings ?? [] }
 }
 
 export async function rescheduleLesson(organizationId: number | string, lessonId: number | string, input: RescheduleInput, timeZone: string): Promise<Lesson> {

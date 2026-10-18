@@ -1,3 +1,4 @@
+import type { Balance } from './balance'
 import type { Student } from './student'
 
 export type LicenseCategory = 'A' | 'AB' | 'AC' | 'AD' | 'AE' | 'B' | 'C' | 'D' | 'E' | 'ACC'
@@ -23,6 +24,8 @@ export type Enrollment = {
   category: LicenseCategory
   status: EnrollmentStatus
   contracted_minutes: number | null
+  // Saldo calculado pela API sobre todos os movimentos; só a equipe vê
+  balance?: Balance
   // Preço e observações só vêm para a equipe
   price_cents?: number | null
   notes?: string | null

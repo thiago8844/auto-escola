@@ -14,6 +14,9 @@ import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import ExamDetailPage from '../pages/exams/ExamDetailPage'
+import ExamsPage from '../pages/exams/ExamsPage'
+import AuditPage from '../pages/organization/AuditPage'
 import EnrollmentDetailPage from '../pages/enrollments/EnrollmentDetailPage'
 import EnrollmentFormPage from '../pages/enrollments/EnrollmentFormPage'
 import EnrollmentsPage from '../pages/enrollments/EnrollmentsPage'
@@ -100,6 +103,9 @@ export const router = createBrowserRouter([
               // Veículos: todos os membros veem; só a equipe altera (a tela trava os campos)
               { path: organizationSections.vehicles, element: <VehiclesPage /> },
               { path: `${organizationSections.vehicles}/:vehicleId`, element: <VehicleFormPage /> },
+              // Exames: a equipe vê todos; o instrutor, só os que acompanha (a API filtra)
+              { path: organizationSections.exams, element: <ExamsPage /> },
+              { path: `${organizationSections.exams}/:examId`, element: <ExamDetailPage /> },
               { path: organizationSections.enrollments, element: <EnrollmentsPage /> },
               { path: `${organizationSections.enrollments}/:enrollmentId`, element: <EnrollmentDetailPage /> },
               {
@@ -127,6 +133,7 @@ export const router = createBrowserRouter([
                 children: [
                   { path: organizationSections.members, element: <MembersPage /> },
                   { path: organizationSections.invitations, element: <InvitationsPage /> },
+                  { path: organizationSections.audit, element: <AuditPage /> },
                 ],
               },
             ],

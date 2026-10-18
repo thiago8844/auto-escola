@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert } from 'react-bootstrap'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { EnrollmentPicker } from '../../components/EnrollmentPicker'
+import { LessonBalanceNotice } from '../../components/LessonBalanceNotice'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
 import { SelectField } from '../../components/SelectField'
@@ -18,6 +19,7 @@ import { useVehicles } from '../../hooks/useVehicles'
 import { scheduleSchema, type ScheduleInput } from '../../schemas/lesson'
 import type { Enrollment } from '../../types/enrollment'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { notify } from '../../stores/toastStore'
 import { todayInTimeZone } from '../../utils/timezone'
 
 // /agenda/nova, opcionalmente com ?matricula=ID (vem do detalhe da matrícula) e ?data=YYYY-MM-DD
@@ -52,6 +54,7 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<ScheduleInput>({
     resolver: zodResolver(scheduleSchema),
@@ -59,6 +62,8 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
       enrollment_id: presetEnrollment ? String(presetEnrollment.id) : '',
       instructor_id: '',
       vehicle_id: '',
+      category: '',
+      override_reason: '',
       date: /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : todayInTimeZone(organization.timezone),
       start_time: '',
       duration: '50',
@@ -66,9 +71,24 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
     },
   })
 
+  const [enrollmentId, vehicleId, duration, overrideReason, chosenCategory] = useWatch({
+    control,
+    name: ['enrollment_id', 'vehicle_id', 'duration', 'override_reason', 'category'],
+  })
+  const selected = useEnrollment(organization.id, enrollmentId, enrollmentId !== '')
+  const enrollment = selected.data ?? (presetEnrollment && String(presetEnrollment.id) === enrollmentId ? presetEnrollment : undefined)
+  const vehicle = vehicles.data?.data.find((v) => String(v.id) === vehicleId)
+  // Matrícula conjunta (AB...): a categoria vem do veículo ou é escolhida aqui
+  const composite = enrollment !== undefined && enrollment.category.length > 1 && enrollment.category !== 'ACC'
+  const lessonCategory = !enrollment ? null : composite ? (vehicle?.category ?? (chosenCategory || null)) : enrollment.category
+  const needed = /^\d+$/.test(duration) ? Number(duration) : 0
+
   const onSubmit = handleSubmit((values) =>
     create.mutate(values, {
-      onSuccess: (lesson) => navigate(links.lesson(lesson.id)),
+      onSuccess: (lesson) => {
+        lesson.warnings.forEach((warning) => notify.warning(warning.message))
+        navigate(links.lesson(lesson.id))
+      },
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
@@ -123,7 +143,29 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
           </SelectField>
           {vehicles.error && <p className="small text-danger">{vehicles.error.message}</p>}
 
+          {composite && !vehicle && (
+            <SelectField label="Categoria da aula" error={errors.category?.message} {...register('category')}>
+              <option value="">Escolha A ou B (ou um veículo)</option>
+              {enrollment!.category.split('').map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </SelectField>
+          )}
+
           <WindowFields register={register} errors={errors} timeZone={organization.timezone} />
+
+          {enrollment?.balance && (
+            <LessonBalanceNotice
+              balance={enrollment.balance}
+              category={composite ? lessonCategory : null}
+              needed={needed}
+              overrideReason={overrideReason}
+              onOverrideReasonChange={(value) => setValue('override_reason', value)}
+              overrideError={errors.override_reason?.message}
+            />
+          )}
           <TextAreaField label="Observações (opcional)" error={errors.notes?.message} {...register('notes')} />
           <SubmitButton loading={create.isPending}>Agendar aula</SubmitButton>
         </form>

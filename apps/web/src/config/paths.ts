@@ -27,6 +27,8 @@ export const organizationSections = {
   instructors: 'instrutores',
   schedule: 'agenda',
   partners: 'parceiros',
+  exams: 'exames',
+  audit: 'auditoria',
 } as const
 
 // O espaço ativo está sempre na URL
@@ -55,6 +57,9 @@ export function organizationPaths(organizationId: number | string) {
     schedule: `${base}/${organizationSections.schedule}`,
     scheduleNew: (query = '') => `${base}/${organizationSections.schedule}/nova${query}`,
     lesson: (lessonId: number | string) => `${base}/${organizationSections.schedule}/${lessonId}`,
+    exams: `${base}/${organizationSections.exams}`,
+    exam: (examId: number | string) => `${base}/${organizationSections.exams}/${examId}`,
+    audit: `${base}/${organizationSections.audit}`,
     partners: `${base}/${organizationSections.partners}`,
     partnerNew: `${base}/${organizationSections.partners}/novo`,
     partner: (partnerId: number | string) => `${base}/${organizationSections.partners}/${partnerId}`,
