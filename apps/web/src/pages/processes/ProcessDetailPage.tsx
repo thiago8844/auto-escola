@@ -18,7 +18,9 @@ import { useExams } from '../../hooks/useExams'
 import { ExamFormModal } from '../exams/ExamFormModal'
 import { ExamsSummary } from '../exams/ExamsSummary'
 import { FeesPanel } from '../exams/FeesPanel'
+import { AddChecklistItem } from './AddChecklistItemButton'
 import { ChecklistItemModal } from './ChecklistItemModal'
+import { ProcessEditModal } from './ProcessEditModal'
 import { OutcomePanel } from './OutcomePanel'
 
 export default function ProcessDetailPage() {
@@ -39,6 +41,7 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
   const updateStatus = useUpdateProcessStatus(organization.id, String(process.id))
   const [editing, setEditing] = useState<ChecklistItem | null>(null)
   const [schedulingExam, setSchedulingExam] = useState(false)
+  const [correcting, setCorrecting] = useState(false)
   const exams = useExams(organization.id, { page: 1, perPage: 100, processId: process.id, order: 'asc' })
   const closed = process.status === 'completed' || process.status === 'closed'
 
@@ -47,6 +50,14 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
       <PageHeader
         title={PROCESS_TYPE_LABELS[process.type]}
         subtitle={process.student && <Link to={links.student(process.student.id)}>{process.student.name}</Link>}
+        actions={
+          !closed && (
+            <Button size="sm" variant="outline-secondary" onClick={() => setCorrecting(true)}>
+              <i className="bi bi-pencil me-1" aria-hidden="true" />
+              Corrigir dados
+            </Button>
+          )
+        }
       />
 
       <Card className="mb-4">
@@ -161,6 +172,7 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
             },
           ]}
         />
+        {!closed && <AddChecklistItem organizationId={organization.id} processId={String(process.id)} existing={process.checklist ?? []} />}
       </section>
 
       <section aria-labelledby="timeline-title">
@@ -171,7 +183,8 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
       </section>
 
       {schedulingExam && <ExamFormModal organizationId={organization.id} timezone={organization.timezone} presetProcess={process} onClose={() => setSchedulingExam(false)} />}
-      {editing && <ChecklistItemModal organizationId={organization.id} processId={String(process.id)} item={editing} onClose={() => setEditing(null)} />}
+      {editing && <ChecklistItemModal organizationId={organization.id} processId={String(process.id)} studentId={process.student?.id} item={editing} onClose={() => setEditing(null)} />}
+      {correcting && <ProcessEditModal organizationId={organization.id} process={process} onClose={() => setCorrecting(false)} />}
     </>
   )
 }

@@ -4,6 +4,7 @@ import type { Lesson, LessonStatus } from '../types/lesson'
 import type { Paginated } from '../types/organization'
 import { zonedTimeToIso } from '../utils/timezone'
 import { http } from './client'
+import { fetchAllPages } from './paginate'
 
 const base = (organizationId: number | string) => `/organizations/${organizationId}/lessons`
 const handledByScreen = { skipGlobalError: true } as const
@@ -11,22 +12,26 @@ const orNull = (value: string) => value.trim() || null
 
 // Matrícula: usada no histórico do aluno e no detalhe da matrícula
 export async function listLessons(organizationId: number | string, enrollmentId: number | string): Promise<Paginated<Lesson>> {
-  const { data } = await http.get<Paginated<Lesson>>(base(organizationId), {
-    params: { enrollment_id: enrollmentId, per_page: 100 },
-    ...handledByScreen,
+  return fetchAllPages(async (page) => {
+    const { data } = await http.get<Paginated<Lesson>>(base(organizationId), {
+      params: { enrollment_id: enrollmentId, per_page: 100, page },
+      ...handledByScreen,
+    })
+    return data
   })
-  return data
 }
 
 // `from` e `to` são dias ('YYYY-MM-DD') no fuso do espaço: a API aplica o fuso
 export type AgendaParams = { from: string; to: string; instructorId?: string; vehicleId?: string }
 
 export async function listAgenda(organizationId: number | string, { from, to, instructorId, vehicleId }: AgendaParams): Promise<Paginated<Lesson>> {
-  const { data } = await http.get<Paginated<Lesson>>(base(organizationId), {
-    params: { from, to, instructor_id: instructorId || undefined, vehicle_id: vehicleId || undefined, per_page: 100 },
-    ...handledByScreen,
+  return fetchAllPages(async (page) => {
+    const { data } = await http.get<Paginated<Lesson>>(base(organizationId), {
+      params: { from, to, instructor_id: instructorId || undefined, vehicle_id: vehicleId || undefined, per_page: 100, page },
+      ...handledByScreen,
+    })
+    return data
   })
-  return data
 }
 
 export async function getLesson(organizationId: number | string, lessonId: number | string): Promise<Lesson> {

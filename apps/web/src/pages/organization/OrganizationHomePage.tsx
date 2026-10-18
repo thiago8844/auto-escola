@@ -1,9 +1,11 @@
 import { Alert, Badge, Card, Col, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { OnboardingGuide } from '../../components/OnboardingGuide'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
 import { paths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useAuthStore } from '../../stores/authStore'
+import { canOperate } from '../../utils/permissions'
 
 // Protótipo: confirma que login, sessão e espaço ativo funcionam. Os cards ainda não têm dados.
 const sampleStats = [
@@ -32,6 +34,8 @@ export default function OrganizationHomePage() {
           Seu e-mail ainda não foi confirmado. <Link to={paths.verifyEmailNotice}>Confirmar agora</Link>
         </Alert>
       )}
+
+      {canOperate(organization.role) && <OnboardingGuide organizationId={organization.id} />}
 
       <Row xs={1} md={3} className="g-4">
         {sampleStats.map((stat) => (

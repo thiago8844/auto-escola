@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { FormField } from '../../components/FormField'
 import { SubmitButton } from '../../components/SubmitButton'
+import { PASSWORD_MIN } from '../../config'
 import { paths } from '../../config/paths'
 import { useRegister } from '../../hooks/useAuthMutations'
 import { registerSchema, type RegisterInput } from '../../schemas/auth'
@@ -43,7 +44,7 @@ export default function RegisterPage() {
           label="Senha"
           type="password"
           autoComplete="new-password"
-          hint="Mínimo de 3 caracteres."
+          hint={`Mínimo de ${PASSWORD_MIN} caracteres.`}
           error={errors.password?.message}
           {...register('password')}
         />

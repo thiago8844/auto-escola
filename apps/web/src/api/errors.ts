@@ -48,6 +48,11 @@ const CODE_MESSAGES: Record<string, string> = {
   invalid_status_transition: 'Esta aula não pode mudar para essa situação.',
   lesson_not_completed: 'Evolução, duração real e registro oficial só valem para aula realizada.',
   registry_evidence_required: 'Para confirmar o registro oficial, informe o protocolo ou referência.',
+  invalid_reset_token: 'Este link de redefinição é inválido ou expirou. Peça um novo.',
+  document_file_missing: 'O arquivo deste documento não está disponível. Anexe-o novamente como nova versão (Substituir) para recuperá-lo.',
+  stale_record: 'Este registro foi alterado por outra pessoa depois que você abriu a tela. Recarregue para ver a versão atual e refaça a alteração.',
+  idempotency_key_reused: 'Esta solicitação já foi enviada com outro conteúdo. Recarregue a tela e tente de novo.',
+  request_in_progress: 'Esta ação já está sendo processada. Aguarde um instante.',
   email_not_verified: 'Confirme seu e-mail antes de aceitar o convite.',
 }
 

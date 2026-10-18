@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
@@ -8,6 +9,7 @@ import { EnrollmentStatusBadge, LessonStatusBadge } from '../../components/Statu
 import { ENROLLMENT_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
 import { BalancePanel } from './BalancePanel'
+import { EnrollmentEditModal } from './EnrollmentEditModal'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCompleteLesson, useEnrollment, useEnrollmentLessons, useUpdateEnrollmentStatus } from '../../hooks/useEnrollments'
 import { notify } from '../../stores/toastStore'
@@ -40,6 +42,7 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
   const updateStatus = useUpdateEnrollmentStatus(organization.id, String(enrollment.id))
   const lessons = useEnrollmentLessons(organization.id, String(enrollment.id))
   const complete = useCompleteLesson(organization.id)
+  const [editing, setEditing] = useState(false)
 
   return (
     <>
@@ -50,9 +53,15 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
           <>
             <EnrollmentStatusBadge status={enrollment.status} />
             {operate && (
-              <Link to={links.scheduleNew(`?matricula=${enrollment.id}`)} className="btn btn-sm btn-primary">
-                Agendar aula
-              </Link>
+              <>
+                <Button size="sm" variant="outline-secondary" onClick={() => setEditing(true)}>
+                  <i className="bi bi-pencil me-1" aria-hidden="true" />
+                  Corrigir dados
+                </Button>
+                <Link to={links.scheduleNew(`?matricula=${enrollment.id}`)} className="btn btn-sm btn-primary">
+                  Agendar aula
+                </Link>
+              </>
             )}
           </>
         }
@@ -167,6 +176,7 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
           )}
         </QueryState>
       </section>
+      {editing && <EnrollmentEditModal organization={organization} enrollment={enrollment} onClose={() => setEditing(false)} />}
     </>
   )
 }

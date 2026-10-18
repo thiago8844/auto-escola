@@ -7,11 +7,11 @@ import { http } from './client'
 const handledByScreen = { skipGlobalError: true } as const
 const orNull = (value: string) => value.trim() || null
 
-export type StudentListParams = { search: string; page: number }
+export type StudentListParams = { search: string; page: number; archived?: boolean }
 
-export async function listStudents(organizationId: number | string, { search, page }: StudentListParams): Promise<Paginated<Student>> {
+export async function listStudents(organizationId: number | string, { search, page, archived }: StudentListParams): Promise<Paginated<Student>> {
   const { data } = await http.get<Paginated<Student>>(`/organizations/${organizationId}/students`, {
-    params: { per_page: PAGE_SIZE, page, search: search || undefined },
+    params: { per_page: PAGE_SIZE, page, search: search || undefined, archived: archived ? 1 : undefined },
     ...handledByScreen,
   })
   return data
@@ -37,7 +37,7 @@ export async function createStudent(organizationId: number | string, input: Stud
   return data.data
 }
 
-export async function updateStudent(organizationId: number | string, studentId: number | string, input: StudentInput): Promise<Student> {
-  const { data } = await http.patch<{ data: Student }>(`/organizations/${organizationId}/students/${studentId}`, toPayload(input), handledByScreen)
+export async function updateStudent(organizationId: number | string, studentId: number | string, input: StudentInput, expectedUpdatedAt?: string): Promise<Student> {
+  const { data } = await http.patch<{ data: Student }>(`/organizations/${organizationId}/students/${studentId}`, { ...toPayload(input), expected_updated_at: expectedUpdatedAt }, handledByScreen)
   return data.data
 }

@@ -4,6 +4,8 @@ import { Alert, Form } from 'react-bootstrap'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AffectedModal } from '../../components/AffectedModal'
+import { ArchiveCard } from '../../components/ArchiveCard'
+import { FormErrorAlert } from '../../components/FormErrorAlert'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
@@ -13,11 +15,12 @@ import { TextAreaField } from '../../components/TextAreaField'
 import { VEHICLE_CATEGORIES, VEHICLE_STATUS } from '../../config/domain'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useArchive } from '../../hooks/useArchive'
 import { useCreateVehicle, useUpdateVehicle, useVehicle } from '../../hooks/useVehicles'
 import { vehicleSchema, type VehicleInput } from '../../schemas/vehicle'
 import type { Commitment } from '../../types/availability'
 import type { Vehicle } from '../../types/vehicle'
-import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { applyFieldErrors } from '../../utils/applyFieldErrors'
 import { canOperate } from '../../utils/permissions'
 import { VehicleFleetPanel } from './VehicleFleetPanel'
 
@@ -69,8 +72,9 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
   const navigate = useNavigate()
   const editable = canOperate(organization.role)
   const create = useCreateVehicle(organization.id)
-  const update = useUpdateVehicle(organization.id, String(vehicle?.id ?? ''))
+  const update = useUpdateVehicle(organization.id, String(vehicle?.id ?? ''), vehicle?.updated_at)
   const save = vehicle ? update : create
+  const { archive } = useArchive(organization.id, 'vehicles')
   const [affected, setAffected] = useState<Commitment[] | null>(null)
 
   const {
@@ -95,7 +99,6 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
-  const alertMessage = formAlertMessage(save.error)
 
   return (
     <>
@@ -103,7 +106,7 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
 
       <div className="form-narrow">
         {!editable && <Alert variant="info">Somente a equipe pode alterar veículos.</Alert>}
-        {alertMessage && <Alert variant="danger" role="alert">{alertMessage}</Alert>}
+        <FormErrorAlert error={save.error} />
 
         <form onSubmit={onSubmit} noValidate>
           <fieldset disabled={!editable}>
@@ -145,6 +148,16 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
             {editable && <SubmitButton loading={save.isPending}>{vehicle ? 'Salvar alterações' : 'Cadastrar veículo'}</SubmitButton>}
           </fieldset>
         </form>
+
+        {vehicle && editable && (
+          <ArchiveCard
+            noun="veículo"
+            name={`${vehicle.plate} · ${vehicle.model}`}
+            consequences="Aulas antigas, manutenções e documentos continuam no histórico. A placa continua reservada a este cadastro: para voltar a usar o veículo, restaure-o em Veículos > Mostrar arquivados. Não é possível arquivar com aulas ou exames futuros."
+            pending={archive.isPending}
+            onArchive={() => archive.mutate(vehicle.id, { onSuccess: () => navigate(links.vehicles) })}
+          />
+        )}
       </div>
 
       {vehicle && editable && (

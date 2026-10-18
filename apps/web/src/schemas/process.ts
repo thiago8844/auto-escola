@@ -34,6 +34,8 @@ export const checklistItemSchema = z
     source: z.string(),
     reference: z.string().trim().max(100, 'Máximo de 100 caracteres.'),
     occurred_on: z.string(),
+    // Evidência privada ('' = nenhuma). Anexar não confere o item: a conferência é a situação "Conferido".
+    document_id: z.string(),
     notes: z.string().trim().max(2000, 'Máximo de 2000 caracteres.'),
   })
   .superRefine((data, ctx) => {

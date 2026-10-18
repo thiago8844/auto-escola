@@ -42,4 +42,5 @@ export type QualificationProcess = {
   // Desfecho: resultado por categoria, emissão e próximo passo (detalhe do processo)
   outcome?: ProcessOutcome
   created_at: string
+  updated_at?: string
 }

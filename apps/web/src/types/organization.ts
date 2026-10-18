@@ -18,6 +18,7 @@ export type Organization = {
   // Papel do usuário logado neste espaço
   role: Role
   created_at: string
+  updated_at?: string
 }
 
 export type Member = {

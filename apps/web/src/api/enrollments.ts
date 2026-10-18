@@ -3,18 +3,39 @@ import type { EnrollmentInput } from '../schemas/enrollment'
 import type { Enrollment, EnrollmentStatus } from '../types/enrollment'
 import type { Paginated } from '../types/organization'
 import { http } from './client'
+import { fetchAllPages } from './paginate'
 
-export type EnrollmentListParams = { studentId?: number | string; page: number; perPage?: number }
+export type EnrollmentListParams = {
+  studentId?: number | string
+  page: number
+  perPage?: number
+  status?: string
+  category?: string
+  partnerId?: string
+  search?: string
+}
 
 export async function listEnrollments(
   organizationId: number | string,
-  { studentId, page, perPage = LIST_PAGE_SIZE }: EnrollmentListParams,
+  { studentId, page, perPage = LIST_PAGE_SIZE, status, category, partnerId, search }: EnrollmentListParams,
 ): Promise<Paginated<Enrollment>> {
-  const { data } = await http.get<Paginated<Enrollment>>(`/organizations/${organizationId}/enrollments`, {
-    params: { per_page: perPage, page, student_id: studentId },
-    skipGlobalError: true,
-  })
-  return data
+  const request = async (current: number) => {
+    const { data } = await http.get<Paginated<Enrollment>>(`/organizations/${organizationId}/enrollments`, {
+      params: {
+        per_page: perPage,
+        page: current,
+        student_id: studentId,
+        status: status || undefined,
+        category: category || undefined,
+        partner_id: partnerId || undefined,
+        search: search || undefined,
+      },
+      skipGlobalError: true,
+    })
+    return data
+  }
+  // Lista de um aluno traz todas as matrículas dele; a lista geral é paginada
+  return studentId ? fetchAllPages(request) : request(page)
 }
 
 export async function getEnrollment(organizationId: number | string, enrollmentId: number | string): Promise<Enrollment> {
@@ -48,5 +69,22 @@ export async function updateEnrollmentStatus(
   status: EnrollmentStatus,
 ): Promise<Enrollment> {
   const { data } = await http.patch<{ data: Enrollment }>(`/organizations/${organizationId}/enrollments/${enrollmentId}`, { status })
+  return data.data
+}
+
+export type EnrollmentEdit = { partner_id: number | null; qualification_process_id: number | null; category?: string; notes: string | null }
+
+// Correção por operação explícita: a API recusa o que alteraria histórico (categoria com aulas/saldo/exames) e explica o porquê
+export async function updateEnrollment(
+  organizationId: number | string,
+  enrollmentId: number | string,
+  input: EnrollmentEdit,
+  expectedUpdatedAt?: string,
+): Promise<Enrollment> {
+  const { data } = await http.patch<{ data: Enrollment }>(
+    `/organizations/${organizationId}/enrollments/${enrollmentId}`,
+    { ...input, expected_updated_at: expectedUpdatedAt },
+    { skipGlobalError: true },
+  )
   return data.data
 }

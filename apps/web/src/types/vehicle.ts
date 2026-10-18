@@ -15,4 +15,5 @@ export type Vehicle = {
   status: VehicleStatus
   notes: string | null
   created_at: string
+  updated_at?: string
 }

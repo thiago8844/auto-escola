@@ -39,3 +39,7 @@ export function useRefreshUser() {
     onSuccess: (user) => useAuthStore.getState().setUser(user),
   })
 }
+
+export const useForgotPassword = () => useMutation({ mutationFn: authApi.forgotPassword })
+export const useResetPassword = () => useMutation({ mutationFn: authApi.resetPassword })
+export const useChangePassword = () => useMutation({ mutationFn: authApi.changePassword })

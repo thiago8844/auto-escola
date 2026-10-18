@@ -2,6 +2,9 @@ export const paths = {
   home: '/',
   login: '/login',
   register: '/cadastro',
+  forgotPassword: '/esqueci-senha',
+  // O e-mail de recuperação aponta para este caminho (com ?token= e &email=)
+  resetPassword: '/redefinir-senha',
   verifyEmailNotice: '/verifique-email',
   // O e-mail enviado pela API aponta para este caminho (com expires e signature na query)
   verifyEmail: '/auth/email/verify/:id/:hash',

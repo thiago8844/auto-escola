@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createProcess, getProcess, listProcesses, updateChecklistItem, updateProcessStatus, type ProcessListParams } from '../api/processes'
+import { addChecklistItem, createProcess, getProcess, listProcesses, updateChecklistItem, updateProcessData, updateProcessStatus, type ProcessListParams } from '../api/processes'
 import { queryKeys } from '../lib/queryKeys'
 import type { ChecklistItemInput, ProcessInput } from '../schemas/process'
 import { notify } from '../stores/toastStore'
@@ -45,6 +45,28 @@ export function useUpdateChecklistItem(organizationId: number, processId: string
     mutationFn: ({ itemId, input }: { itemId: number; input: ChecklistItemInput }) => updateChecklistItem(organizationId, processId, itemId, input),
     onSuccess: () => {
       notify.success('Item atualizado.')
+      return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })
+    },
+  })
+}
+
+export function useAddChecklistItem(organizationId: number, processId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (type: string) => addChecklistItem(organizationId, processId, type),
+    onSuccess: () => {
+      notify.success('Exigência acrescentada. Ela passa a bloquear a prática até ser conferida.')
+      return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })
+    },
+  })
+}
+
+export function useUpdateProcessData(organizationId: number, processId: string, expectedUpdatedAt?: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ProcessInput) => updateProcessData(organizationId, processId, input, expectedUpdatedAt),
+    onSuccess: () => {
+      notify.success('Dados do processo atualizados.')
       return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })
     },
   })

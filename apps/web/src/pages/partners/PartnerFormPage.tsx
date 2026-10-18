@@ -5,14 +5,17 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
+import { ArchiveCard } from '../../components/ArchiveCard'
+import { FormErrorAlert } from '../../components/FormErrorAlert'
 import { QueryState } from '../../components/QueryState'
 import { SubmitButton } from '../../components/SubmitButton'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useArchive } from '../../hooks/useArchive'
 import { useCreatePartner, usePartner, useUpdatePartner } from '../../hooks/usePartners'
 import { partnerSchema, type PartnerInput } from '../../schemas/partner'
 import type { Partner } from '../../types/partner'
-import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { applyFieldErrors } from '../../utils/applyFieldErrors'
 
 // Cadastro (/parceiros/novo) e edição (/parceiros/:partnerId)
 export default function PartnerFormPage() {
@@ -33,8 +36,9 @@ function PartnerForm({ partner }: { partner?: Partner }) {
   const links = organizationPaths(organization.id)
   const navigate = useNavigate()
   const create = useCreatePartner(organization.id)
-  const update = useUpdatePartner(organization.id, String(partner?.id ?? ''))
+  const update = useUpdatePartner(organization.id, String(partner?.id ?? ''), partner?.updated_at)
   const save = partner ? update : create
+  const { archive } = useArchive(organization.id, 'partners')
 
   const {
     register,
@@ -53,7 +57,6 @@ function PartnerForm({ partner }: { partner?: Partner }) {
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
-  const alertMessage = formAlertMessage(save.error)
 
   return (
     <>
@@ -61,7 +64,7 @@ function PartnerForm({ partner }: { partner?: Partner }) {
 
       <div className="form-narrow">
         <Alert variant="secondary">Parceiro é só um cadastro: ele não ganha conta nem acesso ao sistema.</Alert>
-        {alertMessage && <Alert variant="danger" role="alert">{alertMessage}</Alert>}
+        <FormErrorAlert error={save.error} />
 
         <form onSubmit={onSubmit} noValidate>
           <FormField label="Nome" autoFocus={!partner} error={errors.name?.message} {...register('name')} />
@@ -70,6 +73,16 @@ function PartnerForm({ partner }: { partner?: Partner }) {
           <FormField label="Telefone (opcional)" type="tel" error={errors.phone?.message} {...register('phone')} />
           <SubmitButton loading={save.isPending}>{partner ? 'Salvar alterações' : 'Cadastrar parceiro'}</SubmitButton>
         </form>
+
+        {partner && (
+          <ArchiveCard
+            noun="parceiro"
+            name={partner.name}
+            consequences="As matrículas e aulas já registradas continuam com o histórico. Ele deixa de aparecer nas opções de novas matrículas e pode ser restaurado em Parceiros > Mostrar arquivados."
+            pending={archive.isPending}
+            onArchive={() => archive.mutate(partner.id, { onSuccess: () => navigate(links.partners) })}
+          />
+        )}
       </div>
     </>
   )

@@ -6,4 +6,5 @@ export type Partner = {
   document: string | null
   email: string | null
   phone: string | null
+  updated_at?: string
 }

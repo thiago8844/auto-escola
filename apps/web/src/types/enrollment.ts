@@ -32,5 +32,7 @@ export type Enrollment = {
   qualification_process_id: number | null
   practice_release?: PracticeRelease
   student?: Pick<Student, 'id' | 'name' | 'phone'>
+  partner?: { id: number; name: string }
   created_at: string
+  updated_at?: string
 }

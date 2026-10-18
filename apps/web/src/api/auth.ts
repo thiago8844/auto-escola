@@ -1,4 +1,4 @@
-import type { LoginInput, RegisterInput } from '../schemas/auth'
+import type { ChangePasswordInput, LoginInput, RegisterInput, ResetPasswordInput } from '../schemas/auth'
 import type { MessageResponse } from '../types/api'
 import type { User } from '../types/auth'
 import { http } from './client'
@@ -37,5 +37,21 @@ export async function verifyEmail(id: string, hash: string, search: string): Pro
     `/auth/email/verify/${encodeURIComponent(id)}/${encodeURIComponent(hash)}${search}`,
     handledByScreen,
   )
+  return data
+}
+
+// Resposta sempre igual, exista a conta ou não
+export async function forgotPassword(email: string): Promise<MessageResponse> {
+  const { data } = await http.post<MessageResponse>('/auth/forgot-password', { email }, handledByScreen)
+  return data
+}
+
+export async function resetPassword(input: ResetPasswordInput & { email: string; token: string }): Promise<MessageResponse> {
+  const { data } = await http.post<MessageResponse>('/auth/reset-password', input, handledByScreen)
+  return data
+}
+
+export async function changePassword(input: ChangePasswordInput): Promise<MessageResponse> {
+  const { data } = await http.post<MessageResponse>('/auth/password', input, handledByScreen)
   return data
 }

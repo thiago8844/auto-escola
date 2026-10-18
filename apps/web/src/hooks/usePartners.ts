@@ -28,10 +28,10 @@ export function useCreatePartner(organizationId: number) {
   })
 }
 
-export function useUpdatePartner(organizationId: number, partnerId: string) {
+export function useUpdatePartner(organizationId: number, partnerId: string, expectedUpdatedAt?: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: PartnerInput) => updatePartner(organizationId, partnerId, input),
+    mutationFn: (input: PartnerInput) => updatePartner(organizationId, partnerId, input, expectedUpdatedAt),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) }),
   })
 }

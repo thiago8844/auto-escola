@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
+import { ArchiveCard } from '../../components/ArchiveCard'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
 import { BalanceBadge } from '../../components/BalanceBar'
 import { DocumentStatusBadge, EnrollmentStatusBadge, LessonStatusBadge, ReleaseBadge } from '../../components/StatusBadges'
 import { DOCUMENT_STATUS, DOCUMENT_TYPE_LABELS } from '../../config/domain'
-import type { DocumentStatus } from '../../types/document'
+import type { DocumentStatus, StudentDocument } from '../../types/document'
 import { Timeline } from '../../components/Timeline'
 import { ExamsSummary } from '../exams/ExamsSummary'
+import { DocumentVersionsModal } from './DocumentVersionsModal'
 import { UploadDocumentModal } from './UploadDocumentModal'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
+import { useArchive } from '../../hooks/useArchive'
 import { useDocumentFile, useUpdateDocumentStatus } from '../../hooks/useDocuments'
 import { useEnrollmentsLessons, useStudentDocuments, useStudentEnrollments } from '../../hooks/useStudentHistory'
 import { useStudent } from '../../hooks/useStudents'
@@ -43,6 +46,8 @@ function StudentDetail({ student }: { student: Student }) {
   const links = organizationPaths(organization.id)
   const operate = canOperate(organization.role)
   const studentId = String(student.id)
+  const navigate = useNavigate()
+  const { archive } = useArchive(organization.id, 'students')
 
   const enrollments = useStudentEnrollments(organization.id, studentId)
   const lessonQueries = useEnrollmentsLessons(organization.id, enrollments.data?.data)
@@ -50,6 +55,8 @@ function StudentDetail({ student }: { student: Student }) {
   const documentFile = useDocumentFile(organization.id)
   const updateDocumentStatus = useUpdateDocumentStatus(organization.id)
   const [uploading, setUploading] = useState(false)
+  const [replacing, setReplacing] = useState<StudentDocument | null>(null)
+  const [versionsOf, setVersionsOf] = useState<StudentDocument | null>(null)
   const [lessonsShown, setLessonsShown] = useState(LESSONS_STEP)
 
   // Aulas de todas as matrículas, da mais recente para a mais antiga
@@ -263,13 +270,24 @@ function StudentDetail({ student }: { student: Student }) {
                         <Button
                           variant="outline-secondary"
                           size={mobile ? undefined : 'sm'}
-                          className={mobile ? 'flex-fill' : undefined}
+                          className={mobile ? 'flex-fill me-2' : 'me-2'}
                           disabled={documentFile.isPending}
                           onClick={() => documentFile.mutate({ document: doc, mode: 'download', tab: null })}
                         >
                           <i className="bi bi-download me-1" aria-hidden="true" />
                           Baixar
                         </Button>
+                        {doc.status !== 'replaced' && (
+                          <Button variant="outline-secondary" size={mobile ? undefined : 'sm'} className={mobile ? 'flex-fill me-2' : 'me-2'} onClick={() => setReplacing(doc)}>
+                            <i className="bi bi-arrow-repeat me-1" aria-hidden="true" />
+                            Substituir
+                          </Button>
+                        )}
+                        {(doc.version > 1 || doc.status === 'replaced') && (
+                          <Button variant="link" size={mobile ? undefined : 'sm'} onClick={() => setVersionsOf(doc)}>
+                            Versões
+                          </Button>
+                        )}
                       </>
                     ),
                   },
@@ -280,7 +298,28 @@ function StudentDetail({ student }: { student: Student }) {
         </section>
       )}
 
-      {uploading && <UploadDocumentModal organizationId={organization.id} studentId={student.id} onClose={() => setUploading(false)} />}
+      {operate && (
+        <div className="form-narrow">
+          <ArchiveCard
+            noun="aluno"
+            name={student.name}
+            consequences="Matrículas, aulas, saldo, exames e documentos continuam no histórico. O CPF continua reservado a este cadastro: para voltar a atender, restaure-o em Alunos > Mostrar arquivados. Não é possível arquivar com aula ou exame agendado nem com matrícula em andamento."
+            pending={archive.isPending}
+            onArchive={() => archive.mutate(student.id, { onSuccess: () => navigate(links.students) })}
+          />
+        </div>
+      )}
+
+      {replacing && (
+        <UploadDocumentModal
+          organizationId={organization.id}
+          owner={{ student_id: student.id, replaces_document_id: replacing.id, ...(replacing.qualification_process_id ? { qualification_process_id: replacing.qualification_process_id } : {}) }}
+          replacing={{ type: replacing.type, label: DOCUMENT_TYPE_LABELS[replacing.type] }}
+          onClose={() => setReplacing(null)}
+        />
+      )}
+      {versionsOf && <DocumentVersionsModal organizationId={organization.id} document={versionsOf} onClose={() => setVersionsOf(null)} />}
+      {uploading && <UploadDocumentModal organizationId={organization.id} owner={{ student_id: student.id }} onClose={() => setUploading(false)} />}
     </>
   )
 }

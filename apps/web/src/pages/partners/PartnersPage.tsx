@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Alert, Form } from 'react-bootstrap'
+import { Alert, Button, Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import { ArchivedToggle } from '../../components/ArchivedToggle'
 import { DataTable } from '../../components/DataTable'
 import { PageHeader } from '../../components/PageHeader'
 import { Pagination } from '../../components/Pagination'
@@ -8,19 +8,22 @@ import { QueryState } from '../../components/QueryState'
 import { PAGE_SIZE } from '../../config/organization'
 import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
-import { useDebouncedValue } from '../../hooks/useDebouncedValue'
+import { useArchive } from '../../hooks/useArchive'
 import { useClampPage, usePageParam } from '../../hooks/usePageParam'
 import { usePartners } from '../../hooks/usePartners'
+import { useUrlFilters, useUrlSearch } from '../../hooks/useUrlFilters'
 import { formatDocument } from '../../utils/formatDocument'
 
 export default function PartnersPage() {
   const organization = useActiveOrganization()
   const links = organizationPaths(organization.id)
   const [page, setPage] = usePageParam()
-  const [text, setText] = useState('')
-  const search = useDebouncedValue(text.trim())
+  const [text, setText, search] = useUrlSearch()
+  const { values, set } = useUrlFilters(['arquivados'] as const)
+  const archived = values.arquivados === '1'
+  const { restore } = useArchive(organization.id, 'partners')
 
-  const query = usePartners(organization.id, { page, search })
+  const query = usePartners(organization.id, { page, search, archived })
   useClampPage(page, query.data?.meta.last_page, setPage)
 
   return (
@@ -38,20 +41,19 @@ export default function PartnersPage() {
         Parceiros são auto escolas externas, em nome das quais um instrutor autônomo atende. Eles não têm acesso ao sistema.
       </Alert>
 
-      <Form.Group controlId="partner-search" className="mb-4 form-narrow">
-        <Form.Label className="visually-hidden">Buscar parceiro por nome</Form.Label>
-        <Form.Control
-          type="search"
-          placeholder="Buscar por nome"
-          value={text}
-          onChange={(event) => {
-            setText(event.target.value)
-            setPage(1, true)
-          }}
-        />
-      </Form.Group>
+      <div className="d-flex flex-wrap align-items-end gap-3 mb-4">
+        <Form.Group controlId="partner-search" className="flex-grow-1 form-narrow">
+          <Form.Label className="visually-hidden">Buscar parceiro por nome</Form.Label>
+          <Form.Control type="search" placeholder="Buscar por nome" value={text} onChange={(event) => setText(event.target.value)} />
+        </Form.Group>
+        <ArchivedToggle id="partner-archived" checked={archived} onChange={(checked) => set('arquivados', checked ? '1' : '')} />
+      </div>
 
-      <QueryState query={query} isEmpty={(data) => data.data.length === 0} empty={search ? `Nenhum parceiro encontrado para "${search}".` : 'Nenhum parceiro cadastrado ainda.'}>
+      <QueryState
+        query={query}
+        isEmpty={(data) => data.data.length === 0}
+        empty={archived ? 'Nenhum parceiro arquivado.' : search ? `Nenhum parceiro encontrado para "${search}".` : 'Nenhum parceiro cadastrado ainda.'}
+      >
         {(data) => (
           <>
             <DataTable
@@ -62,6 +64,19 @@ export default function PartnersPage() {
                 { header: 'CPF/CNPJ', cell: (partner) => <span className="tabular-nums">{partner.document ? formatDocument(partner.document) : '—'}</span> },
                 { header: 'E-mail', cell: (partner) => <span className="text-break">{partner.email ?? '—'}</span> },
                 { header: 'Telefone', cell: (partner) => <span className="tabular-nums">{partner.phone ?? '—'}</span> },
+                ...(archived
+                  ? [
+                      {
+                        header: 'Ações',
+                        actions: true,
+                        cell: (partner: (typeof data.data)[number]) => (
+                          <Button size="sm" variant="outline-primary" disabled={restore.isPending} onClick={() => restore.mutate(partner.id)}>
+                            Restaurar
+                          </Button>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
             <Pagination page={page} lastPage={data.meta.last_page} total={data.meta.total} perPage={PAGE_SIZE} onPageChange={setPage} />

@@ -4,6 +4,7 @@ import type { Commitment } from '../types/availability'
 import type { Instructor } from '../types/instructor'
 import type { Paginated } from '../types/organization'
 import { http } from './client'
+import { fetchAllPages } from './paginate'
 
 const handledByScreen = { skipGlobalError: true } as const
 const base = (organizationId: number | string) => `/organizations/${organizationId}/instructors`
@@ -11,12 +12,15 @@ const base = (organizationId: number | string) => `/organizations/${organization
 export type InstructorListParams = { page: number; active?: boolean; all?: boolean }
 
 export async function listInstructors(organizationId: number | string, { page, active, all }: InstructorListParams): Promise<Paginated<Instructor>> {
-  const { data } = await http.get<Paginated<Instructor>>(base(organizationId), {
-    // `all` serve às listas de escolha (ex.: agendamento): traz até 100 de uma vez
-    params: { per_page: all ? LIST_PAGE_SIZE : PAGE_SIZE, page, active: active === undefined ? undefined : active ? 1 : 0 },
-    ...handledByScreen,
-  })
-  return data
+  const request = async (current: number) => {
+    const { data } = await http.get<Paginated<Instructor>>(base(organizationId), {
+      params: { per_page: all ? LIST_PAGE_SIZE : PAGE_SIZE, page: current, active: active === undefined ? undefined : active ? 1 : 0 },
+      ...handledByScreen,
+    })
+    return data
+  }
+  // `all` serve às listas de escolha (ex.: agendamento): junta todas as páginas
+  return all ? fetchAllPages(request) : request(page)
 }
 
 export async function getInstructor(organizationId: number | string, instructorId: number | string): Promise<Instructor> {

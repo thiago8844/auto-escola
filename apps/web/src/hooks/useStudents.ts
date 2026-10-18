@@ -27,10 +27,10 @@ export function useCreateStudent(organizationId: number) {
   })
 }
 
-export function useUpdateStudent(organizationId: number, studentId: string) {
+export function useUpdateStudent(organizationId: number, studentId: string, expectedUpdatedAt?: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: StudentInput) => updateStudent(organizationId, studentId, input),
+    mutationFn: (input: StudentInput) => updateStudent(organizationId, studentId, input, expectedUpdatedAt),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) }),
   })
 }

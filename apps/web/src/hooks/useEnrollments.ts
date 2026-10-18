@@ -1,13 +1,13 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createEnrollment, getEnrollment, listEnrollments, updateEnrollmentStatus, type EnrollmentListParams } from '../api/enrollments'
+import { createEnrollment, getEnrollment, listEnrollments, updateEnrollment, updateEnrollmentStatus, type EnrollmentEdit, type EnrollmentListParams } from '../api/enrollments'
 import { listLessons, completeLesson } from '../api/lessons'
 import { queryKeys } from '../lib/queryKeys'
 import type { EnrollmentInput } from '../schemas/enrollment'
 import type { EnrollmentStatus } from '../types/enrollment'
 import { PAGE_SIZE } from '../config/organization'
 
-export function useEnrollments(organizationId: number, page: number) {
-  const params: EnrollmentListParams = { page, perPage: PAGE_SIZE }
+export function useEnrollments(organizationId: number, page: number, filters: Pick<EnrollmentListParams, 'status' | 'category' | 'partnerId' | 'search'> = {}) {
+  const params: EnrollmentListParams = { page, perPage: PAGE_SIZE, ...filters }
   return useQuery({
     queryKey: queryKeys.organizations.enrollments(organizationId, params),
     queryFn: () => listEnrollments(organizationId, params),
@@ -53,6 +53,14 @@ export function useCompleteLesson(organizationId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (lessonId: number) => completeLesson(organizationId, lessonId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) }),
+  })
+}
+
+export function useUpdateEnrollment(organizationId: number, enrollmentId: string, expectedUpdatedAt?: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: EnrollmentEdit) => updateEnrollment(organizationId, enrollmentId, input, expectedUpdatedAt),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) }),
   })
 }

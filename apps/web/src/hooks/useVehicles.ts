@@ -27,10 +27,10 @@ export function useCreateVehicle(organizationId: number) {
   })
 }
 
-export function useUpdateVehicle(organizationId: number, vehicleId: string) {
+export function useUpdateVehicle(organizationId: number, vehicleId: string, expectedUpdatedAt?: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: VehicleInput) => updateVehicle(organizationId, vehicleId, input),
+    mutationFn: (input: VehicleInput) => updateVehicle(organizationId, vehicleId, input, expectedUpdatedAt),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) }),
   })
 }

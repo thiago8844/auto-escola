@@ -4,19 +4,23 @@ import type { Commitment } from '../types/availability'
 import type { Paginated } from '../types/organization'
 import type { Vehicle, VehicleStatus } from '../types/vehicle'
 import { http } from './client'
+import { fetchAllPages } from './paginate'
 
 const handledByScreen = { skipGlobalError: true } as const
 const orNull = (value: string) => value.trim() || null
 
-export type VehicleListParams = { page: number; search?: string; status?: VehicleStatus | ''; all?: boolean }
+export type VehicleListParams = { page: number; search?: string; status?: VehicleStatus | ''; all?: boolean; archived?: boolean }
 
-export async function listVehicles(organizationId: number | string, { page, search, status, all }: VehicleListParams): Promise<Paginated<Vehicle>> {
-  const { data } = await http.get<Paginated<Vehicle>>(`/organizations/${organizationId}/vehicles`, {
-    // `all` serve às listas de escolha (agendamento, filtros): traz até 100 de uma vez
-    params: { per_page: all ? LIST_PAGE_SIZE : PAGE_SIZE, page, search: search || undefined, status: status || undefined },
-    ...handledByScreen,
-  })
-  return data
+export async function listVehicles(organizationId: number | string, { page, search, status, all, archived }: VehicleListParams): Promise<Paginated<Vehicle>> {
+  const request = async (current: number) => {
+    const { data } = await http.get<Paginated<Vehicle>>(`/organizations/${organizationId}/vehicles`, {
+      params: { per_page: all ? LIST_PAGE_SIZE : PAGE_SIZE, page: current, search: search || undefined, status: status || undefined, archived: archived ? 1 : undefined },
+      ...handledByScreen,
+    })
+    return data
+  }
+  // `all` serve às listas de escolha (agendamento, filtros): junta todas as páginas
+  return all ? fetchAllPages(request) : request(page)
 }
 
 export async function getVehicle(organizationId: number | string, vehicleId: number | string): Promise<Vehicle> {
@@ -45,10 +49,10 @@ export async function createVehicle(organizationId: number | string, input: Vehi
 }
 
 // Inativar o veículo ou antecipar o CRLV não cancela nada: a API devolve os compromissos futuros afetados
-export async function updateVehicle(organizationId: number | string, vehicleId: number | string, input: VehicleInput): Promise<{ vehicle: Vehicle; affected: Commitment[] }> {
+export async function updateVehicle(organizationId: number | string, vehicleId: number | string, input: VehicleInput, expectedUpdatedAt?: string): Promise<{ vehicle: Vehicle; affected: Commitment[] }> {
   const { data } = await http.patch<{ data: Vehicle; meta?: { affected: Commitment[] } }>(
     `/organizations/${organizationId}/vehicles/${vehicleId}`,
-    toPayload(input),
+    { ...toPayload(input), expected_updated_at: expectedUpdatedAt },
     handledByScreen,
   )
   return { vehicle: data.data, affected: data.meta?.affected ?? [] }

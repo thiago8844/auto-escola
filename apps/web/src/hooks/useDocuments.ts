@@ -1,16 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchDocumentFile, updateDocumentStatus, uploadDocument } from '../api/documents'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchDocumentFile, listDocumentVersions, updateDocumentStatus, uploadDocument, type DocumentOwner } from '../api/documents'
 import { queryKeys } from '../lib/queryKeys'
 import type { DocumentUploadInput } from '../schemas/document'
 import { notify } from '../stores/toastStore'
 import type { DocumentStatus, StudentDocument } from '../types/document'
 
-export function useUploadDocument(organizationId: number, studentId: number) {
+export function useDocumentVersions(organizationId: number, documentId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: [...queryKeys.organizations.detail(organizationId), 'document-versions', documentId],
+    queryFn: () => listDocumentVersions(organizationId, documentId),
+    enabled,
+  })
+}
+
+export function useUploadDocument(organizationId: number, owner: DocumentOwner) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: DocumentUploadInput) => uploadDocument(organizationId, studentId, input),
+    mutationFn: (input: DocumentUploadInput) => uploadDocument(organizationId, owner, input),
     onSuccess: () => {
-      notify.success('Documento anexado.')
+      notify.success(owner.replaces_document_id ? 'Nova versão anexada; a anterior ficou no histórico.' : 'Documento anexado.')
       return queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })
     },
   })

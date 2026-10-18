@@ -6,7 +6,7 @@ import { NotificationBell } from '../components/NotificationBell'
 import { Logo } from '../components/Logo'
 import { NavItem, type NavItemProps } from '../components/NavItem'
 import { ThemeToggle } from '../components/ThemeToggle'
-import { APP_NAME } from '../config'
+import { APP_NAME, SUPPORT_EMAIL } from '../config'
 import { paths } from '../config/paths'
 import { useLogout } from '../hooks/useAuthMutations'
 import { useAuthStore } from '../stores/authStore'
@@ -26,6 +26,9 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
 
   return (
     <div className="app-shell d-lg-flex">
+      <a href="#conteudo" className="visually-hidden-focusable position-absolute p-2 bg-body" style={{ zIndex: 2000 }}>
+        Pular para o conteúdo
+      </a>
       <Navbar expand="lg" className="app-sidebar flex-lg-column align-items-lg-stretch bg-surface border-bottom">
         <Container fluid className="flex-lg-column align-items-lg-stretch flex-lg-grow-1">
           <Navbar.Brand as={Link} to={paths.home} aria-label={APP_NAME}>
@@ -53,6 +56,14 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
                   <i className="bi bi-person-circle me-2" aria-hidden="true" />
                   {user?.name}
                 </p>
+                {SUPPORT_EMAIL && (
+                  <p className="small mb-2">
+                    <a href={`mailto:${SUPPORT_EMAIL}`}>
+                      <i className="bi bi-life-preserver me-2" aria-hidden="true" />
+                      Falar com o suporte
+                    </a>
+                  </p>
+                )}
                 <div className="d-flex flex-wrap gap-2">
                   <Link to={paths.settings} className="btn btn-outline-secondary btn-sm flex-fill">
                     <i className="bi bi-gear me-2" aria-hidden="true" />
@@ -69,7 +80,7 @@ export function AppLayout({ navItems, sidebarHeader, children }: AppLayoutProps)
           </Navbar.Offcanvas>
         </Container>
       </Navbar>
-      <main className="app-content flex-grow-1 p-3 p-lg-4">
+      <main id="conteudo" tabIndex={-1} className="app-content flex-grow-1 p-3 p-lg-4">
         <div className="d-none d-lg-flex justify-content-end mb-3">
           <NotificationBell />
         </div>

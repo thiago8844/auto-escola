@@ -5,6 +5,7 @@ import { QueryState } from '../../components/QueryState'
 import { ReasonModal } from '../../components/ReasonModal'
 import { DOCUMENT_STATUS, DOCUMENT_TYPE_LABELS } from '../../config/domain'
 import { useCancelMaintenance, useReleaseBlock, useVehicleOverview } from '../../hooks/useAvailability'
+import { useDocumentFile } from '../../hooks/useDocuments'
 import type { AvailabilityBlock, Maintenance } from '../../types/availability'
 import type { DocumentStatus, DocumentType } from '../../types/document'
 import type { Organization } from '../../types/organization'
@@ -12,6 +13,7 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
 import { formatDateTime } from '../../utils/formatDateTime'
 import { BlockModal } from '../availability/BlockModal'
+import { UploadDocumentModal } from '../students/UploadDocumentModal'
 import { CompleteMaintenanceModal, NewMaintenanceModal } from './MaintenanceModals'
 
 const MAINTENANCE_STATUS = {
@@ -23,7 +25,9 @@ const MAINTENANCE_STATUS = {
 // Painel da frota no detalhe do veículo: ações diretas no topo e, abaixo, tudo o que afeta a disponibilidade dele
 export function VehicleFleetPanel({ organization, vehicleId }: { organization: Organization; vehicleId: number }) {
   const query = useVehicleOverview(organization.id, String(vehicleId))
-  const [modal, setModal] = useState<null | 'block' | 'maintenance'>(null)
+  const [modal, setModal] = useState<null | 'block' | 'maintenance' | 'document'>(null)
+  const [replacing, setReplacing] = useState<{ id: number; type: DocumentType } | null>(null)
+  const file = useDocumentFile(organization.id)
   const [completing, setCompleting] = useState<Maintenance | null>(null)
   const [cancelling, setCancelling] = useState<Maintenance | null>(null)
   const [releasing, setReleasing] = useState<AvailabilityBlock | null>(null)
@@ -171,9 +175,15 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
 
               <Card>
                 <Card.Body>
-                  <Card.Title as="h3" className="h6">
-                    Documentos e versões
-                  </Card.Title>
+                  <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                    <Card.Title as="h3" className="h6 mb-0">
+                      Documentos e versões
+                    </Card.Title>
+                    <Button size="sm" variant="outline-primary" onClick={() => setModal('document')}>
+                      <i className="bi bi-upload me-1" aria-hidden="true" />
+                      Anexar CRLV ou documento
+                    </Button>
+                  </div>
                   {overview.documents.length === 0 ? (
                     <p className="text-secondary mb-0">Nenhum documento anexado a este veículo.</p>
                   ) : (
@@ -184,7 +194,17 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
                             {DOCUMENT_TYPE_LABELS[doc.type as DocumentType] ?? doc.type} · v{doc.version}
                             {doc.expires_at && <span className="text-secondary"> · vale até {formatDate(doc.expires_at)}</span>}
                           </span>
-                          <Badge bg={DOCUMENT_STATUS[doc.status as DocumentStatus]?.bg ?? 'secondary'}>{DOCUMENT_STATUS[doc.status as DocumentStatus]?.label ?? doc.status}</Badge>
+                          <span className="d-inline-flex align-items-center gap-2">
+                            <Badge bg={DOCUMENT_STATUS[doc.status as DocumentStatus]?.bg ?? 'secondary'}>{DOCUMENT_STATUS[doc.status as DocumentStatus]?.label ?? doc.status}</Badge>
+                            <Button size="sm" variant="link" className="p-0" disabled={file.isPending} onClick={() => file.mutate({ document: doc as never, mode: 'view', tab: window.open('', '_blank') })}>
+                              Ver
+                            </Button>
+                            {doc.status !== 'replaced' && (
+                              <Button size="sm" variant="link" className="p-0" onClick={() => setReplacing({ id: doc.id, type: doc.type as DocumentType })}>
+                                Substituir
+                              </Button>
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -196,6 +216,17 @@ export function VehicleFleetPanel({ organization, vehicleId }: { organization: O
         }}
       </QueryState>
 
+      {modal === 'document' && (
+        <UploadDocumentModal organizationId={organization.id} owner={{ vehicle_id: vehicleId }} defaultType="vehicle_registration" title="Anexar documento do veículo" onClose={() => setModal(null)} />
+      )}
+      {replacing && (
+        <UploadDocumentModal
+          organizationId={organization.id}
+          owner={{ vehicle_id: vehicleId, replaces_document_id: replacing.id }}
+          replacing={{ type: replacing.type, label: DOCUMENT_TYPE_LABELS[replacing.type] }}
+          onClose={() => setReplacing(null)}
+        />
+      )}
       {modal === 'block' && <BlockModal organization={organization} vehicleId={vehicleId} onClose={() => setModal(null)} />}
       {modal === 'maintenance' && <NewMaintenanceModal organization={organization} vehicleId={vehicleId} onClose={() => setModal(null)} />}
       {completing && <CompleteMaintenanceModal organization={organization} maintenance={completing} onClose={() => setCompleting(null)} />}

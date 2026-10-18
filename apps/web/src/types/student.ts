@@ -7,4 +7,6 @@ export type Student = {
   email?: string | null
   birth_date?: string | null
   created_at: string
+  // Para detectar edição simultânea (enviado como expected_updated_at)
+  updated_at?: string
 }

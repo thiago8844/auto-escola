@@ -12,6 +12,8 @@ import { OrganizationLayout } from '../layouts/OrganizationLayout'
 import AcceptInvitationPage from '../pages/invitations/AcceptInvitationPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
+import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
 import AlertsPage from '../pages/alerts/AlertsPage'
@@ -57,6 +59,9 @@ export const router = createBrowserRouter([
         children: [
           // O link do e-mail funciona logado ou não
           { path: paths.verifyEmail, element: <VerifyEmailPage /> },
+          // Recuperação de senha: o link do e-mail abre logado ou não
+          { path: paths.forgotPassword, element: <ForgotPasswordPage /> },
+          { path: paths.resetPassword, element: <ResetPasswordPage /> },
           {
             element: <GuestOnly />,
             children: [

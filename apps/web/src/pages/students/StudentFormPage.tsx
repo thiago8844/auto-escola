@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
+import { FormErrorAlert } from '../../components/FormErrorAlert'
 import { QueryState } from '../../components/QueryState'
 import { SubmitButton } from '../../components/SubmitButton'
 import { organizationPaths } from '../../config/paths'
@@ -11,7 +11,7 @@ import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCreateStudent, useStudent, useUpdateStudent } from '../../hooks/useStudents'
 import { studentSchema, type StudentInput } from '../../schemas/student'
 import type { Student } from '../../types/student'
-import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { applyFieldErrors } from '../../utils/applyFieldErrors'
 
 const emptyValues: StudentInput = { name: '', cpf: '', email: '', phone: '', birth_date: '' }
 
@@ -44,7 +44,7 @@ function StudentForm({ student }: { student?: Student }) {
   const links = organizationPaths(organization.id)
   const navigate = useNavigate()
   const create = useCreateStudent(organization.id)
-  const update = useUpdateStudent(organization.id, String(student?.id ?? ''))
+  const update = useUpdateStudent(organization.id, String(student?.id ?? ''), student?.updated_at)
   const save = student ? update : create
 
   const {
@@ -64,14 +64,13 @@ function StudentForm({ student }: { student?: Student }) {
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
-  const alertMessage = formAlertMessage(save.error)
 
   return (
     <>
       <h1 className="mb-4">{student ? 'Editar aluno' : 'Novo aluno'}</h1>
 
       <div className="form-narrow">
-        {alertMessage && <Alert variant="danger" role="alert">{alertMessage}</Alert>}
+        <FormErrorAlert error={save.error} />
 
         <form onSubmit={onSubmit} noValidate>
           <FormField label="Nome" autoFocus error={errors.name?.message} {...register('name')} />

@@ -40,6 +40,10 @@ export default function LoginPage() {
         <SubmitButton loading={login.isPending}>Entrar</SubmitButton>
       </form>
 
+      <p className="text-center small mt-3 mb-0">
+        <Link to={paths.forgotPassword}>Esqueci minha senha</Link>
+      </p>
+
       <p className="text-center small mt-4 mb-0">
         Ainda não tem conta? <Link to={paths.register}>Cadastre-se</Link>
       </p>
