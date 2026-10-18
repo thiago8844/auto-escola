@@ -24,11 +24,13 @@ export const scheduleSchema = z.object({
   category: z.string(),
   // Exceção autorizada para agendar com saldo insuficiente
   override_reason: z.string().trim().max(255, 'Máximo de 255 caracteres.'),
+  // Exceção para agendar fora do horário de atendimento (só aparece quando a API recusa)
+  hours_override_reason: z.string().trim().max(255, 'Máximo de 255 caracteres.'),
   ...windowFields,
   notes: z.string().trim().max(2000, 'Máximo de 2000 caracteres.'),
 })
 
-export const rescheduleSchema = z.object(windowFields)
+export const rescheduleSchema = z.object({ ...windowFields, hours_override_reason: z.string().trim().max(255, 'Máximo de 255 caracteres.') })
 
 export const lessonStatusSchema = z.object({
   status: z.enum(['completed', 'missed', 'cancelled']),

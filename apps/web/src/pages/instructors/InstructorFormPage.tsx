@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { AffectedModal } from '../../components/AffectedModal'
 import { ConfirmModal } from '../../components/ConfirmModal'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
@@ -14,8 +15,10 @@ import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCreateInstructor, useInstructor, useSetInstructorLink, useUpdateInstructor } from '../../hooks/useInstructors'
 import { instructorSchema, type InstructorInput } from '../../schemas/instructor'
+import type { Commitment } from '../../types/availability'
 import type { Instructor } from '../../types/instructor'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
+import { InstructorAvailabilityPanel } from './InstructorAvailabilityPanel'
 
 // Cadastro (/instrutores/novo) e detalhe/edição (/instrutores/:instructorId)
 export default function InstructorFormPage() {
@@ -40,6 +43,7 @@ function InstructorForm({ instructor }: { instructor?: Instructor }) {
   const link = useSetInstructorLink(organization.id, String(instructor?.id ?? ''))
   const save = instructor ? update : create
   const [confirmDeactivate, setConfirmDeactivate] = useState(false)
+  const [affected, setAffected] = useState<Commitment[] | null>(null)
 
   // Identidade de instrutor com conta só ele altera, em /me/instructor
   const identityLocked = instructor?.has_account === true
@@ -121,16 +125,38 @@ function InstructorForm({ instructor }: { instructor?: Instructor }) {
         )}
       </div>
 
+      {instructor && active && (
+        <div className="mw-100">
+          <InstructorAvailabilityPanel organization={organization} instructorId={instructor.id} />
+        </div>
+      )}
+
       <ConfirmModal
         show={confirmDeactivate}
         title="Desativar vínculo"
         confirmLabel="Desativar"
         pending={link.isPending}
-        onConfirm={() => link.mutate(false, { onSettled: () => setConfirmDeactivate(false) })}
+        onConfirm={() =>
+          link.mutate(false, {
+            onSuccess: (saved) => saved.affected.length > 0 && setAffected(saved.affected),
+            onSettled: () => setConfirmDeactivate(false),
+          })
+        }
         onCancel={() => setConfirmDeactivate(false)}
       >
-        {instructor?.full_name} não poderá receber novas aulas neste espaço. As aulas já agendadas continuam.
+        {instructor?.full_name} não poderá receber novas aulas neste espaço. As aulas já agendadas não são canceladas: se houver alguma, você verá a lista para escolher uma providência.
       </ConfirmModal>
+
+      {affected && instructor && (
+        <AffectedModal
+          organizationId={organization.id}
+          timezone={organization.timezone}
+          title="Vínculo desativado"
+          summary={`${instructor.full_name} não recebe mais novas aulas neste espaço.`}
+          commitments={affected}
+          onClose={() => setAffected(null)}
+        />
+      )}
     </>
   )
 }

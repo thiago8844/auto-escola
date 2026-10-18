@@ -6,6 +6,7 @@ import { EnrollmentPicker } from '../../components/EnrollmentPicker'
 import { LessonBalanceNotice } from '../../components/LessonBalanceNotice'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
+import { FormField } from '../../components/FormField'
 import { SelectField } from '../../components/SelectField'
 import { SubmitButton } from '../../components/SubmitButton'
 import { TextAreaField } from '../../components/TextAreaField'
@@ -64,6 +65,7 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
       vehicle_id: '',
       category: '',
       override_reason: '',
+      hours_override_reason: '',
       date: /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : todayInTimeZone(organization.timezone),
       start_time: '',
       duration: '50',
@@ -164,6 +166,14 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
               overrideReason={overrideReason}
               onOverrideReasonChange={(value) => setValue('override_reason', value)}
               overrideError={errors.override_reason?.message}
+            />
+          )}
+          {create.error?.code === 'outside_business_hours' && (
+            <FormField
+              label="Motivo da exceção"
+              hint="Fora do horário de atendimento. Escreva o motivo e envie de novo para agendar mesmo assim; ele fica registrado."
+              error={errors.hours_override_reason?.message}
+              {...register('hours_override_reason')}
             />
           )}
           <TextAreaField label="Observações (opcional)" error={errors.notes?.message} {...register('notes')} />

@@ -1,5 +1,6 @@
 import { LIST_PAGE_SIZE, PAGE_SIZE } from '../config/organization'
 import type { VehicleInput } from '../schemas/vehicle'
+import type { Commitment } from '../types/availability'
 import type { Paginated } from '../types/organization'
 import type { Vehicle, VehicleStatus } from '../types/vehicle'
 import { http } from './client'
@@ -43,7 +44,12 @@ export async function createVehicle(organizationId: number | string, input: Vehi
   return data.data
 }
 
-export async function updateVehicle(organizationId: number | string, vehicleId: number | string, input: VehicleInput): Promise<Vehicle> {
-  const { data } = await http.patch<{ data: Vehicle }>(`/organizations/${organizationId}/vehicles/${vehicleId}`, toPayload(input), handledByScreen)
-  return data.data
+// Inativar o veículo ou antecipar o CRLV não cancela nada: a API devolve os compromissos futuros afetados
+export async function updateVehicle(organizationId: number | string, vehicleId: number | string, input: VehicleInput): Promise<{ vehicle: Vehicle; affected: Commitment[] }> {
+  const { data } = await http.patch<{ data: Vehicle; meta?: { affected: Commitment[] } }>(
+    `/organizations/${organizationId}/vehicles/${vehicleId}`,
+    toPayload(input),
+    handledByScreen,
+  )
+  return { vehicle: data.data, affected: data.meta?.affected ?? [] }
 }

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert } from 'react-bootstrap'
+import { useState } from 'react'
+import { Alert, Button, Card } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { DocumentField } from '../../components/DocumentField'
 import { FormField } from '../../components/FormField'
@@ -9,8 +10,10 @@ import { UFS } from '../../config/domain'
 import { SubmitButton } from '../../components/SubmitButton'
 import { ORGANIZATION_TYPE_LABELS } from '../../config/organization'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
-import { useUpdateOrganization } from '../../hooks/useOrganizations'
+import { WeeklyHoursEditor } from '../../components/WeeklyHoursEditor'
+import { useSaveBusinessHours, useUpdateOrganization } from '../../hooks/useOrganizations'
 import { organizationUpdateSchema, type OrganizationUpdateInput } from '../../schemas/organization'
+import { summarizeHours } from '../../utils/summarizeHours'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
 import { canEditOrganization } from '../../utils/permissions'
 
@@ -74,7 +77,58 @@ export default function OrganizationSettingsPage() {
             {editable && <SubmitButton loading={update.isPending}>Salvar alterações</SubmitButton>}
           </fieldset>
         </form>
+
+        <BusinessHoursCard organizationId={organization.id} hours={organization.business_hours} editable={editable} />
       </div>
     </>
+  )
+}
+
+// Horário de atendimento do espaço. Sem regra, a agenda é livre e só os bloqueios restringem.
+function BusinessHoursCard({ organizationId, hours, editable }: { organizationId: number; hours: Record<string, Array<{ start: string; end: string }>> | null; editable: boolean }) {
+  const save = useSaveBusinessHours(organizationId)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(hours ?? {})
+
+  return (
+    <Card className="mt-4">
+      <Card.Body>
+        <Card.Title as="h2" className="h5">
+          Horário de atendimento
+        </Card.Title>
+        <p className="mb-2">{summarizeHours(hours)}</p>
+        <p className="small text-secondary">
+          {hours
+            ? 'Aulas fora desse horário só entram com uma exceção justificada. Bloqueios de veículo e instrutor continuam valendo.'
+            : 'Hoje a agenda é livre: qualquer horário pode receber aulas, exceto os bloqueados. Defina um horário se quiser que o sistema avise quando algo for marcado fora dele.'}
+        </p>
+        {editable && !editing && (
+          <Button variant="outline-primary" onClick={() => { setDraft(hours ?? {}); setEditing(true) }}>
+            {hours ? 'Alterar horário' : 'Definir horário de atendimento'}
+          </Button>
+        )}
+        {editing && (
+          <>
+            <WeeklyHoursEditor value={draft} onChange={setDraft} />
+            {save.error && (
+              <Alert variant="danger" className="mt-2" role="alert">
+                {save.error.message}
+              </Alert>
+            )}
+            <div className="d-flex flex-wrap gap-2 mt-3">
+              <Button disabled={save.isPending} onClick={() => save.mutate(Object.keys(draft).length ? draft : null, { onSuccess: () => setEditing(false) })}>
+                Salvar horário
+              </Button>
+              <Button variant="outline-secondary" disabled={save.isPending} onClick={() => save.mutate(null, { onSuccess: () => { setDraft({}); setEditing(false) } })}>
+                Agenda livre
+              </Button>
+              <Button variant="link" onClick={() => setEditing(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </>
+        )}
+      </Card.Body>
+    </Card>
   )
 }

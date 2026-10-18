@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { Alert, Form } from 'react-bootstrap'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { AffectedModal } from '../../components/AffectedModal'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
@@ -13,9 +15,11 @@ import { organizationPaths } from '../../config/paths'
 import { useActiveOrganization } from '../../hooks/useActiveOrganization'
 import { useCreateVehicle, useUpdateVehicle, useVehicle } from '../../hooks/useVehicles'
 import { vehicleSchema, type VehicleInput } from '../../schemas/vehicle'
+import type { Commitment } from '../../types/availability'
 import type { Vehicle } from '../../types/vehicle'
 import { applyFieldErrors, formAlertMessage } from '../../utils/applyFieldErrors'
 import { canOperate } from '../../utils/permissions'
+import { VehicleFleetPanel } from './VehicleFleetPanel'
 
 const emptyValues: VehicleInput = {
   plate: '',
@@ -67,6 +71,7 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
   const create = useCreateVehicle(organization.id)
   const update = useUpdateVehicle(organization.id, String(vehicle?.id ?? ''))
   const save = vehicle ? update : create
+  const [affected, setAffected] = useState<Commitment[] | null>(null)
 
   const {
     register,
@@ -82,7 +87,11 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
 
   const onSubmit = handleSubmit((values) =>
     save.mutate(values, {
-      onSuccess: () => navigate(links.vehicles),
+      onSuccess: (saved) => {
+        // Inativar ou antecipar o CRLV pode deixar aulas e exames sem veículo utilizável: mostra o que fazer
+        if ('affected' in saved && saved.affected.length > 0) setAffected(saved.affected)
+        else navigate(links.vehicles)
+      },
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
@@ -137,6 +146,23 @@ function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
           </fieldset>
         </form>
       </div>
+
+      {vehicle && editable && (
+        <div className="mw-100">
+          <VehicleFleetPanel organization={organization} vehicleId={vehicle.id} />
+        </div>
+      )}
+
+      {affected && vehicle && (
+        <AffectedModal
+          organizationId={organization.id}
+          timezone={organization.timezone}
+          title="Veículo atualizado"
+          summary={`As alterações em ${vehicle.plate} foram salvas.`}
+          commitments={affected}
+          onClose={() => navigate(links.vehicles)}
+        />
+      )}
     </>
   )
 }

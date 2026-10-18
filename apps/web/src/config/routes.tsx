@@ -14,6 +14,7 @@ import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import VerifyEmailNoticePage from '../pages/auth/VerifyEmailNoticePage'
 import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
+import AvailabilityPage from '../pages/availability/AvailabilityPage'
 import ExamDetailPage from '../pages/exams/ExamDetailPage'
 import ExamsPage from '../pages/exams/ExamsPage'
 import AuditPage from '../pages/organization/AuditPage'
@@ -104,6 +105,8 @@ export const router = createBrowserRouter([
               { path: organizationSections.vehicles, element: <VehiclesPage /> },
               { path: `${organizationSections.vehicles}/:vehicleId`, element: <VehicleFormPage /> },
               // Exames: a equipe vê todos; o instrutor, só os que acompanha (a API filtra)
+              // Disponibilidade: a equipe gerencia bloqueios; o instrutor registra a própria indisponibilidade
+              { path: organizationSections.availability, element: <AvailabilityPage /> },
               { path: organizationSections.exams, element: <ExamsPage /> },
               { path: `${organizationSections.exams}/:examId`, element: <ExamDetailPage /> },
               { path: organizationSections.enrollments, element: <EnrollmentsPage /> },

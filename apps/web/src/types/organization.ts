@@ -13,6 +13,8 @@ export type Organization = {
   city: string | null
   state: string | null
   timezone: string
+  // Horário de atendimento do espaço; nulo = agenda livre, só os bloqueios restringem
+  business_hours: Record<string, Array<{ start: string; end: string }>> | null
   // Papel do usuário logado neste espaço
   role: Role
   created_at: string

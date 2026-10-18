@@ -30,6 +30,10 @@ export const queryKeys = {
     fees: (id: number | string, params: object) => ['organizations', String(id), 'fees', params] as const,
     closureCheck: (id: number | string, processId: number | string) => ['organizations', String(id), 'closure-check', String(processId)] as const,
     timeline: (id: number | string, params: object) => ['organizations', String(id), 'timeline', params] as const,
+    blocks: (id: number | string, params: object) => ['organizations', String(id), 'blocks', params] as const,
+    maintenances: (id: number | string, params: object) => ['organizations', String(id), 'maintenances', params] as const,
+    vehicleOverview: (id: number | string, vehicleId: number | string) => ['organizations', String(id), 'vehicle-overview', String(vehicleId)] as const,
+    instructorAvailability: (id: number | string, instructorId: number | string) => ['organizations', String(id), 'instructor-availability', String(instructorId)] as const,
     invitationsAll: (id: number | string) => ['organizations', String(id), 'invitations'] as const,
   },
 }

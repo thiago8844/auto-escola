@@ -30,8 +30,8 @@ export async function listAgenda(organizationId: number | string, { from, to, in
 }
 
 export async function getLesson(organizationId: number | string, lessonId: number | string): Promise<Lesson> {
-  const { data } = await http.get<{ data: Lesson }>(`${base(organizationId)}/${lessonId}`, handledByScreen)
-  return data.data
+  const { data } = await http.get<{ data: Lesson; meta?: { blockers: Array<{ code: string; message: string }> } }>(`${base(organizationId)}/${lessonId}`, handledByScreen)
+  return { ...data.data, blockers: data.meta?.blockers }
 }
 
 // Início no fuso do espaço + duração em minutos -> início e fim em UTC
@@ -52,6 +52,7 @@ export async function createLesson(organizationId: number | string, input: Sched
       vehicle_id: input.vehicle_id ? Number(input.vehicle_id) : null,
       category: input.category || null,
       override_reason: input.override_reason?.trim() || undefined,
+      hours_override_reason: input.hours_override_reason?.trim() || undefined,
       notes: orNull(input.notes),
       ...toWindow(input, timeZone),
     },
@@ -61,7 +62,11 @@ export async function createLesson(organizationId: number | string, input: Sched
 }
 
 export async function rescheduleLesson(organizationId: number | string, lessonId: number | string, input: RescheduleInput, timeZone: string): Promise<Lesson> {
-  const { data } = await http.post<{ data: Lesson }>(`${base(organizationId)}/${lessonId}/reschedule`, toWindow(input, timeZone), handledByScreen)
+  const { data } = await http.post<{ data: Lesson }>(
+    `${base(organizationId)}/${lessonId}/reschedule`,
+    { ...toWindow(input, timeZone), hours_override_reason: input.hours_override_reason?.trim() || undefined },
+    handledByScreen,
+  )
   return data.data
 }
 

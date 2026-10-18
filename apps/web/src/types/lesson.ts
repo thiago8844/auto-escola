@@ -20,4 +20,6 @@ export type Lesson = {
   vehicle?: { id: number; plate: string; model: string; category: string }
   instructor?: { id: number; full_name: string }
   enrollment?: { id: number; category: string; student?: { id: number; name: string } }
+  // Só no detalhe de aula agendada (equipe): o que impediria a execução hoje (pré-reserva x prática liberada)
+  blockers?: Array<{ code: string; message: string }>
 }

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Alert, Badge, Button, Card } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
+import { ReassignControls } from '../../components/CommitmentList'
 import { FormField } from '../../components/FormField'
 import { PageHeader } from '../../components/PageHeader'
 import { QueryState } from '../../components/QueryState'
@@ -60,8 +61,32 @@ function LessonDetail({ lesson }: { lesson: Lesson }) {
             {formatDayLabel(day)} · {formatTime(lesson.starts_at, timeZone)}–{formatTime(lesson.ends_at, timeZone)}
           </span>
         }
-        actions={<LessonStatusBadge status={lesson.status} />}
+        actions={
+          <>
+            {scheduled && operate && lesson.blockers && (
+              <Badge bg={lesson.blockers.length === 0 ? 'success' : 'warning'} text={lesson.blockers.length === 0 ? undefined : 'dark'}>
+                {lesson.blockers.length === 0 ? 'Pronta para realizar' : 'Pré-reserva'}
+              </Badge>
+            )}
+            <LessonStatusBadge status={lesson.status} />
+          </>
+        }
       />
+
+      {scheduled && operate && lesson.blockers && lesson.blockers.length > 0 && (
+        <Alert variant="warning" className="mb-4">
+          <div className="fw-semibold mb-1">
+            <i className="bi bi-bookmark-fill me-2" aria-hidden="true" />
+            Pré-reserva: ainda não pode ser realizada
+          </div>
+          <ul className="mb-2 ps-3">
+            {lesson.blockers.map((blocker) => (
+              <li key={blocker.code}>{blocker.message}</li>
+            ))}
+          </ul>
+          <ReassignControls organizationId={organization.id} lessonId={lesson.id} showLink={false} />
+        </Alert>
+      )}
 
       {scheduled && (
         <div className="d-flex flex-wrap gap-2 mb-4">

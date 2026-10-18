@@ -1,5 +1,6 @@
 import { LIST_PAGE_SIZE, PAGE_SIZE } from '../config/organization'
 import type { InstructorInput } from '../schemas/instructor'
+import type { Commitment } from '../types/availability'
 import type { Instructor } from '../types/instructor'
 import type { Paginated } from '../types/organization'
 import { http } from './client'
@@ -38,7 +39,8 @@ export async function updateInstructor(organizationId: number | string, instruct
 }
 
 // Ativa ou desativa só o vínculo com o espaço; aulas já agendadas continuam
-export async function setInstructorLink(organizationId: number | string, instructorId: number | string, active: boolean): Promise<Instructor> {
-  const { data } = await http.patch<{ data: Instructor }>(`${base(organizationId)}/${instructorId}/link`, { active })
-  return data.data
+// Ao desativar, a API devolve os compromissos futuros do instrutor para a equipe resolver (nada é cancelado)
+export async function setInstructorLink(organizationId: number | string, instructorId: number | string, active: boolean): Promise<Instructor & { affected: Commitment[] }> {
+  const { data } = await http.patch<{ data: Instructor; meta?: { affected: Commitment[] } }>(`${base(organizationId)}/${instructorId}/link`, { active })
+  return { ...data.data, affected: data.meta?.affected ?? [] }
 }

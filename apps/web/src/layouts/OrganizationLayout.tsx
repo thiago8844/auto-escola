@@ -20,6 +20,7 @@ export function OrganizationLayout() {
     { to: links.vehicles, icon: 'bi-car-front', label: 'Veículos' },
     { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },
     { to: links.exams, icon: 'bi-clipboard-check', label: 'Exames' },
+    { to: links.availability, icon: 'bi-slash-circle', label: 'Bloqueios' },
     ...(organization && canOperate(organization.role)
       ? [
           { to: links.instructors, icon: 'bi-person-badge', label: 'Instrutores' },

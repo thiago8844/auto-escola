@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createOrganization, getOrganization, listOrganizations, updateOrganization } from '../api/organizations'
+import { createOrganization, getOrganization, listOrganizations, saveBusinessHours, updateOrganization } from '../api/organizations'
 import { queryKeys } from '../lib/queryKeys'
 import type { OrganizationUpdateInput } from '../schemas/organization'
 
@@ -27,6 +27,14 @@ export function useUpdateOrganization(id: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: OrganizationUpdateInput) => updateOrganization(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all }),
+  })
+}
+
+export function useSaveBusinessHours(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (hours: Parameters<typeof saveBusinessHours>[1]) => saveBusinessHours(id, hours),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all }),
   })
 }

@@ -57,3 +57,9 @@ export async function updateOrganization(id: number | string, input: Organizatio
   )
   return data.data
 }
+
+// Horário de atendimento do espaço; null volta à agenda livre (só os bloqueios restringem)
+export async function saveBusinessHours(id: number | string, hours: Organization['business_hours']): Promise<Organization> {
+  const { data } = await http.patch<{ data: Organization }>(`/organizations/${id}`, { business_hours: hours }, handledByScreen)
+  return data.data
+}
