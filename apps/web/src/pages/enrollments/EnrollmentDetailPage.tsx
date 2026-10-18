@@ -45,7 +45,16 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
       <PageHeader
         title={`Matrícula · Categoria ${enrollment.category}`}
         subtitle={enrollment.student && <Link to={links.student(enrollment.student.id)}>{enrollment.student.name}</Link>}
-        actions={<EnrollmentStatusBadge status={enrollment.status} />}
+        actions={
+          <>
+            <EnrollmentStatusBadge status={enrollment.status} />
+            {operate && (
+              <Link to={links.scheduleNew(`?matricula=${enrollment.id}`)} className="btn btn-sm btn-primary">
+                Agendar aula
+              </Link>
+            )}
+          </>
+        }
       />
 
       <Card className="mb-4">
@@ -114,7 +123,15 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
                 rows={data.data}
                 getKey={(lesson) => lesson.id}
                 columns={[
-                  { header: 'Data e hora', primary: true, cell: (lesson) => <span className="tabular-nums">{formatDateTime(lesson.starts_at, organization.timezone)}</span> },
+                  {
+                    header: 'Data e hora',
+                    primary: true,
+                    cell: (lesson) => (
+                      <Link to={links.lesson(lesson.id)} className="tabular-nums">
+                        {formatDateTime(lesson.starts_at, organization.timezone)}
+                      </Link>
+                    ),
+                  },
                   { header: 'Instrutor', cell: (lesson) => lesson.instructor?.full_name ?? '—' },
                   { header: 'Veículo', cell: (lesson) => lesson.vehicle?.plate ?? '—' },
                   { header: 'Situação', cell: (lesson) => <LessonStatusBadge status={lesson.status} /> },

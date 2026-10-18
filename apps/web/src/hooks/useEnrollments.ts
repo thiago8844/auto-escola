@@ -15,10 +15,11 @@ export function useEnrollments(organizationId: number, page: number) {
   })
 }
 
-export function useEnrollment(organizationId: number, enrollmentId: string) {
+export function useEnrollment(organizationId: number, enrollmentId: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.organizations.enrollment(organizationId, enrollmentId),
     queryFn: () => getEnrollment(organizationId, enrollmentId),
+    enabled,
   })
 }
 

@@ -1,6 +1,6 @@
 import type { DocumentStatus, DocumentType } from '../types/document'
 import type { ChecklistItemType, EnrollmentStatus, LicenseCategory } from '../types/enrollment'
-import type { LessonStatus } from '../types/lesson'
+import type { LessonStatus, RegistryStatus } from '../types/lesson'
 import type { VehicleStatus } from '../types/vehicle'
 import type { ChecklistItemStatus, ChecklistSource, ProcessStatus, ProcessType } from '../types/process'
 
@@ -104,4 +104,11 @@ export const VEHICLE_CATEGORIES = ['A', 'B', 'C', 'D', 'E', 'ACC'] as const
 export const VEHICLE_STATUS: Record<VehicleStatus, { label: string; bg: string; icon: string }> = {
   active: { label: 'Ativo', bg: 'success', icon: 'bi-check-circle-fill' },
   inactive: { label: 'Inativo', bg: 'secondary', icon: 'bi-pause-circle' },
+}
+
+export const REGISTRY_STATUS: Record<RegistryStatus, { label: string; bg: string }> = {
+  not_informed: { label: 'Não informado', bg: 'secondary' },
+  pending: { label: 'Pendente', bg: 'warning' },
+  confirmed: { label: 'Confirmado', bg: 'success' },
+  rejected: { label: 'Rejeitado', bg: 'danger' },
 }

@@ -35,3 +35,9 @@
 .data-card-list > div + div {
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
+
+// Seletor de data da agenda: não ocupa a linha inteira no desktop
+.agenda-date {
+  width: auto;
+  min-width: 11rem;
+}

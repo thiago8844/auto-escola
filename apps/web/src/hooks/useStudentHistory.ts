@@ -10,6 +10,7 @@ export function useStudentEnrollments(organizationId: number, studentId: string)
   return useQuery({
     queryKey: queryKeys.organizations.enrollments(organizationId, params),
     queryFn: () => listEnrollments(organizationId, params),
+    enabled: studentId !== '',
   })
 }
 

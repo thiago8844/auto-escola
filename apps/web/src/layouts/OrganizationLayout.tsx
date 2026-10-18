@@ -15,6 +15,7 @@ export function OrganizationLayout() {
 
   const navItems = [
     { to: links.home, icon: 'bi-speedometer2', label: 'Início', end: true },
+    { to: links.schedule, icon: 'bi-calendar-week', label: 'Agenda' },
     { to: links.students, icon: 'bi-mortarboard', label: 'Alunos' },
     { to: links.vehicles, icon: 'bi-car-front', label: 'Veículos' },
     { to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas' },

@@ -22,6 +22,9 @@ import StudentFormPage from '../pages/students/StudentFormPage'
 import StudentsPage from '../pages/students/StudentsPage'
 import InstructorFormPage from '../pages/instructors/InstructorFormPage'
 import InstructorsPage from '../pages/instructors/InstructorsPage'
+import LessonDetailPage from '../pages/schedule/LessonDetailPage'
+import LessonFormPage from '../pages/schedule/LessonFormPage'
+import SchedulePage from '../pages/schedule/SchedulePage'
 import VehicleFormPage from '../pages/vehicles/VehicleFormPage'
 import VehiclesPage from '../pages/vehicles/VehiclesPage'
 import InvitationsPage from '../pages/organization/InvitationsPage'
@@ -80,6 +83,9 @@ export const router = createBrowserRouter([
               { path: organizationSections.settings, element: <OrganizationSettingsPage /> },
               { path: organizationSections.students, element: <StudentsPage /> },
               { path: `${organizationSections.students}/:studentId`, element: <StudentDetailPage /> },
+              // Agenda: a equipe vê tudo; o instrutor, só as próprias aulas (a API filtra)
+              { path: organizationSections.schedule, element: <SchedulePage /> },
+              { path: `${organizationSections.schedule}/:lessonId`, element: <LessonDetailPage /> },
               // Veículos: todos os membros veem; só a equipe altera (a tela trava os campos)
               { path: organizationSections.vehicles, element: <VehiclesPage /> },
               { path: `${organizationSections.vehicles}/:vehicleId`, element: <VehicleFormPage /> },
@@ -88,6 +94,7 @@ export const router = createBrowserRouter([
               {
                 element: <RequirePermission allow={canOperate} />,
                 children: [
+                  { path: `${organizationSections.schedule}/nova`, element: <LessonFormPage /> },
                   { path: `${organizationSections.vehicles}/novo`, element: <VehicleFormPage /> },
                   { path: organizationSections.instructors, element: <InstructorsPage /> },
                   { path: `${organizationSections.instructors}/novo`, element: <InstructorFormPage /> },

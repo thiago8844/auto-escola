@@ -1,5 +1,7 @@
 export type LessonStatus = 'scheduled' | 'completed' | 'missed' | 'cancelled'
 
+export type RegistryStatus = 'not_informed' | 'pending' | 'confirmed' | 'rejected'
+
 export type Lesson = {
   id: number
   status: LessonStatus
@@ -10,6 +12,8 @@ export type Lesson = {
   status_reason: string | null
   notes: string | null
   evolution: string | null
+  // Registro do lançamento oficial (feito fora do sistema), separado do status da aula
+  registry: { status: RegistryStatus; reference: string | null; document_id: number | null }
   vehicle?: { id: number; plate: string; model: string; category: string }
   instructor?: { id: number; full_name: string }
   enrollment?: { id: number; category: string; student?: { id: number; name: string } }

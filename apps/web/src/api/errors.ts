@@ -37,6 +37,17 @@ const CODE_MESSAGES: Record<string, string> = {
   invitation_expired: 'Este convite expirou. Peça um novo à equipe do espaço.',
   invitation_recipient_mismatch: 'Este convite foi enviado para outro e-mail. Entre com a conta do e-mail convidado.',
   instructor_identity_locked: 'Este instrutor tem conta própria: só ele altera nome, credencial e categorias, no próprio perfil.',
+  instructor_unavailable: 'Instrutor indisponível nesse horário. Ele pode ter aula em outro espaço.',
+  vehicle_unavailable: 'Veículo já ocupado por outra aula nesse horário.',
+  student_unavailable: 'O aluno já tem aula agendada nesse horário.',
+  enrollment_closed: 'Matrícula encerrada ou rescindida não aceita novas aulas.',
+  vehicle_inactive: 'O veículo escolhido está inativo.',
+  vehicle_document_expired: 'O CRLV do veículo vence antes do dia da aula.',
+  vehicle_category_mismatch: 'A categoria do veículo não é coberta pela categoria da matrícula.',
+  instructor_category_mismatch: 'O instrutor não tem a categoria desse veículo cadastrada.',
+  invalid_status_transition: 'Esta aula não pode mudar para essa situação.',
+  lesson_not_completed: 'Evolução, duração real e registro oficial só valem para aula realizada.',
+  registry_evidence_required: 'Para confirmar o registro oficial, informe o protocolo ou referência.',
   email_not_verified: 'Confirme seu e-mail antes de aceitar o convite.',
 }
 
