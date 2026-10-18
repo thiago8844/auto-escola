@@ -68,6 +68,21 @@ class Organization extends Model
         return $this->hasMany(Lesson::class);
     }
 
+    public function exams(): HasMany
+    {
+        return $this->hasMany(PracticalExam::class);
+    }
+
+    public function externalFees(): HasMany
+    {
+        return $this->hasMany(ExternalFee::class);
+    }
+
+    public function auditEvents(): HasMany
+    {
+        return $this->hasMany(AuditEvent::class);
+    }
+
     public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);

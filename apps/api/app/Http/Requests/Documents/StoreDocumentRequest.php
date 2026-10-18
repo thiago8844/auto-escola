@@ -35,6 +35,7 @@ class StoreDocumentRequest extends FormRequest
             'student_id' => ['nullable', 'integer', $inOrganization('students', true)],
             'qualification_process_id' => ['nullable', 'integer', $inOrganization('qualification_processes')],
             'vehicle_id' => ['nullable', 'integer', $inOrganization('vehicles', true)],
+            'practical_exam_id' => ['nullable', 'integer', $inOrganization('practical_exams')],
             'replaces_document_id' => ['nullable', 'integer', $inOrganization('documents')],
             'issuer' => ['nullable', 'string', 'max:150'],
             'issued_at' => ['nullable', 'date'],
@@ -57,10 +58,11 @@ class StoreDocumentRequest extends FormRequest
                 $this->input('student_id'),
                 $this->input('qualification_process_id'),
                 $this->input('vehicle_id'),
+                $this->input('practical_exam_id'),
             ]);
 
             if ($owners === []) {
-                $validator->errors()->add('student_id', 'Informe o aluno, o processo ou o veículo a que o documento pertence.');
+                $validator->errors()->add('student_id', 'Informe o aluno, o processo, o exame ou o veículo a que o documento pertence.');
 
                 return;
             }

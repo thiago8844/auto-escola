@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * organização que a criou; instrutores a veem na agenda pessoal, sem cópia.
  */
 #[Fillable([
-    'organization_id', 'enrollment_id', 'instructor_id', 'vehicle_id', 'starts_at', 'ends_at',
+    'organization_id', 'enrollment_id', 'instructor_id', 'vehicle_id', 'category', 'starts_at', 'ends_at',
     'actual_minutes', 'status', 'status_reason', 'notes', 'evolution',
     'registry_status', 'registry_reference', 'registry_document_id',
 ])]

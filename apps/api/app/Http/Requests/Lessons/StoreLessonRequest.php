@@ -34,6 +34,10 @@ class StoreLessonRequest extends FormRequest
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            // Matrícula conjunta (AB...) sem veículo: informe a categoria da aula.
+            'category' => ['nullable', 'string', Rule::in(\App\Enums\LicenseCategory::simpleValues())],
+            // Exceção autorizada para agendar com saldo insuficiente; exige motivo.
+            'override_reason' => ['nullable', 'string', 'min:3', 'max:255'],
         ];
     }
 

@@ -33,6 +33,12 @@ class ChangeMemberRole
             }
 
             $organization->members()->updateExistingPivot($target->getKey(), ['role' => $newRole->value]);
+
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'access.role_changed',
+                "Papel de {$target->name} alterado: ".($currentRole?->value ?? '—')." → {$newRole->value}.", [
+                    'actor_id' => $actor->getKey(),
+                    'changes' => ['user_id' => $target->getKey(), 'role' => ['from' => $currentRole?->value, 'to' => $newRole->value]],
+                ]);
         });
 
         $organization->forgetRoleCache();

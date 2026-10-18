@@ -51,6 +51,9 @@ class InvitationController extends Controller
 
         if ($invitation->revoked_at === null) {
             $invitation->forceFill(['revoked_at' => now()])->save();
+
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'access.invitation_revoked',
+                "Convite para {$invitation->email} revogado.", ['subject' => $invitation]);
         }
 
         return (new InvitationResource($invitation->refresh()))->response();

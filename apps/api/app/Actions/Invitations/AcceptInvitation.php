@@ -77,6 +77,12 @@ class AcceptInvitation
                 'accepted_by_user_id' => $user->getKey(),
             ])->save();
 
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'access.invitation_accepted',
+                "Convite aceito por {$user->name} como {$invitation->role->value}.", [
+                    'actor_id' => $user->getKey(),
+                    'subject' => $invitation,
+                ]);
+
             $organization->forgetRoleCache();
 
             return $invitation->refresh();

@@ -37,4 +37,21 @@ class EnrollmentPolicy extends OperationalPolicy
     {
         return $this->canOperate($user, $organization);
     }
+
+    /** Saldo, extrato e contratação: equipe de operação. */
+    public function viewBalance(User $user, Enrollment $enrollment, Organization $organization): bool
+    {
+        return $this->canOperate($user, $organization);
+    }
+
+    public function contract(User $user, Enrollment $enrollment, Organization $organization): bool
+    {
+        return $this->canOperate($user, $organization);
+    }
+
+    /** Ajustes e estornos manuais: somente proprietário e administrador. */
+    public function adjustBalance(User $user, Enrollment $enrollment, Organization $organization): bool
+    {
+        return $organization->roleFor($user)?->canAudit() ?? false;
+    }
 }

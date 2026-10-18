@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
 
 class QualificationProcessController extends Controller
 {
-    private const RELATIONS = ['student', 'checklistItems.checker'];
+    private const RELATIONS = ['student', 'checklistItems.checker', 'exams', 'categoryTracks', 'externalFees.exams', 'enrollments'];
 
     public function index(Request $request, Organization $organization): AnonymousResourceCollection
     {
@@ -68,7 +68,21 @@ class QualificationProcessController extends Controller
     ): JsonResponse {
         $this->authorize('update', [$qualificationProcess, $organization]);
 
-        $qualificationProcess->update($request->payload());
+        $qualificationProcess->fill($request->payload());
+        $changes = collect($qualificationProcess->getDirty())
+            ->map(fn ($new, $key) => ['from' => $qualificationProcess->getOriginal($key) instanceof \BackedEnum ? $qualificationProcess->getOriginal($key)->value : $qualificationProcess->getOriginal($key), 'to' => $new instanceof \BackedEnum ? $new->value : $new])
+            ->all();
+        $qualificationProcess->save();
+
+        if ($changes !== []) {
+            app(\App\Services\Audit::class)->record($organization->getKey(), isset($changes['status']) ? 'process.status' : 'process.updated',
+                isset($changes['status']) ? "Situação do processo: {$changes['status']['from']} → {$changes['status']['to']}." : 'Dados do processo atualizados.', [
+                    'student_id' => $qualificationProcess->student_id,
+                    'process_id' => $qualificationProcess->getKey(),
+                    'subject' => $qualificationProcess,
+                    'changes' => array_diff_key($changes, ['notes' => 1]),
+                ]);
+        }
 
         return (new QualificationProcessResource($qualificationProcess->refresh()->load(self::RELATIONS)))->response();
     }

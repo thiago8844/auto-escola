@@ -65,7 +65,8 @@ class QualificationProcessRequest extends FormRequest
             'current_categories.*' => ['distinct', Rule::enum(LicenseCategory::class)],
             'target_categories' => [$required, 'array', 'min:1'],
             'target_categories.*' => ['distinct', Rule::enum(LicenseCategory::class)],
-            'status' => ['sometimes', Rule::enum(ProcessStatus::class)],
+            // Concluir/encerrar são operações próprias (com motivo e conferência de pendências).
+            'status' => ['sometimes', Rule::enum(ProcessStatus::class)->except([ProcessStatus::Completed, ProcessStatus::Closed])],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

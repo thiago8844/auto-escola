@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ChecklistItemController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
+use App\Http\Controllers\Api\V1\ExternalFeeController;
+use App\Http\Controllers\Api\V1\EnrollmentBalanceController;
 use App\Http\Controllers\Api\V1\EnrollmentController;
 use App\Http\Controllers\Api\V1\InvitationAcceptController;
 use App\Http\Controllers\Api\V1\InvitationController;
@@ -14,6 +16,9 @@ use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\OrganizationInstructorController;
 use App\Http\Controllers\Api\V1\OrganizationMemberController;
 use App\Http\Controllers\Api\V1\PartnerController;
+use App\Http\Controllers\Api\V1\PracticalExamController;
+use App\Http\Controllers\Api\V1\ProcessOutcomeController;
+use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\QualificationProcessController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\VehicleController;
@@ -94,6 +99,13 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('enrollments', EnrollmentController::class)
                     ->only(['index', 'store', 'show', 'update']);
 
+                // Pacotes e saldo de aulas
+                Route::get('enrollments/{enrollment}/balance', [EnrollmentBalanceController::class, 'show']);
+                Route::get('enrollments/{enrollment}/credit-entries', [EnrollmentBalanceController::class, 'entries']);
+                Route::post('enrollments/{enrollment}/packages', [EnrollmentBalanceController::class, 'storePackage']);
+                Route::post('enrollments/{enrollment}/credit-adjustments', [EnrollmentBalanceController::class, 'adjust']);
+                Route::post('enrollments/{enrollment}/credit-entries/{credit_entry}/reversal', [EnrollmentBalanceController::class, 'reverse']);
+
                 // Veículos
                 Route::apiResource('vehicles', VehicleController::class);
 
@@ -102,6 +114,33 @@ Route::prefix('v1')->group(function () {
                     ->only(['index', 'store', 'show', 'update']);
                 Route::post('qualification-processes/{qualification_process}/checklist-items', [ChecklistItemController::class, 'store']);
                 Route::patch('qualification-processes/{qualification_process}/checklist-items/{checklist_item}', [ChecklistItemController::class, 'update']);
+
+                // Desfecho do processo, linha do tempo e auditoria
+                Route::get('qualification-processes/{qualification_process}/closure-check', [ProcessOutcomeController::class, 'closureCheck']);
+                Route::post('qualification-processes/{qualification_process}/issuance', [ProcessOutcomeController::class, 'issuance']);
+                Route::post('qualification-processes/{qualification_process}/close', [ProcessOutcomeController::class, 'close']);
+                Route::post('qualification-processes/{qualification_process}/reopen', [ProcessOutcomeController::class, 'reopen']);
+                Route::post('qualification-processes/{qualification_process}/categories/{category}/renunciation', [ProcessOutcomeController::class, 'renounce']);
+                Route::post('qualification-processes/{qualification_process}/categories/{category}/renunciation/confirm', [ProcessOutcomeController::class, 'confirmRenunciation']);
+                Route::post('qualification-processes/{qualification_process}/categories/{category}/renunciation/revert', [ProcessOutcomeController::class, 'revertRenunciation']);
+                Route::get('qualification-processes/{qualification_process}/timeline', [TimelineController::class, 'process']);
+                Route::get('students/{student}/timeline', [TimelineController::class, 'student']);
+                Route::get('audit-events', [TimelineController::class, 'organization']);
+
+                // Exames práticos e taxas externas
+                Route::get('exams', [PracticalExamController::class, 'index']);
+                Route::post('exams', [PracticalExamController::class, 'store']);
+                Route::get('exams/{exam}', [PracticalExamController::class, 'show']);
+                Route::patch('exams/{exam}', [PracticalExamController::class, 'update']);
+                Route::post('exams/{exam}/reschedule', [PracticalExamController::class, 'reschedule']);
+                Route::post('exams/{exam}/result', [PracticalExamController::class, 'result']);
+                Route::post('exams/{exam}/result-correction', [PracticalExamController::class, 'correct']);
+                Route::get('external-fees', [ExternalFeeController::class, 'index']);
+                Route::post('external-fees', [ExternalFeeController::class, 'store']);
+                Route::get('external-fees/{external_fee}', [ExternalFeeController::class, 'show']);
+                Route::patch('external-fees/{external_fee}', [ExternalFeeController::class, 'update']);
+                Route::post('external-fees/{external_fee}/status', [ExternalFeeController::class, 'status']);
+                Route::post('external-fees/{external_fee}/reimbursement', [ExternalFeeController::class, 'reimbursement']);
 
                 // Documentos privados
                 Route::get('documents', [DocumentController::class, 'index']);

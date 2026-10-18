@@ -53,7 +53,21 @@ class UpdateChecklistItem
             $item->checked_at = null;
         }
 
+        $changes = collect($item->getDirty())->only(['status', 'source', 'reference'])
+            ->map(fn ($new, $key) => ['from' => $item->getOriginal($key) instanceof \BackedEnum ? $item->getOriginal($key)->value : $item->getOriginal($key), 'to' => $new instanceof \BackedEnum ? $new->value : $new])
+            ->all();
         $item->save();
+
+        if ($changes !== []) {
+            $process = $item->process()->first();
+            app(\App\Services\Audit::class)->record($item->organization_id, 'process.checklist', "Checklist de liberação: {$item->type->value} atualizado.", [
+                'actor_id' => $user->getKey(),
+                'student_id' => $process?->student_id,
+                'process_id' => $item->qualification_process_id,
+                'subject' => $item,
+                'changes' => $changes,
+            ]);
+        }
 
         return $item;
     }

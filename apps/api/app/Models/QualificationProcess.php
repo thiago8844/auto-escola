@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\IssuanceStatus;
 use App\Enums\LicenseCategory;
 use App\Enums\ProcessStatus;
 use App\Enums\ProcessType;
@@ -19,6 +20,8 @@ use Illuminate\Support\Collection;
 #[Fillable([
     'organization_id', 'student_id', 'type', 'uf', 'municipality', 'renach', 'protocol',
     'opened_at', 'current_categories', 'target_categories', 'status', 'notes',
+    'issuance_status', 'issuance_kind', 'issuance_reference', 'issued_at', 'delivered_at', 'issuance_document_id',
+    'definitive_follow_up', 'definitive_due_at', 'closure_kind', 'closure_reason', 'closed_at',
 ])]
 class QualificationProcess extends Model
 {
@@ -26,6 +29,8 @@ class QualificationProcess extends Model
 
     protected $attributes = [
         'status' => 'preparing',
+        'issuance_status' => 'not_started',
+        'definitive_follow_up' => false,
     ];
 
     protected function casts(): array
@@ -34,6 +39,12 @@ class QualificationProcess extends Model
             'type' => ProcessType::class,
             'status' => ProcessStatus::class,
             'opened_at' => 'date',
+            'issuance_status' => IssuanceStatus::class,
+            'issued_at' => 'date',
+            'delivered_at' => 'date',
+            'definitive_due_at' => 'date',
+            'definitive_follow_up' => 'boolean',
+            'closed_at' => 'datetime',
             'current_categories' => 'array',
             'target_categories' => 'array',
         ];
@@ -57,6 +68,21 @@ class QualificationProcess extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function categoryTracks(): HasMany
+    {
+        return $this->hasMany(ProcessCategoryTrack::class);
+    }
+
+    public function exams(): HasMany
+    {
+        return $this->hasMany(PracticalExam::class);
+    }
+
+    public function externalFees(): HasMany
+    {
+        return $this->hasMany(ExternalFee::class);
     }
 
     public function documents(): HasMany

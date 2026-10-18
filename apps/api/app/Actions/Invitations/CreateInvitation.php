@@ -72,7 +72,7 @@ class CreateInvitation
                 $this->assertProfileCanBeInvited($instructorId);
             }
 
-            return Invitation::create([
+            $invitation = Invitation::create([
                 'organization_id' => $organization->getKey(),
                 'email' => $email,
                 'role' => $role,
@@ -81,6 +81,14 @@ class CreateInvitation
                 'invited_by_user_id' => $actor->getKey(),
                 'expires_at' => Carbon::now()->addDays((int) config('autoescola.invitation_ttl_days')),
             ]);
+
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'access.invited',
+                "Convite enviado a {$email} como {$role->value}.", [
+                    'actor_id' => $actor->getKey(),
+                    'subject' => $invitation,
+                ]);
+
+            return $invitation;
         });
 
         // Fora da transação: o e-mail não deve ser reenviado por rollback. Não é enfileirado,

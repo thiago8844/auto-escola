@@ -49,6 +49,12 @@ class RevokeMembership
             }
 
             $organization->members()->detach($target->getKey());
+
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'access.revoked',
+                "Acesso de {$target->name} revogado.", [
+                    'actor_id' => $actor->getKey(),
+                    'changes' => ['user_id' => $target->getKey(), 'role' => $currentRole?->value],
+                ]);
         });
 
         $organization->forgetRoleCache();

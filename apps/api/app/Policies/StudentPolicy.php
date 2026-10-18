@@ -42,4 +42,10 @@ class StudentPolicy extends OperationalPolicy
     {
         return $this->canOperate($user, $organization);
     }
+
+    /** Linha do tempo do aluno: equipe de operação. */
+    public function viewTimeline(User $user, Student $student, Organization $organization): bool
+    {
+        return $this->canOperate($user, $organization);
+    }
 }

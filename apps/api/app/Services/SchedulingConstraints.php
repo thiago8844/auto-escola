@@ -9,6 +9,7 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Enrollment;
 use App\Models\Instructor;
 use App\Models\Lesson;
+use App\Models\PracticalExam;
 use App\Models\Student;
 use App\Models\Vehicle;
 use Carbon\CarbonInterface;
@@ -89,6 +90,7 @@ class SchedulingConstraints
         CarbonInterface $startsAt,
         CarbonInterface $endsAt,
         ?int $ignoreLessonId = null,
+        ?int $ignoreExamId = null,
     ): void {
         $this->assertInTransaction();
 
@@ -98,7 +100,8 @@ class SchedulingConstraints
             ->when($ignoreLessonId, fn ($q) => $q->whereKeyNot($ignoreLessonId))
             ->where('starts_at', '<', $endsAt)
             ->where('ends_at', '>', $startsAt)
-            ->exists();
+            ->exists()
+            || $this->examOverlap(PracticalExam::query()->where('vehicle_id', $vehicleId), $startsAt, $endsAt, $ignoreExamId);
 
         if ($conflict) {
             throw new BusinessRuleException('Veículo indisponível nesse horário.', 'vehicle_unavailable', 409);
@@ -113,6 +116,7 @@ class SchedulingConstraints
         CarbonInterface $startsAt,
         CarbonInterface $endsAt,
         ?int $ignoreLessonId = null,
+        ?int $ignoreExamId = null,
     ): void {
         $this->assertInTransaction();
 
@@ -122,11 +126,25 @@ class SchedulingConstraints
             ->when($ignoreLessonId, fn ($q) => $q->whereKeyNot($ignoreLessonId))
             ->where('starts_at', '<', $endsAt)
             ->where('ends_at', '>', $startsAt)
-            ->exists();
+            ->exists()
+            || $this->examOverlap(PracticalExam::query()->where('student_id', $studentId), $startsAt, $endsAt, $ignoreExamId);
 
         if ($conflict) {
             throw new BusinessRuleException('O aluno já tem uma aula nesse horário.', 'student_unavailable', 409);
         }
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<PracticalExam>  $query
+     */
+    private function examOverlap($query, CarbonInterface $startsAt, CarbonInterface $endsAt, ?int $ignoreExamId): bool
+    {
+        return $query
+            ->where('status', 'scheduled')
+            ->when($ignoreExamId, fn ($q) => $q->whereKeyNot($ignoreExamId))
+            ->where('scheduled_at', '<', $endsAt)
+            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$startsAt])
+            ->exists();
     }
 
     private function assertInTransaction(): void

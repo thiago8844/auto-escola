@@ -54,6 +54,21 @@ class Enrollment extends Model
         return $this->belongsTo(QualificationProcess::class, 'qualification_process_id');
     }
 
+    public function packages(): HasMany
+    {
+        return $this->hasMany(EnrollmentPackage::class);
+    }
+
+    public function creditEntries(): HasMany
+    {
+        return $this->hasMany(CreditEntry::class);
+    }
+
+    public function exams(): HasMany
+    {
+        return $this->hasMany(PracticalExam::class);
+    }
+
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);

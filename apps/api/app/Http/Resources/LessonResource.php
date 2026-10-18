@@ -21,6 +21,7 @@ class LessonResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status->value,
+            'category' => $this->category,
             'starts_at' => $this->starts_at->toIso8601String(),
             'ends_at' => $this->ends_at->toIso8601String(),
             'scheduled_minutes' => $this->scheduledMinutes(),

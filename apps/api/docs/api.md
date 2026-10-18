@@ -1009,3 +1009,34 @@ Só a equipe. É o registro do lançamento **oficial** da aula (feito fora do si
 *Equipe* = owner, admin ou staff. *Parcial* = instrutor, só o atribuído a ele.
 
 Para o detalhamento de cada permissão, veja [permissoes.md](../../../docs/permissoes.md).
+
+## Saldo de aulas, exames, taxas e desfecho
+
+Todas as rotas ficam sob `/api/v1/organizations/{organization}`. Erros de regra de negócio trazem `error` (código estável) e `message` em português.
+
+### Pacotes e saldo (`enrollments/{enrollment}`)
+
+| Método | Rota | Quem | Descrição |
+|---|---|---|---|
+| `GET` | `/balance` | Equipe | Saldo calculado sobre todo o extrato: `contracted`, `reserved`, `realized`, `consumed`, `available`, `by_category` (AB), `policy`, `packages`. |
+| `GET` | `/credit-entries` | Equipe | Extrato paginado (origem, data, responsável, motivo). |
+| `POST` | `/packages` | Equipe | Contratação/acréscimo com política (`consume_basis`, `absence_charge`, `late_cancel_charge`, `cancel_notice_hours`). |
+| `POST` | `/credit-adjustments` | Proprietário/gestor | Ajuste manual (`minutes` ≠ 0, `reason`). Nunca deixa o saldo negativo. |
+| `POST` | `/credit-entries/{id}/reversal` | Proprietário/gestor | Estorno por movimento compensatório (`reason`); o original é preservado. |
+
+`POST /lessons` aceita `category` (matrícula AB sem veículo) e `override_reason` (exceção com saldo insuficiente) e devolve `warnings`. Reserva, liberação e consumo de cada aula são idempotentes (`lesson:ID:tipo`). `contracted_minutes`/`price_cents` não mudam mais por `PATCH` da matrícula.
+
+### Exames e taxas
+
+| Método | Rota | Quem | Descrição |
+|---|---|---|---|
+| `GET`/`POST` | `/exams` | Equipe (instrutor: lista resumida dos próprios) | Filtros `from`, `to`, `category`, `status`, `q`, `student_id`, `qualification_process_id`. |
+| `GET`/`PATCH` | `/exams/{exam}` | Equipe / instrutor responsável (resumo) | Protocolo, local e observações. |
+| `POST` | `/exams/{exam}/reschedule` | Equipe | Mantém a tentativa; data/local anteriores vão para `schedule_history`. |
+| `POST` | `/exams/{exam}/result` | Equipe | `approved`, `failed`, `absent`, `incomplete` ou `cancelled`. |
+| `POST` | `/exams/{exam}/result-correction` | Proprietário/gestor | Corrige resultado com `reason`; o anterior fica na auditoria. |
+| `*` | `/external-fees` (+ `/{id}/status`, `/{id}/reimbursement`) | Equipe | Taxas sem efeito em caixa; confirmação exige `confirmation_source` e `paid_by`. |
+
+### Desfecho e histórico (`qualification-processes/{process}`)
+
+`GET /closure-check`, `POST /issuance`, `POST /close`, `POST /reopen` (proprietário/gestor), `POST /categories/{cat}/renunciation[/confirm|/revert]`, `GET /timeline`. O recurso do processo traz `outcome` (resultado por categoria, emissão, encerramento e `next_step`). Também: `GET /students/{student}/timeline` (equipe) e `GET /audit-events` (proprietário/gestor).

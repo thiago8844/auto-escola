@@ -29,6 +29,14 @@ enum MembershipRole: string
     }
 
     /**
+     * Pode ajustar/estornar saldo e ver a trilha de auditoria do espaço (proprietário e administrador).
+     */
+    public function canAudit(): bool
+    {
+        return in_array($this, [self::Owner, self::Admin], true);
+    }
+
+    /**
      * Papéis que um administrador pode conceder ou revogar. Administradores não
      * promovem nem removem proprietários ou outros administradores.
      *

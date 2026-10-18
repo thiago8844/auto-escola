@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\QualificationProcess;
+use App\Services\ProcessOutcome;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +33,12 @@ class QualificationProcessResource extends JsonResource
             'notes' => $this->notes,
             'student' => new StudentResource($this->whenLoaded('student')),
             'practice_release' => $this->when($this->relationLoaded('checklistItems'), fn () => PracticeReleaseSummary::of($this->resource)),
+            'issuance_status' => $this->issuance_status->value,
+            'closed_at' => $this->closed_at?->toIso8601String(),
+            'outcome' => $this->when(
+                $this->relationLoaded('exams') && $this->relationLoaded('checklistItems'),
+                fn () => app(ProcessOutcome::class)->for($this->resource),
+            ),
             'checklist' => ChecklistItemResource::collection($this->whenLoaded('checklistItems')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

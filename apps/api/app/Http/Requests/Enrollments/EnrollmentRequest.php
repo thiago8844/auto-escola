@@ -41,8 +41,9 @@ class EnrollmentRequest extends FormRequest
                 ->where('organization_id', $organization->getKey())],
             'status' => ['sometimes', Rule::enum(EnrollmentStatus::class)],
             // Serviço contratado em minutos: não presume "hora" nem "hora-aula".
-            'contracted_minutes' => ['nullable', 'integer', 'min:1', 'max:100000'],
-            'price_cents' => ['nullable', 'integer', 'min:0'],
+            // Depois de criada, a contratação só muda por acréscimo/ajuste no extrato de saldo.
+            'contracted_minutes' => $isCreate ? ['nullable', 'integer', 'min:1', 'max:100000'] : ['prohibited'],
+            'price_cents' => $isCreate ? ['nullable', 'integer', 'min:0'] : ['prohibited'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

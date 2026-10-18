@@ -31,4 +31,16 @@ class QualificationProcessPolicy extends OperationalPolicy
     {
         return $this->canOperate($user, $organization);
     }
+
+    /** Emissão, renúncia, encerramento e linha do tempo: equipe de operação. */
+    public function outcome(User $user, QualificationProcess $process, Organization $organization): bool
+    {
+        return $this->canOperate($user, $organization);
+    }
+
+    /** Reabrir processo encerrado: proprietário e administrador. */
+    public function reopen(User $user, QualificationProcess $process, Organization $organization): bool
+    {
+        return $organization->roleFor($user)?->canAudit() ?? false;
+    }
 }

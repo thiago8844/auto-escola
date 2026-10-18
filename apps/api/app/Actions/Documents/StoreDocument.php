@@ -6,7 +6,9 @@ use App\Enums\DocumentStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Document;
 use App\Models\Organization;
+use App\Models\PracticalExam;
 use App\Models\QualificationProcess;
+use App\Services\Audit;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -21,12 +23,21 @@ use Illuminate\Support\Str;
  */
 class StoreDocument
 {
+    public function __construct(private readonly Audit $audit) {}
+
     /**
      * @param  array<string, mixed>  $data  Metadados validados (sem o arquivo).
      */
     public function __invoke(Organization $organization, User $user, UploadedFile $file, array $data): Document
     {
         $disk = Storage::disk(config('autoescola.documents_disk'));
+
+        // Exame informado: processo e aluno vêm da tentativa.
+        if (! empty($data['practical_exam_id'])) {
+            $exam = PracticalExam::query()->where('organization_id', $organization->getKey())->findOrFail($data['practical_exam_id']);
+            $data['qualification_process_id'] ??= $exam->qualification_process_id;
+            $data['student_id'] ??= $exam->student_id;
+        }
 
         // Titular derivado do processo quando só ele foi informado.
         if (! empty($data['qualification_process_id']) && empty($data['student_id'])) {
@@ -61,7 +72,7 @@ class StoreDocument
                     $version = $previous->version + 1;
                 }
 
-                return Document::create($data + [
+                $document = Document::create($data + [
                     'organization_id' => $organization->getKey(),
                     'status' => DocumentStatus::Attached,
                     'version' => $version,
@@ -71,6 +82,14 @@ class StoreDocument
                     'size' => $file->getSize(),
                     'uploaded_by' => $user->getKey(),
                 ]);
+
+                $this->audit->record($organization->getKey(), 'document.attached', "Documento anexado: {$document->type->value} (v{$version}).", [
+                    'student_id' => $document->student_id,
+                    'process_id' => $document->qualification_process_id,
+                    'subject' => $document,
+                ]);
+
+                return $document;
             });
         } catch (\Throwable $e) {
             $disk->delete($path);
@@ -91,7 +110,8 @@ class StoreDocument
 
         $sameOwner = $previous->student_id === $id('student_id')
             && $previous->qualification_process_id === $id('qualification_process_id')
-            && $previous->vehicle_id === $id('vehicle_id');
+            && $previous->vehicle_id === $id('vehicle_id')
+            && $previous->practical_exam_id === $id('practical_exam_id');
 
         if ($previous->status === DocumentStatus::Replaced
             || $previous->type->value !== $data['type']

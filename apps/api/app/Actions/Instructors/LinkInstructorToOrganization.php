@@ -17,10 +17,13 @@ class LinkInstructorToOrganization
 
         if ($existing) {
             $organization->instructors()->updateExistingPivot($instructor->getKey(), ['active' => $active]);
-
-            return;
+        } else {
+            $organization->instructors()->attach($instructor->getKey(), ['active' => $active]);
         }
 
-        $organization->instructors()->attach($instructor->getKey(), ['active' => $active]);
+        app(\App\Services\Audit::class)->record($organization->getKey(), 'access.instructor_link',
+            "Vínculo do instrutor {$instructor->full_name}: ".($active ? 'ativo' : 'inativo').'.', [
+                'changes' => ['instructor_id' => $instructor->getKey(), 'active' => $active],
+            ]);
     }
 }

@@ -32,6 +32,12 @@ class CreateQualificationProcess
                 ]);
             }
 
+            app(\App\Services\Audit::class)->record($organization->getKey(), 'process.created', 'Processo de habilitação criado.', [
+                'student_id' => $process->student_id,
+                'process_id' => $process->getKey(),
+                'subject' => $process,
+            ]);
+
             return $process;
         });
     }

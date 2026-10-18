@@ -5,6 +5,9 @@ namespace App\Actions\Lessons;
 use App\Enums\LessonStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Lesson;
+use App\Models\Enrollment;
+use App\Services\Audit;
+use App\Services\CreditLedger;
 use App\Services\InstructorAvailability;
 use App\Services\SchedulingConstraints;
 use Carbon\CarbonImmutable;
@@ -19,6 +22,8 @@ class RescheduleLesson
     public function __construct(
         private readonly InstructorAvailability $availability,
         private readonly SchedulingConstraints $constraints,
+        private readonly CreditLedger $ledger,
+        private readonly Audit $audit,
     ) {}
 
     public function __invoke(Lesson $lesson, CarbonImmutable $startsAt, CarbonImmutable $endsAt): Lesson
@@ -58,10 +63,25 @@ class RescheduleLesson
             $this->constraints->lockStudent($studentId);
             $this->constraints->assertStudentAvailable($studentId, $startsAt, $endsAt, $current->getKey());
 
+            $enrollment = Enrollment::query()->whereKey($current->enrollment_id)->lockForUpdate()->firstOrFail();
+            $previous = $current->starts_at->toIso8601String();
+
             $current->forceFill([
                 'starts_at' => $startsAt->utc(),
                 'ends_at' => $endsAt->utc(),
             ])->save();
+            $current->setRelation('enrollment', $enrollment);
+
+            // A reserva acompanha a aula: só a diferença de duração é ajustada, sem duplicar.
+            $this->ledger->syncReservation($current);
+
+            $this->audit->record($current->organization_id, 'lesson.rescheduled', 'Aula remarcada.', [
+                'enrollment_id' => $enrollment->getKey(),
+                'student_id' => $enrollment->student_id,
+                'process_id' => $enrollment->qualification_process_id,
+                'subject' => $current,
+                'changes' => ['starts_at' => ['from' => $previous, 'to' => $current->starts_at->toIso8601String()]],
+            ]);
 
             return $current;
         });

@@ -12,6 +12,7 @@ use App\Http\Requests\Documents\UpdateDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Models\Document;
 use App\Models\Organization;
+use App\Services\Audit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
@@ -27,6 +28,7 @@ class DocumentController extends Controller
             ->when($request->filled('student_id'), fn ($q) => $q->where('student_id', $request->integer('student_id')))
             ->when($request->filled('qualification_process_id'), fn ($q) => $q->where('qualification_process_id', $request->integer('qualification_process_id')))
             ->when($request->filled('vehicle_id'), fn ($q) => $q->where('vehicle_id', $request->integer('vehicle_id')))
+            ->when($request->filled('practical_exam_id'), fn ($q) => $q->where('practical_exam_id', $request->integer('practical_exam_id')))
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->orderByDesc('id')
@@ -54,7 +56,7 @@ class DocumentController extends Controller
     /**
      * Conferência interna e metadados. `verified` registra quem conferiu e quando; não prova autenticidade.
      */
-    public function update(UpdateDocumentRequest $request, Organization $organization, Document $document): JsonResponse
+    public function update(UpdateDocumentRequest $request, Organization $organization, Document $document, Audit $audit): JsonResponse
     {
         $this->authorize('update', [$document, $organization]);
 
@@ -75,6 +77,14 @@ class DocumentController extends Controller
         }
 
         $document->update($data);
+
+        if (isset($data['status'])) {
+            $audit->record($organization->getKey(), 'document.'.$data['status'], "Documento {$document->type->value}: situação {$data['status']}.", [
+                'student_id' => $document->student_id,
+                'process_id' => $document->qualification_process_id,
+                'subject' => $document,
+            ]);
+        }
 
         return (new DocumentResource($document->refresh()))->response();
     }

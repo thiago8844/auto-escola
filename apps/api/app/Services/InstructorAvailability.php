@@ -6,11 +6,12 @@ use App\Enums\LessonStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Instructor;
 use App\Models\Lesson;
+use App\Models\PracticalExam;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Verifica conflitos de agenda do instrutor considerando TODAS as organizações.
+ * Verifica conflitos de agenda do instrutor (aulas e exames) considerando TODAS as organizações.
  *
  * Estratégia de concorrência: antes de checar, a linha do instrutor é travada com
  * SELECT ... FOR UPDATE. Requisições concorrentes para o mesmo instrutor ficam em
@@ -31,6 +32,7 @@ class InstructorAvailability
         CarbonInterface $startsAt,
         CarbonInterface $endsAt,
         ?int $ignoreLessonId = null,
+        ?int $ignoreExamId = null,
     ): void {
         if (DB::transactionLevel() === 0) {
             throw new \LogicException('A verificação de disponibilidade deve rodar dentro de uma transação.');
@@ -42,6 +44,15 @@ class InstructorAvailability
             ->when($ignoreLessonId, fn ($q) => $q->whereKeyNot($ignoreLessonId))
             ->where('starts_at', '<', $endsAt)
             ->where('ends_at', '>', $startsAt)
+            ->exists();
+
+        // Exames práticos também ocupam a janela do instrutor, em qualquer espaço.
+        $conflict = $conflict || PracticalExam::query()
+            ->where('instructor_id', $instructorId)
+            ->where('status', 'scheduled')
+            ->when($ignoreExamId, fn ($q) => $q->whereKeyNot($ignoreExamId))
+            ->where('scheduled_at', '<', $endsAt)
+            ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$startsAt])
             ->exists();
 
         if ($conflict) {

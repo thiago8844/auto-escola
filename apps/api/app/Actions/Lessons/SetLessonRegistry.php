@@ -6,6 +6,7 @@ use App\Enums\LessonStatus;
 use App\Enums\RegistryStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Lesson;
+use App\Services\Audit;
 
 /**
  * Registra a situação do lançamento OFICIAL da aula (feito fora do sistema), com evidência.
@@ -13,6 +14,8 @@ use App\Models\Lesson;
  */
 class SetLessonRegistry
 {
+    public function __construct(private readonly Audit $audit) {}
+
     public function __invoke(Lesson $lesson, RegistryStatus $status, ?string $reference, ?int $documentId): Lesson
     {
         if ($status !== RegistryStatus::NotInformed && $lesson->status !== LessonStatus::Completed) {
@@ -36,6 +39,15 @@ class SetLessonRegistry
             'registry_reference' => $reference,
             'registry_document_id' => $documentId,
         ])->save();
+
+        $lesson->loadMissing('enrollment');
+        $this->audit->record($lesson->organization_id, 'lesson.registry', "Registro oficial da aula: {$status->value}.", [
+            'enrollment_id' => $lesson->enrollment_id,
+            'student_id' => $lesson->enrollment->student_id,
+            'process_id' => $lesson->enrollment->qualification_process_id,
+            'subject' => $lesson,
+            'changes' => ['registry_status' => $status->value, 'reference' => $reference, 'document_id' => $documentId],
+        ]);
 
         return $lesson;
     }

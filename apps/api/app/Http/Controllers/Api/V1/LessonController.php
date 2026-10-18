@@ -64,9 +64,14 @@ class LessonController extends Controller
             CarbonImmutable::parse($request->string('ends_at')->toString()),
             $request->validated('notes'),
             $request->validated('vehicle_id'),
+            $request->validated('category'),
+            $request->validated('override_reason'),
         );
 
-        return (new LessonResource($lesson->load(self::RELATIONS)))->response()->setStatusCode(201);
+        return (new LessonResource($lesson->load(self::RELATIONS)))
+            ->additional(['warnings' => $schedule->warnings])
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Organization $organization, Lesson $lesson): JsonResponse
