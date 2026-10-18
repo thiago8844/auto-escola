@@ -8,7 +8,7 @@ import { selectUnreadCount, useNotificationStore } from '../stores/notificationS
 import { alertPath } from '../utils/alertPath'
 import { formatRelativeTime } from '../utils/formatRelativeTime'
 
-// O sino: dentro de um espaço mostra as pendências reais (guardadas no servidor); fora dele, avisos da sessão.
+// O sino: dentro de um espaço mostra as notificações reais (guardadas no servidor); fora dele, avisos da sessão.
 export function NotificationBell() {
   const { organizationId } = useParams()
   return organizationId ? <OrganizationBell organizationId={Number(organizationId)} /> : <SessionBell />
@@ -49,7 +49,7 @@ function OrganizationBell({ organizationId }: { organizationId: number }) {
 
       <Dropdown.Menu className="notification-menu p-0">
         <div className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
-          <h2 className="h6 mb-0">Pendências</h2>
+          <h2 className="h6 mb-0">Notificações</h2>
           <button type="button" className="btn btn-link btn-sm p-0" disabled={(summary.data?.unread ?? 0) === 0 || markAll.isPending} onClick={() => markAll.mutate(undefined)}>
             Marcar todas como lidas
           </button>
@@ -57,7 +57,7 @@ function OrganizationBell({ organizationId }: { organizationId: number }) {
 
         {list.error && !list.data ? (
           <div className="px-3 py-4 text-center text-secondary small">
-            Não foi possível carregar as pendências.{' '}
+            Não foi possível carregar as notificações.{' '}
             <button type="button" className="btn btn-link btn-sm p-0" onClick={() => void list.refetch()}>
               Tentar novamente
             </button>
@@ -65,7 +65,7 @@ function OrganizationBell({ organizationId }: { organizationId: number }) {
         ) : alerts.length === 0 && sessionItems.length === 0 ? (
           <div className="text-center text-secondary px-3 py-5">
             <i className="bi bi-check2-circle fs-2 d-block mb-2" aria-hidden="true" />
-            Tudo em dia. Nenhuma pendência no momento.
+            Tudo em dia. Nenhuma notificação no momento.
           </div>
         ) : (
           <ul className="list-unstyled mb-0 notification-list">
@@ -128,7 +128,7 @@ function OrganizationBell({ organizationId }: { organizationId: number }) {
 
         <div className="border-top px-3 py-2 d-flex justify-content-between align-items-center">
           <Link to={links.alerts} className="small">
-            Ver todas as pendências{summary.data && summary.data.open > alerts.length ? ` (${summary.data.open})` : ''}
+            Ver todas as notificações{summary.data && summary.data.open > alerts.length ? ` (${summary.data.open})` : ''}
           </Link>
         </div>
       </Dropdown.Menu>
@@ -136,7 +136,7 @@ function OrganizationBell({ organizationId }: { organizationId: number }) {
   )
 }
 
-// Fora de um espaço (ex.: Minha agenda) não há pendências do espaço: só avisos da sessão
+// Fora de um espaço (ex.: Minha agenda) não há notificações do espaço: só avisos da sessão
 function SessionBell() {
   const items = useNotificationStore((state) => state.items)
   const unread = useNotificationStore(selectUnreadCount)
@@ -158,7 +158,7 @@ function SessionBell() {
         {items.length === 0 ? (
           <div className="text-center text-secondary px-3 py-5">
             <i className="bi bi-bell-slash fs-2 d-block mb-2" aria-hidden="true" />
-            Nenhuma notificação por enquanto. As pendências aparecem aqui dentro de cada espaço.
+            Nenhuma notificação por enquanto. As notificações aparecem aqui dentro de cada espaço.
           </div>
         ) : (
           <ul className="list-unstyled mb-0 notification-list">

@@ -33,7 +33,7 @@ export const organizationSections = {
   exams: 'exames',
   audit: 'auditoria',
   availability: 'disponibilidade',
-  alerts: 'pendencias',
+  alerts: 'notificacoes',
   reports: 'relatorios',
   finance: 'financeiro',
 } as const

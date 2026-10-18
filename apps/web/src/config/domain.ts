@@ -62,7 +62,7 @@ export const PROCESS_TYPE_LABELS: Record<ProcessType, string> = {
 export const PROCESS_STATUS: Record<ProcessStatus, { label: string; bg: string }> = {
   preparing: { label: 'Em preparação', bg: 'secondary' },
   active: { label: 'Em andamento', bg: 'primary' },
-  pending: { label: 'Com pendência', bg: 'warning' },
+  pending: { label: 'Com notificação', bg: 'warning' },
   awaiting_issuance: { label: 'Aguardando emissão', bg: 'info' },
   completed: { label: 'Concluído', bg: 'success' },
   closed: { label: 'Encerrado', bg: 'secondary' },

@@ -74,7 +74,7 @@ function ExamDetail({ exam }: { exam: Exam }) {
         <Alert variant="warning">
           <p className="fw-semibold mb-1">
             <i className="bi bi-exclamation-triangle-fill me-2" aria-hidden="true" />
-            Pendências para este exame
+            Notificações para este exame
           </p>
           <ul className="mb-1">
             {exam.pending.map((item) => (

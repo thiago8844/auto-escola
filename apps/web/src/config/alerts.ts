@@ -1,7 +1,7 @@
 import type { AlertCategory, AlertPriority } from '../types/alert'
 import type { NoticeType } from '../types/notice'
 
-// Prioridade da pendência -> aparência do aviso (cor sempre com ícone e texto)
+// Prioridade da notificação -> aparência do aviso (cor sempre com ícone e texto)
 export const PRIORITY_NOTICE: Record<AlertPriority, NoticeType> = { critical: 'error', high: 'warning', normal: 'info', low: 'reminder' }
 export const PRIORITY_LABEL: Record<AlertPriority, string> = { critical: 'Urgente', high: 'Importante', normal: 'Normal', low: 'Baixa' }
 

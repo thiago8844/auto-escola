@@ -13,7 +13,7 @@ export function organizationNavigation(organization: Organization): NavigationMo
     { id: 'home', to: links.home, icon: 'bi-house', label: 'Início', end: true, group: 'Operação' },
     { id: 'schedule', to: links.schedule, icon: 'bi-calendar-week', label: organization.role === 'instructor' ? 'Minhas aulas neste espaço' : 'Agenda', group: 'Operação' },
     { id: 'students', to: links.students, icon: 'bi-mortarboard', label: 'Alunos', group: 'Operação' },
-    { id: 'alerts', to: links.alerts, icon: 'bi-bell', label: 'Pendências', group: 'Operação' },
+    { id: 'alerts', to: links.alerts, icon: 'bi-bell', label: 'Notificações', group: 'Operação' },
     { id: 'availability', to: links.availability, icon: 'bi-slash-circle', label: operate ? 'Bloqueios e manutenção' : 'Minha indisponibilidade', group: 'Operação' },
     { id: 'enrollments', to: links.enrollments, icon: 'bi-journal-text', label: 'Matrículas', group: 'Cadastros' },
     { id: 'exams', to: links.exams, icon: 'bi-clipboard-check', label: 'Exames', group: 'Operação' },

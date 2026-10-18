@@ -14,7 +14,7 @@ describe('preferências pessoais de navegação', () => {
     expect(menu.ordered.some((m) => m.id === 'finance' || m.id === 'members')).toBe(false)
     expect(menu.primary[0].id).toBe('schedule')
   })
-  it('mantém pendências acessíveis e remove módulos ocultos dos atalhos', () => {
+  it('mantém notificações acessíveis e remove módulos ocultos dos atalhos', () => {
     const menu = arrangeNavigation(organizationNavigation(organization), 'instructor', { order: ['vehicles', 'home'], hidden: ['vehicles', 'alerts'] })
     expect(menu.primary.some((m) => m.id === 'vehicles')).toBe(false)
     expect(menu.ordered.filter((m) => !menu.hidden.has(m.id)).some((m) => m.id === 'alerts')).toBe(true)

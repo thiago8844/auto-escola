@@ -108,7 +108,7 @@ export function IssuanceModal({ organizationId, process, onClose }: { organizati
                 id="definitive_follow_up"
                 type="switch"
                 className="mb-3"
-                label="Acompanhar a futura definitiva como pendência"
+                label="Acompanhar a futura definitiva como notificação"
                 checked={field.value}
                 onChange={(event) => field.onChange(event.target.checked)}
               />
@@ -146,7 +146,7 @@ export function CloseProcessModal({ organizationId, process, onClose }: { organi
   const onSubmit = handleSubmit((values) => {
     if (values.kind !== 'completed' && values.reason.length < 3) return setError('reason', { type: 'manual', message: 'Informe o motivo do encerramento.' })
     if (futureCount > 0 && !values.cancel_future) return setError('cancel_future', { type: 'manual', message: 'Confirme o cancelamento dos compromissos futuros.' })
-    if ((data?.pending.length ?? 0) > 0 && !values.acknowledge_pending) return setError('acknowledge_pending', { type: 'manual', message: 'Confirme que está ciente das pendências.' })
+    if ((data?.pending.length ?? 0) > 0 && !values.acknowledge_pending) return setError('acknowledge_pending', { type: 'manual', message: 'Confirme que está ciente das notificações.' })
     close.mutate(
       { kind: values.kind, reason: values.reason || null, cancel_future: values.cancel_future, acknowledge_pending: values.acknowledge_pending },
       { onSuccess: onClose, onError: (error) => applyFieldErrors(error, setError) },
@@ -163,7 +163,7 @@ export function CloseProcessModal({ organizationId, process, onClose }: { organi
       </Modal.Header>
       <form onSubmit={onSubmit} noValidate>
         <Modal.Body>
-          {check.isPending && <Spinner animation="border" size="sm" role="status" aria-label="Conferindo pendências" />}
+          {check.isPending && <Spinner animation="border" size="sm" role="status" aria-label="Conferindo notificações" />}
           {check.error && <Alert variant="danger">{check.error.message}</Alert>}
           {alertMessage && (
             <Alert variant="danger" role="alert">

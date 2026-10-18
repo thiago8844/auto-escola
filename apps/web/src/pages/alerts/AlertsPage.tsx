@@ -16,7 +16,7 @@ import { formatRelativeTime } from '../../utils/formatRelativeTime'
 
 type Tab = 'open' | 'resolved' | 'archived'
 
-// Todas as pendências do espaço que o usuário pode ver, com ação direta no registro de origem
+// Todas as notificações do espaço que o usuário pode ver, com ação direta no registro de origem
 export default function AlertsPage() {
   const organization = useActiveOrganization()
   const [page, setPage] = usePageParam()
@@ -46,8 +46,8 @@ export default function AlertsPage() {
   return (
     <>
       <PageHeader
-        title="Pendências"
-        subtitle="O que precisa de ação no seu espaço. Resolver o registro de origem encerra a pendência. Ler ou arquivar só organiza a sua lista."
+        title="Notificações"
+        subtitle="O que precisa de ação no seu espaço. Resolver o registro de origem encerra a notificação. Ler ou arquivar só organiza a sua lista."
         actions={
           <>
             <Button variant="outline-secondary" onClick={() => refresh.mutate(undefined)} disabled={refresh.isPending}>
@@ -101,7 +101,7 @@ export default function AlertsPage() {
       <QueryState
         query={query}
         isEmpty={(data) => data.data.length === 0}
-        empty={tab === 'open' ? 'Tudo em dia. Nenhuma pendência aberta.' : tab === 'resolved' ? 'Nenhuma pendência resolvida ainda.' : 'Nenhuma pendência arquivada.'}
+        empty={tab === 'open' ? 'Tudo em dia. Nenhuma notificação aberta.' : tab === 'resolved' ? 'Nenhuma notificação resolvida ainda.' : 'Nenhuma notificação arquivada.'}
       >
         {(data) => (
           <>

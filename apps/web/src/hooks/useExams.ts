@@ -44,7 +44,7 @@ export function useFees(organizationId: number, params: FeeListParams, enabled =
   })
 }
 
-// Exame e taxa alteram processo, desfecho, linha do tempo e pendências: tudo do espaço é atualizado
+// Exame e taxa alteram processo, desfecho, linha do tempo e notificações: tudo do espaço é atualizado
 function useExamMutation<T, R>(organizationId: number, mutationFn: (input: T) => Promise<R>, message: string) {
   const queryClient = useQueryClient()
   return useMutation({

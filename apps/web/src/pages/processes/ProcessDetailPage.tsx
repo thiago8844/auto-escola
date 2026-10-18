@@ -75,7 +75,7 @@ function ProcessDetail({ process }: { process: QualificationProcess }) {
                   updateStatus.mutate(event.target.value as ProcessStatus, { onSuccess: () => notify.success('Situação atualizada.') })
                 }
               >
-                {/* Concluir e encerrar são operações próprias, com motivo e conferência de pendências */}
+                {/* Concluir e encerrar são operações próprias, com motivo e conferência de notificações */}
                 {Object.entries(PROCESS_STATUS)
                   .filter(([value]) => value === process.status || (value !== 'completed' && value !== 'closed'))
                   .map(([value, { label }]) => (

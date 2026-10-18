@@ -64,7 +64,7 @@ export default function OrganizationHomePage() {
             <Row xs={1} md={3} className="g-4">
               <IndicatorCard icon="bi-calendar-check" label="Minhas aulas hoje" value={data.today.total} to={`${links.schedule}?data=${today}`} />
               <IndicatorCard icon="bi-calendar-week" label="Minhas aulas na semana" value={data.week.total} to={`${links.schedule}?visao=semana&data=${data.today.date}`} />
-              <IndicatorCard icon="bi-bell" label="Pendências para mim" value={data.pending.open} to={links.alerts} tone={data.pending.open > 0 ? 'warning' : undefined} />
+              <IndicatorCard icon="bi-bell" label="Notificações para mim" value={data.pending.open} to={links.alerts} tone={data.pending.open > 0 ? 'warning' : undefined} />
             </Row>
           )
         }
@@ -87,7 +87,7 @@ function StaffDashboard({ data, timezone, organizationId, today }: { data: Dashb
         <IndicatorCard icon="bi-mortarboard" label="Matrículas em atendimento" value={data.enrollments_in_service} to={`${links.enrollments}?situacao=in_service`} />
         <IndicatorCard
           icon="bi-bell"
-          label="Pendências abertas"
+          label="Notificações abertas"
           value={data.pending.open}
           hint={data.pending.critical + data.pending.high > 0 ? `${data.pending.critical} urgentes · ${data.pending.high} importantes` : 'Tudo em dia'}
           to={links.alerts}

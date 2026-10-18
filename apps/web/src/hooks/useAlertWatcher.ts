@@ -29,9 +29,9 @@ const write = (key: string, value: string) => {
   }
 }
 
-// Mantém as pendências frescas e avisa das novas sem atrapalhar o trabalho:
+// Mantém as notificações frescas e avisa das novas sem atrapalhar o trabalho:
 //  - recalcula ao entrar, a cada 5 minutos e 3 s depois de qualquer ação que altere dados;
-//  - pendência URGENTE não lida abre o alerta máximo (confirmar marca como lida);
+//  - notificação URGENTE não lida abre o alerta máximo (confirmar marca como lida);
 //  - as demais novas viram um balão (até 3; "Não mostrar novamente" disponível), nunca um bloqueio.
 export function useAlertWatcher(organizationId: number) {
   const queryClient = useQueryClient()
@@ -77,7 +77,7 @@ export function useAlertWatcher(organizationId: number) {
       notices.critical({
         id: `alert-${alert.id}`,
         title: alert.title,
-        message: alert.message ?? 'Esta pendência precisa de ação agora.',
+        message: alert.message ?? 'Esta notificação precisa de ação agora.',
         severity: 'danger',
         action: { label: 'Abrir', to: open(alert) },
         onAcknowledge: () => void markAlertRead(organizationId, alert.id).then(invalidate),
@@ -98,10 +98,10 @@ export function useAlertWatcher(organizationId: number) {
       })
     })
     if (fresh.length > 3) {
-      notices.toast({ type: 'info', message: `Mais ${fresh.length - 3} pendências novas. Veja todas no sino.`, key: 'alerts:more', muteKey: 'alerts.toast', action: { label: 'Ver pendências', to: organizationPaths(organizationId).alerts } })
+      notices.toast({ type: 'info', message: `Mais ${fresh.length - 3} notificações novas. Veja todas no sino.`, key: 'alerts:more', muteKey: 'alerts.toast', action: { label: 'Ver notificações', to: organizationPaths(organizationId).alerts } })
     }
     if (lastSeen === null && others.length > 0) {
-      notices.toast({ type: 'info', message: `Você tem ${others.length} ${others.length === 1 ? 'pendência' : 'pendências'} para acompanhar.`, key: 'alerts:welcome', muteKey: 'alerts.toast', action: { label: 'Ver pendências', to: organizationPaths(organizationId).alerts } })
+      notices.toast({ type: 'info', message: `Você tem ${others.length} ${others.length === 1 ? 'notificação' : 'notificações'} para acompanhar.`, key: 'alerts:welcome', muteKey: 'alerts.toast', action: { label: 'Ver notificações', to: organizationPaths(organizationId).alerts } })
     }
 
     const newest = items.map((a) => a.first_seen_at).sort().at(-1)

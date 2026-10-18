@@ -24,7 +24,7 @@ export function AlertSettingsCard({ organizationId, editable }: { organizationId
     <Card className="mt-4">
       <Card.Body>
         <Card.Title as="h2" className="h5">
-          Pendências e alertas
+          Notificações e alertas
         </Card.Title>
         <p className="small text-secondary">Defina com quanta antecedência o sistema avisa. Os alertas são recalculados sozinhos a cada 10 minutos.</p>
         <QueryState query={query} isEmpty={() => false} empty={null}>

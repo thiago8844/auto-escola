@@ -108,7 +108,7 @@ export function OutcomePanel({ organizationId, timezone, process, canReopen, onS
           {outcome.issuance.definitive_follow_up && (
             <p className="small mt-2 mb-0">
               <i className="bi bi-bell me-1" aria-hidden="true" />
-              Acompanhar a futura definitiva{outcome.issuance.definitive_due_at ? ` até ${formatDate(outcome.issuance.definitive_due_at)}` : ''}. Pendência posterior: não impede concluir o processo.
+              Acompanhar a futura definitiva{outcome.issuance.definitive_due_at ? ` até ${formatDate(outcome.issuance.definitive_due_at)}` : ''}. Notificação posterior: não impede concluir o processo.
             </p>
           )}
         </Card.Body>
@@ -139,7 +139,7 @@ export function OutcomePanel({ organizationId, timezone, process, canReopen, onS
             <>
               <div>
                 <h3 className="h6 mb-1">Encerrar acompanhamento</h3>
-                <p className="small text-secondary mb-0">Conclua quando houver desfecho, ou registre desistência. Pendências e compromissos futuros são listados antes de confirmar.</p>
+                <p className="small text-secondary mb-0">Conclua quando houver desfecho, ou registre desistência. Notificações e compromissos futuros são listados antes de confirmar.</p>
               </div>
               <Button variant="outline-secondary" size="sm" onClick={() => setDialog({ kind: 'close' })}>
                 Concluir ou encerrar

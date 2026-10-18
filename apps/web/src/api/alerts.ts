@@ -48,7 +48,7 @@ export const markAllAlertsRead = (organizationId: number | string) => action(org
 export const archiveAlert = (organizationId: number | string, alertId: number) => action(organizationId, `${alertId}/archive`)
 export const unarchiveAlert = (organizationId: number | string, alertId: number) => action(organizationId, `${alertId}/unarchive`)
 
-// Reprocessa as pendências do espaço agora (o servidor também faz isso sozinho a cada 10 minutos)
+// Reprocessa as notificações do espaço agora (o servidor também faz isso sozinho a cada 10 minutos)
 export async function refreshAlerts(organizationId: number | string): Promise<void> {
   await http.post(`${base(organizationId)}/alerts/refresh`, undefined, handledByScreen)
 }

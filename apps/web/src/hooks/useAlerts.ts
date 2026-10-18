@@ -53,10 +53,10 @@ function useAlertMutation<T>(organizationId: number, mutationFn: (input: T) => P
 }
 
 export const useMarkAlertRead = (organizationId: number) => useAlertMutation(organizationId, (id: number) => markAlertRead(organizationId, id))
-export const useMarkAllAlertsRead = (organizationId: number) => useAlertMutation(organizationId, () => markAllAlertsRead(organizationId), 'Pendências marcadas como lidas.')
-export const useArchiveAlert = (organizationId: number) => useAlertMutation(organizationId, (id: number) => archiveAlert(organizationId, id), 'Pendência arquivada.')
-export const useUnarchiveAlert = (organizationId: number) => useAlertMutation(organizationId, (id: number) => unarchiveAlert(organizationId, id), 'Pendência restaurada.')
-export const useRefreshAlerts = (organizationId: number) => useAlertMutation(organizationId, () => refreshAlerts(organizationId), 'Pendências atualizadas.')
+export const useMarkAllAlertsRead = (organizationId: number) => useAlertMutation(organizationId, () => markAllAlertsRead(organizationId), 'Notificações marcadas como lidas.')
+export const useArchiveAlert = (organizationId: number) => useAlertMutation(organizationId, (id: number) => archiveAlert(organizationId, id), 'Notificação arquivada.')
+export const useUnarchiveAlert = (organizationId: number) => useAlertMutation(organizationId, (id: number) => unarchiveAlert(organizationId, id), 'Notificação restaurada.')
+export const useRefreshAlerts = (organizationId: number) => useAlertMutation(organizationId, () => refreshAlerts(organizationId))
 
 export function useAlertSettings(organizationId: number) {
   return useQuery({ queryKey: queryKeys.organizations.alertSettings(organizationId), queryFn: () => getAlertSettings(organizationId) })

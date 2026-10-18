@@ -129,6 +129,8 @@ export const router = createBrowserRouter([
               // Disponibilidade: a equipe gerencia bloqueios; o instrutor registra a própria indisponibilidade
               { path: organizationSections.availability, element: <AvailabilityPage /> },
               { path: organizationSections.alerts, element: <AlertsPage /> },
+              // Compatibilidade com links salvos antes da troca do nome.
+              { path: 'pendencias', element: <AlertsPage /> },
               { path: organizationSections.exams, element: <ExamsPage /> },
               { path: `${organizationSections.exams}/:examId`, element: <ExamDetailPage /> },
               { path: organizationSections.enrollments, element: <EnrollmentsPage /> },

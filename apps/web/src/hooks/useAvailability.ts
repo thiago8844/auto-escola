@@ -63,7 +63,7 @@ export function useImpactPreview(organizationId: number, p: { vehicleId?: string
   })
 }
 
-// Bloqueios, manutenção e reatribuições mexem na agenda, nos veículos e nas pendências do espaço
+// Bloqueios, manutenção e reatribuições mexem na agenda, nos veículos e nas notificações do espaço
 function useInvalidateOrganization(organizationId: number) {
   const queryClient = useQueryClient()
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(organizationId) })

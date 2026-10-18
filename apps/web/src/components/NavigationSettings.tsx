@@ -26,7 +26,7 @@ export function NavigationSettings({ organization }: { organization: Organizatio
       <Modal.Header closeButton><Modal.Title as="h2" className="h5">Meu menu · {organization.name}</Modal.Title></Modal.Header>
       <Modal.Body>
         <p>Os cinco primeiros módulos visíveis são seus atalhos. Use as setas para ordenar ou o botão de estrela para fixar no início.</p>
-        <p className="small text-secondary">Ajustes pessoais neste navegador. Ocultar só muda seu menu; seus acessos e pendências continuam iguais. Todos os módulos permitidos estão nesta lista.</p>
+        <p className="small text-secondary">Ajustes pessoais neste navegador. Ocultar só muda seu menu; seus acessos e notificações continuam iguais. Todos os módulos permitidos estão nesta lista.</p>
         <ul className="list-unstyled mb-0">
           {ordered.map((module, index) => <li key={module.id} className="d-flex flex-wrap align-items-center gap-2 border-bottom py-2">
             <div className="flex-grow-1 min-w-0"><Link to={module.to} onClick={() => setOpen(false)}><i className={`bi ${module.icon} me-2`} aria-hidden="true" />{module.label}</Link>{primary.some((m) => m.id === module.id) && <Badge bg="light" text="body" className="border ms-2">Atalho</Badge>}</div>

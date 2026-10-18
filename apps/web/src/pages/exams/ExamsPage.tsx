@@ -143,7 +143,7 @@ export default function ExamsPage() {
                   ...(staff
                     ? [
                         {
-                          header: 'Pendências',
+                          header: 'Notificações',
                           cell: (exam: (typeof data.data)[number]) =>
                             exam.pending && exam.pending.length > 0 ? (
                               <span className="text-warning-emphasis">

@@ -55,6 +55,6 @@ export type CriticalAlert = {
   action?: NoticeAction
   // Oferece "Não mostrar novamente". Não use em avisos que o usuário não pode ignorar.
   muteKey?: string
-  // Chamado quando a pessoa confirma o alerta (ex.: marcar a pendência como lida)
+  // Chamado quando a pessoa confirma o alerta (ex.: marcar a notificação como lida)
   onAcknowledge?: () => void
 }

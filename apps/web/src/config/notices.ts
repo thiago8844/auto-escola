@@ -20,7 +20,7 @@ export const TOAST_FADE_AFTER_MS = 5000
 // Avisos que o usuário pode silenciar com "Não mostrar novamente".
 // Cadastre aqui a chave (muteKey) com um nome legível: ele aparece em Configurações > Avisos ocultos.
 export const MUTABLE_NOTICES: Record<string, { label: string; description?: string }> = {
-  'alerts.toast': { label: 'Balão de novas pendências', description: 'Aviso na tela quando chega uma pendência nova.' },
+  'alerts.toast': { label: 'Balão de novas notificações', description: 'Aviso na tela quando chega uma notificação nova.' },
   // Exemplo:
   // 'billing.due-soon': { label: 'Mensalidade perto do vencimento', description: 'Lembrete dos dias antes do vencimento.' },
 }

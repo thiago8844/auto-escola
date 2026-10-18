@@ -1,7 +1,7 @@
 import { organizationPaths } from '../config/paths'
 import type { AlertItem } from '../types/alert'
 
-// Link para o registro que precisa de ação. Sem origem conhecida, abre a lista de pendências.
+// Link para o registro que precisa de ação. Sem origem conhecida, abre a lista de notificações.
 export function alertPath(organizationId: number, alert: Pick<AlertItem, 'subject'>): string {
   const links = organizationPaths(organizationId)
   const subject = alert.subject
