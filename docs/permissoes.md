@@ -148,6 +148,22 @@ O checklist do processo guarda o **resultado operacional** de avaliações médi
 | ID de aula, aluno ou instrutor de **outro** espaço | **404** | O route binding é limitado ao espaço da rota. |
 | Registro do próprio espaço, mas sem permissão | **403** | O usuário já sabe que o espaço existe. |
 
+## Disponibilidade, pendências, relatórios e financeiro (módulos 4 a 8)
+
+| Capacidade | owner | admin | staff | instructor |
+|---|:-:|:-:|:-:|:-:|
+| Bloquear veículo ou instrutor do espaço; registrar manutenção | sim | sim | sim | não |
+| Indisponibilidade **pessoal** (vale em todos os espaços do instrutor) | só o próprio instrutor, em qualquer papel que tenha conta |||
+| Ver bloqueios | todos do espaço | todos do espaço | todos do espaço | só os próprios |
+| Pendências (sino) | todas as operacionais | todas | conforme a configuração `staff_receives` | só as atribuídas a ele |
+| Configurar antecedência e destinatários dos alertas | sim | sim | não | não |
+| Relatórios de gestão e exportação CSV | sim | sim | sim | não (só o resumo das próprias aulas) |
+| Financeiro: ver, lançar, editar parcelas abertas e dar baixa | sim | sim | sim | **não** |
+| Financeiro: contas, categorias, formas, recorrências, estornar, cancelar, transferir, ajustar saldo, conciliar | sim | sim | não | não |
+| Arquivar e restaurar aluno, parceiro, veículo | sim | sim | sim | não |
+
+Decisões: o **instrutor nunca acessa o caixa do espaço**; o autônomo, dono do espaço particular, tem acesso total à própria operação. O preço da matrícula, os documentos e os dados de saúde continuam fora do alcance do instrutor, inclusive por atalhos e mensagens de erro (`PermissionMatrixTest`).
+
 ## Onde a regra está no código
 
 | Regra | Arquivo |
@@ -166,3 +182,6 @@ O checklist do processo guarda o **resultado operacional** de avaliações médi
 | Conferência de checklist | `app/Actions/Processes/UpdateChecklistItem.php` |
 | Veículo e aluno na agenda | `app/Services/SchedulingConstraints.php` |
 | Documentos privados | `app/Policies/DocumentPolicy.php`, `app/Actions/Documents/StoreDocument.php` |
+| Bloqueios e manutenção | `app/Policies/AvailabilityBlockPolicy.php`, `app/Services/AvailabilityGuard.php` |
+| Pendências por papel | `app/Models/Alert.php` (`scopeVisibleTo`) |
+| Financeiro | `app/Services/Finance/FinanceAccess.php`, `FinanceController::operate/manage` |
