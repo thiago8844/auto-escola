@@ -95,7 +95,7 @@ function StaffDashboard({ data, timezone, organizationId, today }: { data: Dashb
         />
         <IndicatorCard
           icon="bi-hourglass-split"
-          label="Saldo de aulas baixo"
+          label="Matrículas com poucos minutos para agendar"
           value={data.low_balance.count}
           hint={data.low_balance.exhausted > 0 ? `${data.low_balance.exhausted} esgotados` : undefined}
           to={`${links.alerts}?assunto=balance`}

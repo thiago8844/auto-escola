@@ -97,7 +97,7 @@ export default function EnrollmentsPage() {
                   cell: (enrollment) => <span className="tabular-nums">{enrollment.contracted_minutes ? formatMinutes(enrollment.contracted_minutes) : '—'}</span>,
                 },
                 ...(staff ? [{
-                  header: 'Saldo de aulas',
+                  header: 'Minutos para agendar',
                   cell: (enrollment: import('../../types/enrollment').Enrollment) => (enrollment.balance ? <BalanceBadge available={enrollment.balance.available} hasPackage={enrollment.balance.has_package} /> : '—'),
                 }] : []),
                 { header: 'Prática', cell: (enrollment) => <ReleaseBadge release={enrollment.practice_release} /> },

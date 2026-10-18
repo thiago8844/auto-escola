@@ -11,7 +11,7 @@ const FIELDS: Array<{ key: keyof Omit<AlertSettings, 'staff_receives'>; label: s
   { key: 'fee_lead_days', label: 'Taxas externas', unit: 'dias antes do vencimento', min: 1, max: 60 },
   { key: 'finance_lead_days', label: 'Contas a pagar e a receber', unit: 'dias antes do vencimento', min: 1, max: 60 },
   { key: 'release_lead_days', label: 'Aula sem liberação para a prática', unit: 'dias antes da aula', min: 1, max: 30 },
-  { key: 'low_balance_minutes', label: 'Saldo de aulas baixo', unit: 'minutos restantes', min: 0, max: 1000 },
+  { key: 'low_balance_minutes', label: 'Avisar quando restarem poucos minutos de aula', unit: 'limite em minutos', min: 0, max: 1000 },
   { key: 'inactive_days', label: 'Aluno sem aula', unit: 'dias', min: 3, max: 180 },
   { key: 'lesson_grace_hours', label: 'Aula sem desfecho', unit: 'horas depois do fim', min: 0, max: 72 },
 ]

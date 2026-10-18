@@ -14,7 +14,7 @@ export const ALERT_CATEGORIES: Record<AlertCategory, { label: string; icon: stri
   exam: { label: 'Exames', icon: 'bi-clipboard-check' },
   fee: { label: 'Taxas', icon: 'bi-receipt' },
   process: { label: 'Processos', icon: 'bi-diagram-3' },
-  balance: { label: 'Saldo de aulas', icon: 'bi-hourglass-split' },
+  balance: { label: 'Crédito de aulas', icon: 'bi-hourglass-split' },
   student: { label: 'Alunos', icon: 'bi-mortarboard' },
   finance: { label: 'Financeiro', icon: 'bi-cash-coin' },
 }

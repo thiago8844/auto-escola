@@ -24,7 +24,7 @@ export function LessonBalanceNotice({ balance, category, needed, overrideReason,
     return (
       <Alert variant="secondary" className="small">
         <i className="bi bi-info-circle me-2" aria-hidden="true" />
-        Matrícula sem pacote: esta será uma aula avulsa, sem desconto de saldo.
+        Matrícula sem pacote: esta será uma aula avulsa, sem desconto do pacote.
       </Alert>
     )
   }
@@ -32,7 +32,7 @@ export function LessonBalanceNotice({ balance, category, needed, overrideReason,
   return (
     <div className={`rounded border p-3 mb-3 ${enough ? 'border-success-subtle' : 'border-warning'}`} role="status">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <span className="fw-semibold">Saldo{scope}</span>
+        <span className="fw-semibold">Minutos para agendar{scope}</span>
         <BalanceBadge available={available} hasPackage />
       </div>
       {needed > 0 && (
@@ -44,7 +44,7 @@ export function LessonBalanceNotice({ balance, category, needed, overrideReason,
         <div className="mt-3">
           <Alert variant="warning" className="small">
             <i className="bi bi-exclamation-triangle-fill me-2" aria-hidden="true" />
-            Saldo insuficiente. Contrate mais aulas ou autorize uma exceção explicando o motivo; ela fica registrada no extrato e na auditoria.
+            Minutos disponíveis insuficientes. Contrate mais aulas ou autorize uma exceção explicando o motivo; ela fica registrada no extrato e na auditoria.
           </Alert>
           <Form.Group controlId="override_reason">
             <Form.Label>Motivo da exceção</Form.Label>

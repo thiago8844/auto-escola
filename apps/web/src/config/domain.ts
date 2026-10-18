@@ -167,7 +167,7 @@ export const CLOSURE_KIND_LABELS = { completed: 'Concluído', abandoned: 'Desist
 // Categorias da linha do tempo e da auditoria
 export const AUDIT_CATEGORIES: Record<string, { label: string; icon: string }> = {
   access: { label: 'Acesso', icon: 'bi-shield-lock' },
-  balance: { label: 'Saldo de aulas', icon: 'bi-hourglass-split' },
+  balance: { label: 'Crédito de aulas', icon: 'bi-hourglass-split' },
   lesson: { label: 'Aulas', icon: 'bi-calendar-check' },
   exam: { label: 'Exames', icon: 'bi-clipboard-check' },
   fee: { label: 'Taxas externas', icon: 'bi-receipt' },

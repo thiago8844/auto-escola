@@ -34,13 +34,13 @@ export function BalancePanel({ organizationId, timezone, enrollment, canAdjust }
     <section aria-labelledby="balance-title" className="mb-5">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <h2 id="balance-title" className="h4 mb-0">
-          Pacote e saldo de aulas
+          Pacote de aulas
         </h2>
         <div className="d-flex flex-wrap gap-2">
           {canAdjust && query.data && query.data.has_package && (
             <Button variant="outline-secondary" size="sm" onClick={() => setModal('adjust')}>
               <i className="bi bi-sliders me-1" aria-hidden="true" />
-              Ajustar saldo
+              Ajustar minutos
             </Button>
           )}
           <Button size="sm" onClick={() => setModal('package')}>
@@ -63,8 +63,8 @@ export function BalancePanel({ organizationId, timezone, enrollment, canAdjust }
               <Alert variant={balance.available < 0 ? 'danger' : 'warning'}>
                 <i className="bi bi-exclamation-triangle-fill me-2" aria-hidden="true" />
                 {balance.available < 0
-                  ? `O saldo está excedido em ${formatMinutes(-balance.available)} (aula agendada por exceção autorizada). Registre um acréscimo.`
-                  : 'Saldo esgotado: novas aulas só podem ser agendadas com um acréscimo ou exceção autorizada com motivo.'}
+                  ? `O pacote foi excedido em ${formatMinutes(-balance.available)} (aula agendada por exceção autorizada). Registre um acréscimo.`
+                  : 'Pacote sem minutos para agendar: novas aulas só podem ser agendadas com um acréscimo ou exceção autorizada com motivo.'}
               </Alert>
             )}
 

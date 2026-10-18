@@ -152,7 +152,7 @@ function StudentDetail({ student }: { student: Student }) {
                 ...(operate
                   ? [
                       {
-                        header: 'Saldo de aulas',
+                        header: 'Minutos para agendar',
                         cell: (enrollment: Enrollment) =>
                           enrollment.balance ? (
                             <Link to={links.enrollment(enrollment.id)} className="text-decoration-none">

@@ -24,7 +24,7 @@ const STATS: Array<{ key: keyof BalanceRow; label: string; hint: string; dot: st
   { key: 'reserved', label: 'Reservado', hint: 'Minutos de aulas agendadas que ainda não aconteceram.', dot: 'bg-info' },
   { key: 'realized', label: 'Realizado', hint: 'Tempo de instrução efetivamente dado em aulas concluídas. Falta cobrada não entra aqui.', dot: 'bg-body-secondary border' },
   { key: 'consumed', label: 'Consumido', hint: 'Minutos descontados do pacote (aulas concluídas e faltas ou cancelamentos cobrados em contrato).', dot: 'bg-primary' },
-  { key: 'available', label: 'Disponível', hint: 'Contratado − reservado − consumido: o que ainda pode ser agendado.', dot: 'bg-success' },
+  { key: 'available', label: 'Minutos para agendar', hint: 'Contratado − reservado − consumido: o que ainda pode ser agendado.', dot: 'bg-success' },
 ]
 
 export function BalanceStats({ balance, reference }: { balance: BalanceRow; reference?: number | null }) {
@@ -58,7 +58,7 @@ export function BalanceBadge({ available, hasPackage }: { available: number; has
     return (
       <Badge bg={available < 0 ? 'danger' : 'warning'}>
         <i className="bi bi-exclamation-triangle-fill me-1" aria-hidden="true" />
-        {available < 0 ? `Excedido em ${formatMinutes(-available)}` : 'Saldo esgotado'}
+        {available < 0 ? `Excedido em ${formatMinutes(-available)}` : 'Sem minutos para agendar'}
       </Badge>
     )
   }

@@ -109,7 +109,7 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
 
       {enrollment.balance && operate && <Alert variant="light" className="border mb-4"><strong>Disponível: {formatMinutes(enrollment.balance.available)}</strong><span className="text-secondary ms-2">· minutos para novas aulas</span></Alert>}
       {operate && (
-        <RecordSection title="Pacote e saldo de aulas" defaultOpen={!enrollment.balance?.has_package}>
+        <RecordSection title="Pacote de aulas" defaultOpen={!enrollment.balance?.has_package}>
         <BalancePanel organizationId={organization.id} timezone={organization.timezone} enrollment={enrollment} canAdjust={organization.role === 'owner' || organization.role === 'admin'} />
         </RecordSection>
       )}
