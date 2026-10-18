@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 /node_modules
 CLAUDE.md
+# Variáveis locais (o Vite embute VITE_* no build; use .env.example como modelo)
+.env
