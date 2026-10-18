@@ -1,5 +1,6 @@
+import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
-import { Alert, Button, Card, Form } from 'react-bootstrap'
+import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DataTable } from '../../components/DataTable'
 import { ArchiveCard } from '../../components/ArchiveCard'
@@ -64,6 +65,12 @@ function StudentDetail({ student }: { student: Student }) {
   const lessonsError = lessonQueries.find((q) => q.error)?.error
   const lessonsLoading = lessonQueries.some((q) => q.isPending)
 
+  const nextLesson = [...lessons].filter((lesson) => lesson.status === 'scheduled' && lesson.ends_at >= new Date().toISOString()).sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0]
+  const completedLessons = lessons.filter((lesson) => lesson.status === 'completed').length
+  const openEnrollments = enrollments.data?.data.filter((e) => e.status !== 'closed' && e.status !== 'terminated') ?? []
+  const pendingDocuments = documents.data?.data.filter((d) => d.status === 'attached' || d.status === 'rejected').length ?? 0
+  const withBalance = openEnrollments.filter((e) => e.balance?.has_package)
+
   return (
     <>
       <PageHeader
@@ -83,6 +90,14 @@ function StudentDetail({ student }: { student: Student }) {
           )
         }
       />
+
+      <Row className="g-3 mb-4">
+        <Col md={5}><Card className="h-100 border-primary-subtle"><Card.Body><div className="small text-secondary mb-2">Próxima aula</div>
+          {lessonsLoading ? <span>Carregando…</span> : nextLesson ? <><Link className="fw-semibold" to={links.lesson(nextLesson.id)}>{formatDateTime(nextLesson.starts_at, organization.timezone)}</Link><div className="small text-secondary mt-1">{nextLesson.instructor?.full_name}</div></> : <><div className="mb-2">Nenhuma aula agendada</div>{operate && <Link className="btn btn-sm btn-primary" to={openEnrollments.length === 1 ? links.scheduleNew(`?matricula=${openEnrollments[0].id}`) : openEnrollments.length > 1 ? '#enrollments-title' : links.enrollmentNew(student.id)}>{openEnrollments.length ? 'Agendar aula' : 'Criar matrícula'}</Link>}</>}
+        </Card.Body></Card></Col>
+        <Col md={3}><Card className="h-100"><Card.Body><div className="small text-secondary mb-2">Aulas realizadas</div><div className="h3 mb-0">{lessonsLoading ? '…' : completedLessons}</div><div className="small text-secondary">Histórico do aluno neste espaço</div></Card.Body></Card></Col>
+        {operate && <Col md={4}><Card className="h-100"><Card.Body><div className="small text-secondary mb-2">Saldo disponível</div><div className="h4 mb-1">{enrollments.isPending ? '…' : withBalance.length ? formatMinutes(withBalance.reduce((n, e) => n + (e.balance?.available ?? 0), 0)) : 'Sem pacote ativo'}</div><div className="small text-secondary">{pendingDocuments ? `${pendingDocuments} documento(s) para conferir` : 'Documentos e liberação nos detalhes abaixo'}</div></Card.Body></Card></Col>}
+      </Row>
 
       <Card className="mb-4">
         <Card.Body>
@@ -155,10 +170,8 @@ function StudentDetail({ student }: { student: Student }) {
         </QueryState>
       </section>
 
-      <section className="mb-5" aria-labelledby="lessons-title">
-        <h2 id="lessons-title" className="h4 mb-3">
-          Aulas
-        </h2>
+      <RecordSection title="Histórico de aulas" count={lessons.length}>
+        
         {lessonsError ? (
           <Alert variant="danger" role="alert">
             {lessonsError.message}
@@ -173,7 +186,7 @@ function StudentDetail({ student }: { student: Student }) {
               rows={lessons.slice(0, lessonsShown)}
               getKey={(lesson) => lesson.id}
               columns={[
-                { header: 'Data e hora', primary: true, cell: (lesson) => <span className="tabular-nums">{formatDateTime(lesson.starts_at, organization.timezone)}</span> },
+                { header: 'Data e hora', primary: true, cell: (lesson) => <Link className="tabular-nums" to={links.lesson(lesson.id)}>{formatDateTime(lesson.starts_at, organization.timezone)}</Link> },
                 { header: 'Instrutor', cell: (lesson) => lesson.instructor?.full_name ?? '—' },
                 { header: 'Situação', cell: (lesson) => <LessonStatusBadge status={lesson.status} /> },
               ]}
@@ -190,21 +203,19 @@ function StudentDetail({ student }: { student: Student }) {
             )}
           </>
         )}
-      </section>
+      </RecordSection>
 
       {operate && <ExamsSummary organizationId={organization.id} timezone={organization.timezone} filter={{ studentId: student.id }} />}
 
       {operate && (
-        <section aria-labelledby="timeline-title" className="mb-5">
-          <h2 id="timeline-title" className="h4 mb-3">
-            Linha do tempo do aluno
-          </h2>
+        <RecordSection title="Linha do tempo">
+          
           <Timeline organizationId={organization.id} timezone={organization.timezone} scope={{ kind: 'student', id: student.id }} emptyMessage="Nenhum evento registrado para este aluno ainda." />
-        </section>
+        </RecordSection>
       )}
 
       {operate && (
-        <section aria-labelledby="documents-title">
+        <RecordSection title="Documentos" count={documents.data?.data.length}>
           <div id="documents-title">
             <PageHeader
               as="h2"
@@ -301,7 +312,7 @@ function StudentDetail({ student }: { student: Student }) {
               />
             )}
           </QueryState>
-        </section>
+        </RecordSection>
       )}
 
       {operate && (

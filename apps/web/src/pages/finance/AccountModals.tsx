@@ -1,3 +1,5 @@
+import { FormErrorMessage } from '../../components/FormErrorMessage'
+import { useDraftProtection } from '../../hooks/useFormProtection'
 import { useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
 import { NumericFormat } from 'react-number-format'
@@ -41,23 +43,25 @@ export function AccountFormModal({ organizationId, timezone, account, onClose }:
   const [error, setError] = useState<string | null>(null)
   const pending = create.isPending || update.isPending
 
+  const protection = useDraftProtection({ name, kind, institution, identification, opening, openingDate }, onClose, pending)
+
   const submit = () => {
     setError(null)
     if (name.trim().length < 2) return setError('Dê um nome à conta (ex.: Banco principal, Caixa).')
     const common = { name: name.trim(), institution: institution.trim() || null, identification: identification.trim() || null }
-    const done = { onSuccess: onClose, onError: (e: Error) => setError(e.message) }
+    const done = { onSuccess: () => { protection.saved(); onClose() }, onError: (e: Error) => setError(e.message) }
 
     if (account) update.mutate({ accountId: account.id, ...common }, done)
     else create.mutate({ ...common, kind, opening_balance_cents: toCents(opening), opening_date: openingDate }, done)
   }
 
   return (
-    <Modal show onHide={onClose} centered fullscreen="sm-down">
+    <Modal show onHide={protection.close} centered fullscreen="sm-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">{account ? 'Editar conta' : 'Nova conta ou caixa'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger" role="alert">{error}</Alert>}
+        <FormErrorMessage message={error} />
         <Form.Group className="mb-3" controlId="acc-name">
           <Form.Label>Nome</Form.Label>
           <Form.Control autoFocus value={name} onChange={(event) => setName(event.target.value)} />
@@ -98,7 +102,7 @@ export function AccountFormModal({ organizationId, timezone, account, onClose }:
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={pending}>Cancelar</Button>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={pending}>Cancelar</Button>
         <Button onClick={submit} disabled={pending}>{account ? 'Salvar' : 'Criar conta'}</Button>
       </Modal.Footer>
     </Modal>
@@ -113,20 +117,22 @@ export function AdjustModal({ organizationId, timezone, account, onClose }: Base
   const [date, setDate] = useState(todayInTimeZone(timezone))
   const [error, setError] = useState<string | null>(null)
 
+  const protection = useDraftProtection({ direction, amount, reason, date }, onClose, adjust.isPending)
+
   const submit = () => {
     setError(null)
     if (toCents(amount) < 1) return setError('Informe o valor do ajuste.')
     if (reason.trim().length < 3) return setError('Explique o motivo do ajuste.')
-    adjust.mutate({ accountId: account.id, direction, amount_cents: toCents(amount), reason: reason.trim(), occurred_on: date }, { onSuccess: onClose, onError: (e) => setError(e.message) })
+    adjust.mutate({ accountId: account.id, direction, amount_cents: toCents(amount), reason: reason.trim(), occurred_on: date }, { onSuccess: () => { protection.saved(); onClose() }, onError: (e) => setError(e.message) })
   }
 
   return (
-    <Modal show onHide={onClose} centered fullscreen="sm-down">
+    <Modal show onHide={protection.close} centered fullscreen="sm-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">Ajustar saldo: {account.name}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger" role="alert">{error}</Alert>}
+        <FormErrorMessage message={error} />
         <p className="small text-secondary">O ajuste entra no extrato como um movimento com o motivo. Nada do que já aconteceu é alterado.</p>
         <Form.Group className="mb-3" controlId="adj-direction">
           <Form.Label>O saldo precisa…</Form.Label>
@@ -151,7 +157,7 @@ export function AdjustModal({ organizationId, timezone, account, onClose }: Base
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={adjust.isPending}>Cancelar</Button>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={adjust.isPending}>Cancelar</Button>
         <Button onClick={submit} disabled={adjust.isPending}>Ajustar saldo</Button>
       </Modal.Footer>
     </Modal>
@@ -168,22 +174,24 @@ export function TransferModal({ organizationId, timezone, accounts, onClose }: B
   const [date, setDate] = useState(todayInTimeZone(timezone))
   const [error, setError] = useState<string | null>(null)
 
+  const protection = useDraftProtection({ from, to, amount, reason, date }, onClose, transfer.isPending)
+
   const submit = () => {
     setError(null)
     if (!from || !to) return setError('Escolha a conta de origem e a de destino.')
     if (from === to) return setError('Escolha contas diferentes.')
     if (toCents(amount) < 1) return setError('Informe o valor.')
     if (reason.trim().length < 3) return setError('Explique o motivo da transferência.')
-    transfer.mutate({ from_account_id: Number(from), to_account_id: Number(to), amount_cents: toCents(amount), occurred_on: date, reason: reason.trim() }, { onSuccess: onClose, onError: (e) => setError(e.message) })
+    transfer.mutate({ from_account_id: Number(from), to_account_id: Number(to), amount_cents: toCents(amount), occurred_on: date, reason: reason.trim() }, { onSuccess: () => { protection.saved(); onClose() }, onError: (e) => setError(e.message) })
   }
 
   return (
-    <Modal show onHide={onClose} centered fullscreen="sm-down">
+    <Modal show onHide={protection.close} centered fullscreen="sm-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">Transferir entre contas</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger" role="alert">{error}</Alert>}
+        <FormErrorMessage message={error} />
         <p className="small text-secondary">O valor sai de uma conta e entra na outra de uma vez. Transferência não é receita nem despesa.</p>
         <Row className="g-3 mb-3">
           <Col sm={6}>
@@ -215,7 +223,7 @@ export function TransferModal({ organizationId, timezone, accounts, onClose }: B
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={transfer.isPending}>Cancelar</Button>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={transfer.isPending}>Cancelar</Button>
         <Button onClick={submit} disabled={transfer.isPending}>Transferir</Button>
       </Modal.Footer>
     </Modal>
@@ -233,19 +241,21 @@ export function ReconcileModal({ organizationId, timezone, account, statement, o
   const pending = (statement?.lines ?? []).filter((line) => !line.reconciled)
   const result = reconcile.data
 
+  const protection = useDraftProtection({ date, balance, checked, notes }, onClose, reconcile.isPending)
+
   const submit = () => {
     setError(null)
     if (balance === '') return setError('Informe o saldo que aparece no extrato do banco.')
-    reconcile.mutate({ accountId: account.id, statement_date: date, statement_balance_cents: toCents(balance), movement_ids: checked, notes: notes.trim() || null }, { onError: (e) => setError(e.message) })
+    reconcile.mutate({ accountId: account.id, statement_date: date, statement_balance_cents: toCents(balance), movement_ids: checked, notes: notes.trim() || null }, { onSuccess: () => protection.saved(), onError: (e) => setError(e.message) })
   }
 
   return (
-    <Modal show onHide={onClose} centered size="lg" fullscreen="md-down">
+    <Modal show onHide={protection.close} centered size="lg" fullscreen="md-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">Conferir extrato: {account.name}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger" role="alert">{error}</Alert>}
+        <FormErrorMessage message={error} />
         {result && (
           <Alert variant={result.difference_cents === 0 ? 'success' : 'warning'} role="status">
             {result.difference_cents === 0
@@ -290,7 +300,7 @@ export function ReconcileModal({ organizationId, timezone, account, statement, o
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose}>{result ? 'Fechar' : 'Cancelar'}</Button>
+        <Button variant="outline-secondary" onClick={protection.close}>{result ? 'Fechar' : 'Cancelar'}</Button>
         {!result && <Button onClick={submit} disabled={reconcile.isPending}>Registrar conferência</Button>}
       </Modal.Footer>
     </Modal>

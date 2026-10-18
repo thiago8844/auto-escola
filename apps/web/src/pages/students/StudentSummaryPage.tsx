@@ -41,7 +41,7 @@ export default function StudentSummaryPage() {
 
           <section className="mb-4">
             <h2 className="h5">Contratação e minutos</h2>
-            <div className="table-responsive">
+            <div className="table-responsive d-none d-md-block d-print-block">
               <Table size="sm" className="align-middle">
                 <thead>
                   <tr>
@@ -77,6 +77,7 @@ export default function StudentSummaryPage() {
                 </tbody>
               </Table>
             </div>
+            <div className="d-md-none d-print-none d-grid gap-3">{summary.enrollments.map((e) => <Card key={e.id}><Card.Body><h3 className="h6">Categoria {e.category}</h3><p className="small">{ENROLLMENT_STATUS[e.status as keyof typeof ENROLLMENT_STATUS]?.label ?? e.status}</p><dl className="row small mb-0">{[['Contratado', e.minutes.contracted], ['Reservado', e.minutes.reserved], ['Realizado', e.minutes.realized], ['Consumido', e.minutes.consumed], ['Disponível', e.minutes.available]].map(([label, minutes]) => <div className="d-flex justify-content-between mb-1" key={label}><dt>{label}</dt><dd className="mb-0">{formatMinutes(Number(minutes))}</dd></div>)}</dl></Card.Body></Card>)}</div>
             <p className="small text-secondary">Realizado = tempo de instrução; consumido = o que foi descontado do pacote (pode incluir faltas cobradas).</p>
           </section>
 

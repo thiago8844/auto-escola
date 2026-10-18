@@ -1,3 +1,5 @@
+import { useDraftProtection } from '../../hooks/useFormProtection'
+import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
 import { NumericFormat } from 'react-number-format'
@@ -72,6 +74,8 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
   const diff = totalCents - rowsTotal
   const categoryOptions = (categories.data ?? []).filter((c) => c.active && c.type === (receivable ? 'income' : 'expense'))
 
+  const protection = useDraftProtection({ description, categoryId, total, issuedOn, count, firstDue, periodicity, edited, studentId, partnerId, partyId, newParty, alreadyPaid, paid, notes }, onClose, create.isPending || createParty.isPending)
+
   const submit = async () => {
     setError(null)
     if (description.trim().length < 3) return setError('Descreva o lançamento (mín. 3 letras).')
@@ -103,12 +107,12 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
         paid: alreadyPaid ? { account_id: Number(paid.account_id), method_id: Number(paid.method_id), paid_on: paid.paid_on } : undefined,
         notes: notes.trim() || null,
       },
-      { onSuccess: onClose, onError: (e) => setError(e.message) },
+      { onSuccess: () => { protection.saved(); onClose() }, onError: (e) => setError(e.message) },
     )
   }
 
   return (
-    <Modal show onHide={onClose} centered size="lg" fullscreen="md-down">
+    <Modal show onHide={protection.close} centered size="lg" fullscreen="md-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">
           {copyFrom ? 'Repetir lançamento' : receivable ? 'Nova receita' : 'Nova despesa'}
@@ -201,7 +205,9 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
           </Row>
         )}
 
-        <fieldset className="border rounded p-3 mb-3">
+        {Number(count) === 1 && <Form.Group controlId="entry-single-due" className="mb-3"><Form.Label>Vencimento</Form.Label><Form.Control type="date" value={firstDue} onChange={(e) => setFirstDue(e.target.value)} /></Form.Group>}
+        <Form.Check type="switch" id="entry-installments" label="Parcelar este valor" className="mb-3" checked={Number(count) > 1} onChange={(e) => { setCount(e.target.checked ? '2' : '1'); setEdited(null) }} />
+        <fieldset hidden={Number(count) === 1} className="border rounded p-3 mb-3">
           <legend className="fs-6 float-none w-auto px-2 mb-0">Parcelas</legend>
           <Row className="g-2 align-items-end">
             <Col xs={4} sm={3}>
@@ -240,7 +246,7 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
                         <Form.Control size="sm" type="date" aria-label={`Vencimento da parcela ${index + 1}`} value={row.due_date} onChange={(event) => setRows((current) => current.map((r, i) => (i === index ? { ...r, due_date: event.target.value } : r)))} />
                       </td>
                       <td>
-                        <Form.Control size="sm" inputMode="decimal" aria-label={`Valor da parcela ${index + 1}`} value={row.amount} onChange={(event) => setRows((current) => current.map((r, i) => (i === index ? { ...r, amount: event.target.value.replace(',', '.') } : r)))} />
+                        <MoneyInput size="sm" aria-label={`Valor da parcela ${index + 1}`} value={row.amount} onValueChange={(value) => setRows((current) => current.map((r, i) => (i === index ? { ...r, amount: value } : r)))} />
                       </td>
                     </tr>
                   ))}
@@ -296,7 +302,7 @@ export function EntryFormModal({ organizationId, timezone, type, preset, copyFro
         </Row>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={create.isPending}>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={create.isPending}>
           Cancelar
         </Button>
         <Button onClick={() => void submit()} disabled={create.isPending || createParty.isPending}>

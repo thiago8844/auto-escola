@@ -67,3 +67,9 @@
   .app-sidebar .nav-link { justify-content: flex-start; }
   .modal-footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 }
+
+.record-section { border: 1px solid var(--bs-border-color); border-radius: 0.8rem; background: var(--rc-surface); }
+.record-section > summary { padding: 1rem 1.25rem; cursor: pointer; }
+.record-section[open] > summary { border-bottom: 1px solid var(--bs-border-color); }
+.record-section > summary:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; border-radius: 0.5rem; }
+.record-section section:last-child { margin-bottom: 0 !important; }

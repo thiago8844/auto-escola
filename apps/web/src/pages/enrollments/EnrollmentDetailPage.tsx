@@ -1,3 +1,4 @@
+import { RecordSection } from '../../components/RecordSection'
 import { useState } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
@@ -103,11 +104,14 @@ function EnrollmentDetail({ enrollment }: { enrollment: Enrollment }) {
         </Card.Body>
       </Card>
 
+      {enrollment.balance && operate && <Alert variant="light" className="border mb-4"><strong>Disponível: {formatMinutes(enrollment.balance.available)}</strong><span className="text-secondary ms-2">· minutos para novas aulas</span></Alert>}
       {operate && (
+        <RecordSection title="Pacote e saldo de aulas" defaultOpen={!enrollment.balance?.has_package}>
         <BalancePanel organizationId={organization.id} timezone={organization.timezone} enrollment={enrollment} canAdjust={organization.role === 'owner' || organization.role === 'admin'} />
+        </RecordSection>
       )}
 
-      {operate && <EnrollmentFinancePanel organization={organization} enrollment={enrollment} canManage={organization.role === 'owner' || organization.role === 'admin'} />}
+      {operate && <RecordSection title="Cobrança e recebimentos"><EnrollmentFinancePanel organization={organization} enrollment={enrollment} canManage={organization.role === 'owner' || organization.role === 'admin'} /></RecordSection>}
 
       <section className="mb-4" aria-labelledby="release-title">
         <h2 id="release-title" className="h4 mb-3">

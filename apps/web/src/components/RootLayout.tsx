@@ -1,3 +1,4 @@
+import { FormNavigationGuard } from './FormNavigationGuard'
 import { AuthGate } from './AuthGate'
 import { CriticalAlertHost } from './CriticalAlertHost'
 import { ToastHost } from './ToastHost'
@@ -7,6 +8,7 @@ export function RootLayout() {
   return (
     <>
       <AuthGate />
+      <FormNavigationGuard />
       <ToastHost />
       <CriticalAlertHost />
     </>

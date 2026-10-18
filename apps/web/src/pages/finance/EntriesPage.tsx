@@ -28,7 +28,8 @@ export default function EntriesPage({ type }: { type: EntryType }) {
   const { values, set, clear, active } = useUrlFilters(['situacao', 'de', 'ate', 'categoria', 'conta', 'forma', 'lancamento'] as const)
   const [creating, setCreating] = useState(false)
   const [paying, setPaying] = useState<Installment | null>(null)
-  const [openEntry, setOpenEntry] = useState<number | null>(values.lancamento ? Number(values.lancamento) : null)
+  const openEntry = Number(values.lancamento) > 0 ? Number(values.lancamento) : null
+  const setOpenEntry = (id: number | null) => set('lancamento', id === null ? '' : String(id))
 
   const categories = useCategories(organization.id)
   const accounts = useAccounts(organization.id)
@@ -84,6 +85,10 @@ export default function EntriesPage({ type }: { type: EntryType }) {
             <Form.Label htmlFor="fin-to" className="small mb-1">até</Form.Label>
             <Form.Control id="fin-to" type="date" value={values.ate} isInvalid={rangeInvalid} onChange={(event) => set('ate', event.target.value)} />
           </Col>
+        </Row>
+        <details className="mt-2" open={Boolean(values.categoria || values.forma || values.conta)}>
+          <summary className="text-primary py-2">Mais filtros{[values.categoria, values.forma, values.conta].filter(Boolean).length > 0 ? ` · ${[values.categoria, values.forma, values.conta].filter(Boolean).length} ativos` : ''}</summary>
+          <Row className="g-2 mt-1">
           <Col xs={6} md={2}>
             <Form.Label htmlFor="fin-category" className="small mb-1">Categoria</Form.Label>
             <Form.Select id="fin-category" value={values.categoria} onChange={(event) => set('categoria', event.target.value)}>
@@ -111,7 +116,8 @@ export default function EntriesPage({ type }: { type: EntryType }) {
               ))}
             </Form.Select>
           </Col>
-        </Row>
+          </Row>
+        </details>
         {(active || search !== '') && (
           <Button variant="link" size="sm" className="px-0 mt-2" onClick={() => { setText(''); clear() }}>
             Limpar filtros

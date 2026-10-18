@@ -1,3 +1,4 @@
+import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -52,15 +53,17 @@ function StudentForm({ student }: { student?: Student }) {
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<StudentInput>({
     resolver: zodResolver(studentSchema),
     defaultValues: student ? toFormValues(student) : emptyValues,
   })
 
+  const protection = useFormProtection(isDirty)
+
   const onSubmit = handleSubmit((values) =>
     save.mutate(values, {
-      onSuccess: (saved) => navigate(links.student(saved.id)),
+      onSuccess: (saved) => { protection.saved(); navigate(links.student(saved.id)) },
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )

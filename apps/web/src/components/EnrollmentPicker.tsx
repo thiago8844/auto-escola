@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { ENROLLMENT_STATUS } from '../config/domain'
 import { useActiveOrganization } from '../hooks/useActiveOrganization'
@@ -23,6 +23,11 @@ export function EnrollmentPicker({ value, onChange, error }: EnrollmentPickerPro
   const enrollments = useStudentEnrollments(organization.id, studentId)
   // Matrícula encerrada ou rescindida não aceita aulas
   const open = enrollments.data?.data.filter((e) => e.status !== 'closed' && e.status !== 'terminated') ?? []
+
+  useEffect(() => {
+    const available = enrollments.data?.data.filter((e) => e.status !== 'closed' && e.status !== 'terminated') ?? []
+    if (studentId && available.length === 1 && !value) onChange(String(available[0].id))
+  }, [enrollments.data, studentId, value, onChange])
 
   return (
     <>

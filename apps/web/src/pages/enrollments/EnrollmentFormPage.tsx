@@ -1,5 +1,6 @@
+import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert } from 'react-bootstrap'
+import { Alert, Button } from 'react-bootstrap'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CurrencyField } from '../../components/CurrencyField'
@@ -47,15 +48,17 @@ function EnrollmentForm({ student }: { student: Student }) {
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<EnrollmentInput>({
     resolver: zodResolver(enrollmentSchema),
     defaultValues: { category: 'B', status: 'contracted', contracted_minutes: '', price: '', qualification_process_id: '', partner_id: '', notes: '' },
   })
 
+  const protection = useFormProtection(isDirty)
+
   const onSubmit = handleSubmit((values) =>
     create.mutate(values, {
-      onSuccess: (enrollment) => navigate(links.enrollment(enrollment.id)),
+      onSuccess: (enrollment) => { protection.saved(); navigate(links.enrollment(enrollment.id)) },
       onError: (error) => applyFieldErrors(error, setError),
     }),
   )
@@ -104,7 +107,7 @@ function EnrollmentForm({ student }: { student: Student }) {
           </SelectField>
           {processes.error && <p className="small text-danger">Não foi possível carregar os processos do aluno: {processes.error.message}</p>}
           <p className="small mb-3">
-            Ainda não tem processo? <Link to={links.processNew(student.id)}>Criar processo para este aluno</Link>
+            Ainda não tem processo? <Link to={links.processNew(student.id)} target="_blank" rel="noopener noreferrer">Criar processo em outra aba</Link> <Button variant="link" size="sm" onClick={() => void processes.refetch()}>Atualizar lista de processos</Button>
           </p>
 
           {isIndependent && (

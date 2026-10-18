@@ -1,3 +1,5 @@
+import { useDraftProtection } from '../../hooks/useFormProtection'
+import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row, Table } from 'react-bootstrap'
 import { NumericFormat } from 'react-number-format'
@@ -56,6 +58,8 @@ export function ChargeModal(props: ChargeModalProps) {
   const rows = edited ?? planned
   const diff = totalCents - sumCents(rows.map((row) => toCents(row.amount)))
 
+  const protection = useDraftProtection({ total, count, firstDue, periodicity, payer, partyId, edited }, onClose, charge.isPending)
+
   const submit = () => {
     setError(null)
     if (totalCents < 1) return setError('Informe o valor.')
@@ -72,7 +76,7 @@ export function ChargeModal(props: ChargeModalProps) {
         },
       },
       {
-        onSuccess: (entry) => setCreatedEntryId(entry.id),
+        onSuccess: (entry) => { protection.saved(); setCreatedEntryId(entry.id) },
         onError: (e) => {
           if (e.code === 'entry_already_exists') setExisting((e.body?.existing_entry_id as number | undefined) ?? 0)
           setError(e.message)
@@ -83,7 +87,7 @@ export function ChargeModal(props: ChargeModalProps) {
 
   if (createdEntryId !== null) {
     return (
-      <Modal show onHide={onClose} centered>
+      <Modal show onHide={protection.close} centered>
         <Modal.Header closeButton>
           <Modal.Title as="h2" className="h5">{title}</Modal.Title>
         </Modal.Header>
@@ -94,14 +98,14 @@ export function ChargeModal(props: ChargeModalProps) {
           </Alert>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={onClose}>Fechar</Button>
+          <Button onClick={protection.close}>Fechar</Button>
         </Modal.Footer>
       </Modal>
     )
   }
 
   return (
-    <Modal show onHide={onClose} centered size="lg" fullscreen="md-down">
+    <Modal show onHide={protection.close} centered size="lg" fullscreen="md-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">{title}</Modal.Title>
       </Modal.Header>
@@ -165,7 +169,7 @@ export function ChargeModal(props: ChargeModalProps) {
                   <tr key={index}>
                     <td style={{ width: 70 }}>{index + 1}/{rows.length}</td>
                     <td><Form.Control size="sm" type="date" aria-label={`Vencimento da parcela ${index + 1}`} value={row.due_date} onChange={(event) => setEdited(rows.map((r, i) => (i === index ? { ...r, due_date: event.target.value } : r)))} /></td>
-                    <td><Form.Control size="sm" inputMode="decimal" aria-label={`Valor da parcela ${index + 1}`} value={row.amount} onChange={(event) => setEdited(rows.map((r, i) => (i === index ? { ...r, amount: event.target.value.replace(',', '.') } : r)))} /></td>
+                    <td><MoneyInput size="sm" aria-label={`Valor da parcela ${index + 1}`} value={row.amount} onValueChange={(amount) => setEdited(rows.map((r, i) => (i === index ? { ...r, amount } : r)))} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -178,7 +182,7 @@ export function ChargeModal(props: ChargeModalProps) {
         <p className="small text-secondary mt-3 mb-0">Gerar de novo não cria outro título: a referência é única. Depois de gerar, dê a baixa em Financeiro.</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={charge.isPending}>Cancelar</Button>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={charge.isPending}>Cancelar</Button>
         <Button onClick={submit} disabled={charge.isPending}>{type === 'receivable' ? 'Gerar cobrança' : 'Lançar despesa'}</Button>
       </Modal.Footer>
     </Modal>

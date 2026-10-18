@@ -1,3 +1,5 @@
+import { useDraftProtection } from '../../hooks/useFormProtection'
+import { MoneyInput } from '../../components/MoneyInput'
 import { useMemo, useState } from 'react'
 import { Alert, Button, Col, Collapse, Form, Modal, Row } from 'react-bootstrap'
 import { notify } from '../../stores/toastStore'
@@ -50,9 +52,11 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
 
   const update = (key: string, patch: Partial<Line>) => setLines((current) => current.map((line) => (line.key === key ? { ...line, ...patch } : line)))
 
+  const protection = useDraftProtection({ lines, adjust }, onClose, pay.isPending)
+
   const submit = () => {
     setError(null)
-    if (lines.some((line) => !line.account_id || !line.method_id)) return setError('Escolha a conta e a forma de pagamento de cada linha.')
+    if (lines.some((line) => !activeAccounts.some((a) => a.id === Number(line.account_id)) || !activeMethods.some((m) => m.id === Number(line.method_id)))) return setError('Escolha a conta e a forma de pagamento de cada linha.')
     if (lines.some((line) => toCents(line.amount) < 1)) return setError('Informe o valor de cada linha.')
     if (applied + discount > remaining) return setError(`O total passa do que falta pagar (${formatCents(remaining)}).`)
     if (adjusting && adjust.reason.trim().length < 3) return setError('Explique o motivo do desconto, juros, multa ou taxa.')
@@ -73,6 +77,7 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
       },
       {
         onSuccess: () => {
+          protection.saved()
           saveLastUsed(organizationId, type, { account_id: Number(lines[0].account_id), method_id: Number(lines[0].method_id) })
           const pending = lines.some((line) => (methods.data ?? []).find((m) => m.id === Number(line.method_id))?.settlement_days)
           if (pending) notify.info('Cartão ou boleto: o valor só entra na conta quando você confirmar a liquidação.')
@@ -84,7 +89,7 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
   }
 
   return (
-    <Modal show onHide={onClose} centered size="lg" fullscreen="md-down">
+    <Modal show onHide={protection.close} centered size="lg" fullscreen="md-down">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h5">
           {receivable ? 'Receber' : 'Pagar'}: parcela {installment.number}/{installment.entry?.installments_count}
@@ -110,7 +115,7 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
             <Row className="g-2">
               <Col sm={4}>
                 <Form.Label htmlFor={`amount-${line.key}`} className="small mb-1">Valor (R$)</Form.Label>
-                <Form.Control id={`amount-${line.key}`} inputMode="decimal" value={line.amount} onChange={(event) => update(line.key, { amount: event.target.value.replace(',', '.') })} />
+                <MoneyInput id={`amount-${line.key}`} value={line.amount} onValueChange={(value) => update(line.key, { amount: value })} />
               </Col>
               <Col sm={4}>
                 <Form.Label htmlFor={`method-${line.key}`} className="small mb-1">Forma</Form.Label>
@@ -176,7 +181,7 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
                 {([['discount', 'Desconto'], ['interest', 'Juros'], ['fine', 'Multa'], ['fee', 'Taxa de pagamento']] as const).map(([field, label]) => (
                   <Col key={field} xs={6} md={3}>
                     <Form.Label htmlFor={`adj-${field}`} className="small mb-1">{label} (R$)</Form.Label>
-                    <Form.Control id={`adj-${field}`} inputMode="decimal" value={adjust[field]} onChange={(event) => setAdjust({ ...adjust, [field]: event.target.value.replace(',', '.') })} />
+                    <MoneyInput id={`adj-${field}`} value={adjust[field]} onValueChange={(value) => setAdjust({ ...adjust, [field]: value })} />
                   </Col>
                 ))}
                 <Col xs={12}>
@@ -196,10 +201,10 @@ export function PayModal({ organizationId, timezone, installment, onClose }: Pay
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={onClose} disabled={pay.isPending}>
+        <Button variant="outline-secondary" onClick={protection.close} disabled={pay.isPending}>
           Cancelar
         </Button>
-        <Button onClick={submit} disabled={pay.isPending || left < 0}>
+        <Button onClick={submit} disabled={pay.isPending || accounts.isPending || methods.isPending || left < 0}>
           {receivable ? 'Registrar recebimento' : 'Registrar pagamento'}
         </Button>
       </Modal.Footer>

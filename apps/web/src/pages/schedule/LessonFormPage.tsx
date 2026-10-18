@@ -1,3 +1,4 @@
+import { useFormProtection } from '../../hooks/useFormProtection'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert } from 'react-bootstrap'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -56,13 +57,13 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
     handleSubmit,
     setError,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ScheduleInput>({
     resolver: zodResolver(scheduleSchema),
     defaultValues: {
       enrollment_id: presetEnrollment ? String(presetEnrollment.id) : '',
-      instructor_id: '',
-      vehicle_id: '',
+      instructor_id: searchParams.get('instrutor') ?? '',
+      vehicle_id: searchParams.get('veiculo') ?? '',
       category: '',
       override_reason: '',
       hours_override_reason: '',
@@ -85,9 +86,12 @@ function LessonForm({ presetEnrollment }: { presetEnrollment?: Enrollment }) {
   const lessonCategory = !enrollment ? null : composite ? (vehicle?.category ?? (chosenCategory || null)) : enrollment.category
   const needed = /^\d+$/.test(duration) ? Number(duration) : 0
 
+  const protection = useFormProtection(isDirty)
+
   const onSubmit = handleSubmit((values) =>
     create.mutate(values, {
       onSuccess: (lesson) => {
+        protection.saved()
         lesson.warnings.forEach((warning) => notify.warning(warning.message))
         navigate(links.lesson(lesson.id))
       },
