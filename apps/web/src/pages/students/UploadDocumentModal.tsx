@@ -25,6 +25,19 @@ type UploadDocumentModalProps = {
   onUploaded?: (document: StudentDocument) => void
 }
 
+// Agrupa os tipos no seletor. Cada tipo aparece em um único grupo.
+const DOCUMENT_GROUPS: { label: string; types: DocumentType[] }[] = [
+  { label: 'Pessoais', types: ['identity', 'current_license', 'proof_of_residence'] },
+  { label: 'Do processo e do CFC', types: ['learning_license', 'theory_completion', 'assessment_result', 'process_protocol', 'official_request', 'official_lesson_record'] },
+  { label: 'Exame', types: ['exam_scheduling', 'exam_result'] },
+  { label: 'Financeiro', types: ['payment_guide', 'payment_proof', 'receipt', 'contract'] },
+  { label: 'Veículo', types: ['vehicle_registration'] },
+  { label: 'Outros', types: ['other'] },
+]
+
+// Documentos exigidos para o exame prático (conferidos pelo checklist do processo).
+const EXAM_REQUIRED_TYPES: DocumentType[] = ['identity', 'current_license', 'learning_license', 'theory_completion']
+
 // Upload de PDF, JPG, PNG ou WebP até 10 MB. Tipo e tamanho são conferidos aqui e de novo na API.
 export function UploadDocumentModal({ organizationId, owner, replacing, defaultType, title, onClose, onUploaded }: UploadDocumentModalProps) {
   const upload = useUploadDocument(organizationId, owner)
@@ -73,10 +86,15 @@ export function UploadDocumentModal({ organizationId, owner, replacing, defaultT
               <option value="" disabled>
                 Escolha o tipo
               </option>
-              {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
+              {DOCUMENT_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.types.map((value) => (
+                    <option key={value} value={value}>
+                      {DOCUMENT_TYPE_LABELS[value]}
+                      {EXAM_REQUIRED_TYPES.includes(value) ? ' (obrigatório)' : ''}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </SelectField>
           )}
